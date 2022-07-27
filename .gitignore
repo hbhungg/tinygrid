@@ -6,3 +6,4 @@ bin/
 lib/
 pyvenv.cfg
 share/
+venv/
