@@ -10,7 +10,7 @@ source venv/bin/activate
 pip3 install -r requirements.txt
 ```
 
-Export the project dir to PYTHONPATH. This will make Python treat the repo as the root folder.
+Export the project dir to `$PYTHONPATH`. This will make Python treat the repo as the root folder.
 ```
 export PYTHONPATH="$PWD"
 ```
