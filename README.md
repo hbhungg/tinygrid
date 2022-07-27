@@ -3,24 +3,17 @@ Prediction and Optimisation for Renewable Energy Scheduling in the Monash Microg
 
 ## Setup
 ### On Macos/Linux
-Open your terminal, then go to the project folder.
-
-Create a virtual enviroment
+Open your terminal at the project folder.
 ```
 python3 -m venv venv/
-```
-
-Activate it
-```
 source venv/bin/activate
-```
-
-Download dependencies
-```
 pip3 install -r requirements.txt
 ```
 
-Deactivate venv `deactivate`
+Deactivate venv 
+```
+deactivate
+```
 
 
 ## Forecasting problem
