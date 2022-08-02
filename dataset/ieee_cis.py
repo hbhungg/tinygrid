@@ -3,10 +3,10 @@ import datetime
 import numpy as np
 import pandas as pd
 
-from dataset.ieee_cis.tsf_loader import convert_tsf_to_dataframe
+from dataset.tsf_loader import convert_tsf_to_dataframe
 
 
-class DataManager:
+class IEEE_CIS:
   def __init__(self):
     _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     self.PHASE1_TIME = datetime.datetime(day=1, month=10, year=2020, hour=0, minute=0, second=0)
