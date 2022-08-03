@@ -14,10 +14,13 @@ pip3 install -r requirements.txt
 
 Export the project dir to `$PYTHONPATH`. This will make Python treat the repo as the root folder.
 
-Get your path using:
+Get your path to tinygrid folder using:
+```
+PWD
+```
+Type
 ```
 cd
-PWD
 ```
 
 Nano into file
