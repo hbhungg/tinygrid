@@ -7,7 +7,7 @@ from dataset.tsf_loader import convert_tsf_to_dataframe
 
 
 class IEEE_CIS:
-  def __init__(self):
+  def __init__(self) -> None:
     _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
     self.PHASE1_TIME = datetime.datetime(day=1, month=10, year=2020, hour=0, minute=0, second=0)
     self.PHASE2_TIME = datetime.datetime(day=1, month=11, year=2020, hour=0, minute=0, second=0)
