@@ -7,3 +7,4 @@ lib/
 pyvenv.cfg
 share/
 venv/
+*.icloud
