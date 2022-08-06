@@ -1,9 +1,11 @@
+from multiprocessing.dummy import Array
 import os
 import datetime
 import numpy as np
 import pandas as pd
 
 from dataset.tsf_loader import convert_tsf_to_dataframe
+from dataset.schedual_data_model import schedual_model
 
 class IEEE_CIS:
   def __init__(self) -> None:
@@ -12,78 +14,75 @@ class IEEE_CIS:
     self.PHASE2_TIME = datetime.datetime(day=1, month=11, year=2020, hour=0, minute=0, second=0)
     self.energy_data_path = os.path.join(_BASE_DIR, "energy/nov_data.tsf")
     self.weather_data_path = os.path.join(_BASE_DIR, "weather/ERA5_Weather_Data_Monash.csv")
-    
     self.schedule_data_paths_P1 = self.helper_schedule_data_paths(1, _BASE_DIR)
     self.schedule_data_paths_P2 = self.helper_schedule_data_paths(2, _BASE_DIR)
 
-
-  def helper_schedule_data_paths(self, phase_Num, _BASE_DIR):
+  def helper_schedule_data_paths(self, phase_num, _BASE_DIR):
     """
-    Takes phase_Num and _BASE_DIR, creates all file paths for phase phase_Num.
-
+    Takes phase_num and _BASE_DIR, creates all file paths for phase phase_num.
     Return:
       arr
     """
     arr = []
     for j in range(5):
-      fileNameLarge = "phase" + str(phase_Num) + "_instance_large_" + str(j) + ".txt"
-      fileNameSmall = "phase" + str(phase_Num) + "_instance_small_" + str(j) + ".txt"
+      fileNameLarge = "phase" + str(phase_num) + "_instance_large_" + str(j) + ".txt"
+      fileNameSmall = "phase" + str(phase_num) + "_instance_small_" + str(j) + ".txt"
       schedule_data_path_Large = os.path.join(_BASE_DIR, "schedule/" + fileNameLarge)
       schedule_data_path_Small = os.path.join(_BASE_DIR, "schedule/" + fileNameSmall)
       arr += [schedule_data_path_Large, schedule_data_path_Small]
     return arr
 
-  def helper_schedule_reader(self, path):
+  def helper_schedule_reader(self, path, phase_num):
     """
-
+    Takes path and phase_num, puts it into data model.
     Return:
-      
+      schedual_model object
     """
     lines = []
     with open(path) as f:
-      lines = f.readlines()
+      lines = f.read().splitlines()
 
     identifiers = ['ppoi', 'b', 's', 'c', 'r', 'a']
-    
+    schedual_m = schedual_model(phase_num, path)
     for line in lines:
       splitLine = line.split(' ')
       identifier = splitLine[0]
       # ppoi
       if identifiers[0] == identifier:
         # ppoi # buildings # solar # battery # recurring # once-off
-        pass
+        schedual_m.add_ppoi(splitLine)
       # b
-      if identifiers[1] == identifier:
+      elif identifiers[1] == identifier:
         # b # building id # small # large
-        pass
+        schedual_m.add_building(splitLine)
       # s
-      if identifiers[2] == identifier:
+      elif identifiers[2] == identifier:
         # s # solar id # building id
-        pass
+        schedual_m.add_solar(splitLine)
       # c
-      if identifiers[3] == identifier:
+      elif identifiers[3] == identifier:
         # c # building id # capacity kWh # max power kW # efficiency
-        pass
+        schedual_m.add_battery(splitLine)
       # r
-      if identifiers[4] == identifier:
+      elif identifiers[4] == identifier:
         # r # activity # precedences
-        pass
+        schedual_m.add_act(splitLine)
       # a
-      if identifiers[5] == identifier:
+      elif identifiers[5] == identifier:
         # a # activity # $value # $penalty # precedences
-        pass
+        schedual_m.add_once_off_act(splitLine)
+    return schedual_m
 
-
-  def load_schedule_data(self) -> pd.DataFrame:
+  def load_schedule_data(self):
+    arr1 = []
+    arr2 = []
     # Phase 1
     for path in self.schedule_data_paths_P1:
-      self.helper_schedule_reader(path)
-
+      arr1.append(self.helper_schedule_reader(path, 1))
     # Phase 2
     for path in self.schedule_data_paths_P2:
-      self.helper_schedule_reader(path)
-
-    return
+      arr2.append(self.helper_schedule_reader(path, 2))
+    return [arr1, arr2]
 
   def load_energy_data(self) -> dict[str, pd.DataFrame]:
     """
