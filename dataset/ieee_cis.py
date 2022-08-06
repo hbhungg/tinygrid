@@ -5,7 +5,6 @@ import pandas as pd
 
 from dataset.tsf_loader import convert_tsf_to_dataframe
 
-
 class IEEE_CIS:
   def __init__(self):
     _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -13,7 +12,78 @@ class IEEE_CIS:
     self.PHASE2_TIME = datetime.datetime(day=1, month=11, year=2020, hour=0, minute=0, second=0)
     self.energy_data_path = os.path.join(_BASE_DIR, "energy/nov_data.tsf")
     self.weather_data_path = os.path.join(_BASE_DIR, "weather/ERA5_Weather_Data_Monash.csv")
+    
+    self.schedule_data_paths_P1 = self.helper_schedule_data_paths(1, _BASE_DIR)
+    self.schedule_data_paths_P2 = self.helper_schedule_data_paths(2, _BASE_DIR)
 
+
+  def helper_schedule_data_paths(self, phase_Num, _BASE_DIR):
+    """
+    Takes phase_Num and _BASE_DIR, creates all file paths for phase phase_Num.
+
+    Return:
+      arr
+    """
+    arr = []
+    for j in range(5):
+      fileNameLarge = "phase" + str(phase_Num) + "_instance_large_" + str(j) + ".txt"
+      fileNameSmall = "phase" + str(phase_Num) + "_instance_small_" + str(j) + ".txt"
+      schedule_data_path_Large = os.path.join(_BASE_DIR, "schedule/" + fileNameLarge)
+      schedule_data_path_Small = os.path.join(_BASE_DIR, "schedule/" + fileNameSmall)
+      arr += [schedule_data_path_Large, schedule_data_path_Small]
+    return arr
+
+  def helper_schedule_reader(self, path):
+    """
+
+    Return:
+      
+    """
+    lines = []
+    with open(path) as f:
+      lines = f.readlines()
+
+    identifiers = ['ppoi', 'b', 's', 'c', 'r', 'a']
+    
+    for line in lines:
+      splitLine = line.split(' ')
+      identifier = splitLine[0]
+      # ppoi
+      if identifiers[0] == identifier:
+        # ppoi # buildings # solar # battery # recurring # once-off
+        pass
+      # b
+      if identifiers[1] == identifier:
+        # b # building id # small # large
+        pass
+      # s
+      if identifiers[2] == identifier:
+        # s # solar id # building id
+        pass
+      # c
+      if identifiers[3] == identifier:
+        # c # building id # capacity kWh # max power kW # efficiency
+        pass
+      # r
+      if identifiers[4] == identifier:
+        # r # activity # precedences
+        pass
+      # a
+      if identifiers[5] == identifier:
+        # a # activity # $value # $penalty # precedences
+        pass
+
+
+  def load_schedule_data(self) -> pd.DataFrame:
+    # Phase 1
+    for path in self.schedule_data_paths_P1:
+      self.helper_schedule_reader(path)
+
+    # Phase 2
+    for path in self.schedule_data_paths_P2:
+      self.helper_schedule_reader(path)
+
+    return
 
   def load_energy_data(self) -> dict[str, pd.DataFrame]:
     """
