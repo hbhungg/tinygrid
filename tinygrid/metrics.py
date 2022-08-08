@@ -13,14 +13,19 @@ def mase(pred: np.array, true: np.array, training: np.array, cycle: int=2688) ->
   Return:
     MASE value
   """
-  assert len(pred) == len(true)
-  f_horizon = len(pred)
+  assert len(pred) == len(true), "Predicted and actual array must have the same length"
 
+  f_horizon = len(pred)
+  M = len(training_data)
+
+  # TODO: how do we handle NaN value?
   up = np.sum(np.absolute(pred - true))
-  down = f_horizon/(len(training_data) - cycle) * np.sum(np.absolute(training_data[cycle:] - training_data[:-cycle]))
+  down = f_horizon/(M - cycle) * np.sum(np.absolute(training_data[cycle:] - training_data[:-cycle]))
   return up/down
 
 
+# This is for debugging purposes. Compare this output with mase_calculator.R output.
+#  TODO: Delete this or move it to some test
 if __name__ == "__main__":
   a = IEEE_CIS()
   energy = a.load_energy_data()
@@ -33,14 +38,13 @@ if __name__ == "__main__":
     for row in read:
       pred_data[row[0]] = [int(i) for i in row[1:]]
 
-  name = "Solar0"
-  # Very scuff
-  training_data = np.array(energy[name]['energy'][:-(2880*2 + 2976)])
-  actual_data = np.array(energy[name]['energy'][-(2880*2 + 2976):-(2880 + 2976)])
-  pp_data = np.array(pred_data[name][:2880])
-  print(training_data.shape, actual_data.shape, pp_data.shape)
-  print(mase(pp_data, actual_data, training_data))
-  #print(actual_data)
+  for name in pred_data:
+    # Very scuff
+    training_data = np.array(energy[name]['energy'][:-(2880*2 + 2976)])
+    actual_data = np.array(energy[name]['energy'][-(2880*2 + 2976):-(2880 + 2976)])
+    pp_data = np.array(pred_data[name][:2880])
+    print(training_data.shape, actual_data.shape, pp_data.shape)
+    print(mase(pp_data, actual_data, training_data))
 
     
      

@@ -21,8 +21,38 @@ class IEEE_CIS_Torch(Dataset):
 
   def __getitem__(self, idx):
     x = np.array(self.df[idx:idx+self.win_length])
-    y = self.df.iloc[idx+self.win_length+1]['energy']
+    y = np.array([self.df.iloc[idx+self.win_length+1]['energy']])
     return x, y
+
+
+def train(model, epochs, train_loader, val_loader, opt, loss_f, log_interval):
+  for epoch in range(1, epochs+1):
+    _train(model, epoch, train_loader, opt, loss_f, log_interval)
+    test(model, test_loader, loss_f)
+
+def _train(model, epoch, train_loader, opt, loss_f, log_interval):
+  for batch_idx, (data, target) in enumerate(train_loader):
+    optimizer.zero_grad()
+    output = model(data)
+    loss = loss_f(output, target)
+    loss.backward()
+    optimizer.step()
+    if batch_idx % log_interval == 0:
+      print('Train Epoch: {} [{}/{} ({:.0f}%)]\tLoss: {:.6f}'.format(
+        epoch, batch_idx * len(data), len(train_loader.dataset),
+        100. * batch_idx / len(train_loader), loss.item()))
+      torch.save(model.state_dict(), './checkpoints/model.pth')
+
+def _validation(model, test_loader, loss_f):
+  test_loss = 0
+  with torch.no_grad():
+    for data, target in test_loader:
+      output = model(data)
+      test_loss += loss_f(output, target, size_average=False).item()
+    test_loss /= len(test_loader.dataset)
+  print('\nTest set: Avg. loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
+      test_loss, correct, len(test_loader.dataset),
+      100. * correct / len(test_loader.dataset)))
 
 if __name__ == "__main__":
   dm = IEEE_CIS()
@@ -48,9 +78,8 @@ if __name__ == "__main__":
 
   torch.set_default_dtype(torch.float64)
   net = LSTM2(1, 13, 512, 4)
+  optimizer = torch.optim.Adam(net.parameters(), lr=0.0001)
+  loss_f = torch.nn.L1Loss()
 
-  for x, y in dl:
-    print(x.dtype)
-    print(net(x))
-    break
-    
+
+  train(net, 1, dl, [], optimizer, loss_f, 10)
