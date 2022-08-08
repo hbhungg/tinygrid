@@ -28,7 +28,7 @@ class IEEE_CIS_Torch(Dataset):
 def train(model, epochs, train_loader, val_loader, opt, loss_f, log_interval):
   for epoch in range(1, epochs+1):
     _train(model, epoch, train_loader, opt, loss_f, log_interval)
-    test(model, test_loader, loss_f)
+    _validation(model, test_loader, loss_f)
 
 def _train(model, epoch, train_loader, opt, loss_f, log_interval):
   for batch_idx, (data, target) in enumerate(train_loader):
