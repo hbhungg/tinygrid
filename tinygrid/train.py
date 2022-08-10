@@ -25,12 +25,31 @@ class IEEE_CIS_Torch(Dataset):
     return x, y
 
 
-def train(model, epochs, train_loader, val_loader, opt, loss_f, log_interval):
+def train(model, epochs, train_loader, val_loader, opt, loss_f, log_interval) -> None:
+  """
+  Training loop
+  Params:
+    model: Torch model
+    epochs: how many time to train
+    train_loader:
+    val_loader:
+    opt: Torch optimizer
+    loss_f: Torch loss function
+    log_interval: interval to log data outside
+  Return:
+    None
+  """
   for epoch in range(1, epochs+1):
     _train(model, epoch, train_loader, opt, loss_f, log_interval)
-    _validation(model, test_loader, loss_f)
+    validation(model, val_loader, loss_f)
 
-def _train(model, epoch, train_loader, opt, loss_f, log_interval):
+def _train(model, epoch, train_loader, opt, loss_f, log_interval) -> None:
+  """
+  Internal training loop, handles all of the actual training logics
+  Params: see train()
+  Return: None
+  """
+  model.train()
   for batch_idx, (data, target) in enumerate(train_loader):
     optimizer.zero_grad()
     output = model(data)
@@ -43,16 +62,20 @@ def _train(model, epoch, train_loader, opt, loss_f, log_interval):
         100. * batch_idx / len(train_loader), loss.item()))
       torch.save(model.state_dict(), './checkpoints/model.pth')
 
-def _validation(model, test_loader, loss_f):
+def validation(model, test_loader, loss_f) -> None:
+  """
+  Validation loop. Similar to train but to back prop. Just forward and loss calc.
+  Params: see train()
+  Return: None
+  """
   test_loss = 0
+  model.eval()
   with torch.no_grad():
     for data, target in test_loader:
       output = model(data)
-      test_loss += loss_f(output, target, size_average=False).item()
-    test_loss /= len(test_loader.dataset)
-  print('\nTest set: Avg. loss: {:.4f}, Accuracy: {}/{} ({:.0f}%)\n'.format(
-      test_loss, correct, len(test_loader.dataset),
-      100. * correct / len(test_loader.dataset)))
+      test_loss += loss_f(output, target).item()
+    test_loss /= len(test_loader)
+  print('Test set: Avg. loss: {:.4f}'.format(test_loss))
 
 if __name__ == "__main__":
   dm = IEEE_CIS()
@@ -73,13 +96,33 @@ if __name__ == "__main__":
   comb['year_sin'] = np.sin(time_stamp * (2 * np.pi/year))
   comb['year_cos'] = np.cos(time_stamp * (2 * np.pi/year))
 
-  ds = IEEE_CIS_Torch(comb, 28)
-  dl = DataLoader(ds, batch_size=128)
+  # Remove bunch of 0s
+  comb = comb[2460:]
 
+  # Norm col values to 0-1, except for the last 4 (day and year)
+  for i in comb.iloc[:,:-4]:
+    comb[i] = (comb[i]-comb[i].min())/(comb[i].max()-comb[i].min())
+
+  # Split train and test (test is phase1 + phase2)
+  comb_train = comb[:dm.PHASE1_TIME]
+  comb_test = comb[dm.PHASE1_TIME:]
+
+  # Make into PyTorch iterable sliding window dataset
+  ds_train = IEEE_CIS_Torch(comb_train, 28)
+  ds_test = IEEE_CIS_Torch(comb_test, 28)
+
+  BATCH_SIZE = 128 
+
+  # Make into dataloader, train have random
+  dl_train = DataLoader(ds_train, batch_size=BATCH_SIZE, shuffle=True)
+  dl_test = DataLoader(ds_test, batch_size=BATCH_SIZE, shuffle=False)
+
+  # IDK is this good?
+  # TODO: find out if im shooting myself with this
   torch.set_default_dtype(torch.float64)
+
   net = LSTM2(1, 13, 512, 4)
   optimizer = torch.optim.Adam(net.parameters(), lr=0.0001)
   loss_f = torch.nn.L1Loss()
 
-
-  train(net, 1, dl, [], optimizer, loss_f, 10)
+  train(net, 3, dl_train, dl_test, optimizer, loss_f, 10)

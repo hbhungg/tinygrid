@@ -4,3 +4,5 @@ numpy
 scipy
 pulp
 scikit-learn
+
+pytorch == 1.11.0
