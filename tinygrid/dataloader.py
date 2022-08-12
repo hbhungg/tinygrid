@@ -50,6 +50,8 @@ def load_data_helper():
 
   # Fill NaN values
   comb = comb.fillna(method="ffill")
+  # Normalize values to 0-1
+  comb = (comb-comb.min())/(comb.max()-comb.min())
 
   # Transform raw seconds into sin and cos value
   # Creating a seasonal value that represent the repeat of day and year
@@ -63,10 +65,6 @@ def load_data_helper():
 
   # Remove bunch of 0s
   comb = comb[2460:]
-
-  # Norm col values to 0-1, except for the last 4 (day and year)
-  # Should there be a prettier way?
-  comb.iloc[:,:-4] = (comb.iloc[:,:-4]-comb.iloc[:,:-4].min())/(comb.iloc[:,:-4].max()-comb.iloc[:,:-4].min())
 
   # Split train and test (test is phase1 + phase2)
   comb_train = comb[:dm.PHASE1_TIME]
