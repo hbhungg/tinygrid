@@ -14,6 +14,7 @@ class IEEE_CIS:
     self.PHASE2_TIME = datetime.datetime(day=1, month=11, year=2020, hour=0, minute=0, second=0)
     self.energy_data_path = os.path.join(_BASE_DIR, "energy/nov_data.tsf")
     self.weather_data_path = os.path.join(_BASE_DIR, "weather/ERA5_Weather_Data_Monash.csv")
+    self.nov_price_data_path = os.path.join(_BASE_DIR, "price/PRICE_AND_DEMAND_202011_VIC1.csv")
     self.base_dir = _BASE_DIR
 
 
@@ -121,4 +122,18 @@ class IEEE_CIS:
     weather_data['datetime (UTC)'] = pd.to_datetime(weather_data['datetime (UTC)'], format="%Y-%m-%d %H:%M:%S")
     weather_data = weather_data.set_index('datetime (UTC)')
     return weather_data
+
+  def load_AEMO_nov_price_data(self) -> pd.DataFrame:
+      """
+      Load AEMO price data from csv to pandas DataFrame. Transform the datetime string to appropriate type.
+      Set the dataframe index to the datetime column.
+
+      Return:
+        DataFrame object
+      """
+      price_data = pd.read_csv(self.nov_price_data_path)
+      # Parse the time from string to 
+      price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'], format="%Y-%m-%d %H:%M:%S")
+      price_data = price_data.set_index('SETTLEMENTDATE')
+      return price_data
 
