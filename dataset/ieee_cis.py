@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from dataset.tsf_loader import convert_tsf_to_dataframe
-from dataset.schedual_data_model import schedual_model
+from dataset.schedual_data_model import Schedual_Model
 
 class IEEE_CIS:
   def __init__(self) -> None:
@@ -14,8 +14,8 @@ class IEEE_CIS:
     self.PHASE2_TIME = datetime.datetime(day=1, month=11, year=2020, hour=0, minute=0, second=0)
     self.energy_data_path = os.path.join(_BASE_DIR, "energy/nov_data.tsf")
     self.weather_data_path = os.path.join(_BASE_DIR, "weather/ERA5_Weather_Data_Monash.csv")
-    self.schedule_data_paths_P1 = self.helper_schedule_data_paths(1, _BASE_DIR)
-    self.schedule_data_paths_P2 = self.helper_schedule_data_paths(2, _BASE_DIR)
+    self.base_dir = _BASE_DIR
+
 
   def helper_schedule_data_paths(self, phase_num, _BASE_DIR):
     """
@@ -32,7 +32,7 @@ class IEEE_CIS:
       arr += [schedule_data_path_Large, schedule_data_path_Small]
     return arr
 
-  def helper_schedule_reader(self, path, phase_num):
+  def helper_schedule_reader(self, phase_num, path):
     """
     Takes path and phase_num, puts it into data model.
     Return:
@@ -43,7 +43,7 @@ class IEEE_CIS:
       lines = f.read().splitlines()
 
     identifiers = ['ppoi', 'b', 's', 'c', 'r', 'a']
-    schedual_m = schedual_model(phase_num, path)
+    schedual_m = Schedual_Model(phase_num, path)
     for line in lines:
       splitLine = line.split(' ')
       identifier = splitLine[0]
@@ -61,7 +61,7 @@ class IEEE_CIS:
         schedual_m.add_solar(splitLine)
       # c
       elif identifiers[3] == identifier:
-        # c # building id # capacity kWh # max power kW # efficiency
+        # c # battery id # building id # capacity kWh # max power kW # efficiency
         schedual_m.add_battery(splitLine)
       # r
       elif identifiers[4] == identifier:
@@ -73,15 +73,17 @@ class IEEE_CIS:
         schedual_m.add_once_off_act(splitLine)
     return schedual_m
 
-  def load_schedule_data(self):
+  def load_schedule_data(self, schedule_data_paths_P1, schedule_data_paths_P2):
     arr1 = []
     arr2 = []
     # Phase 1
-    for path in self.schedule_data_paths_P1:
-      arr1.append(self.helper_schedule_reader(path, 1))
+    for path in schedule_data_paths_P1:
+      # helper schedule reader
+      arr1.append(self.helper_schedule_reader(1, path))
     # Phase 2
-    for path in self.schedule_data_paths_P2:
-      arr2.append(self.helper_schedule_reader(path, 2))
+    for path in schedule_data_paths_P2:
+      # helper schedule reader
+      arr2.append(self.helper_schedule_reader(2, path))
     return [arr1, arr2]
 
   def load_energy_data(self) -> dict[str, pd.DataFrame]:
