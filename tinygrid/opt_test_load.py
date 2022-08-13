@@ -6,4 +6,8 @@ m = IEEE_CIS()
 #multiple_files = m.load_schedule_data(schedule_data_paths_P1, schedule_data_paths_P2)
 
 single_file = m.helper_schedule_reader(1, "/Users/harrisperdis/Documents/GitHub/tinygrid/dataset/schedule/phase1_instance_large_0.txt")
-pass
+
+
+
+def constructGraph(data_model):
+  pass

@@ -75,7 +75,7 @@ class Schedual_Model:
       pre_act_lst = line_arr[9:len(line_arr)]
 
     temp = {
-		"act_id": line_arr[1],
+		"once_off_act_id": line_arr[1],
 		"num_rooms": int(line_arr[2]),
 		"room_size_req": line_arr[3],
 		"load_kW": float(line_arr[4]),
