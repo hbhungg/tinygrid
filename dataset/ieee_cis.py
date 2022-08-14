@@ -20,7 +20,8 @@ class IEEE_CIS:
 
   def helper_schedule_data_paths(self, phase_num: int) -> list[str]:
     """
-    # Creates all file paths for phase phase_num
+    # helper_schedule_data_paths 
+    ### Creates all file paths for phase phase_num.
 
     @param phase_num: The phase number
     @complexity: Worst-Best-Case: O(c), where c represents some constant
@@ -42,7 +43,8 @@ class IEEE_CIS:
 
   def helper_schedule_reader(self, phase_num: int, f_path: str) -> Schedule_Model:
     """
-    # Lines are read from file path and are placed into object named Schedule_Model based on identifier at the beginning of each line.
+    # helper_schedule_reader
+    ### Lines are read from file path and are placed into object named Schedule_Model based on identifier at the beginning of each line.
 
     @param phase_num: The phase number
     @param f_path: The txt file path
@@ -90,7 +92,8 @@ class IEEE_CIS:
 
   def load_schedule_data(self, schedule_data_paths_P1: list, schedule_data_paths_P2: list) -> list[list[Schedule_Model]]:
     """
-    # Calls self.helper_schedule_reader for each path in input lists.
+    # load_schedule_data 
+    ### Calls self.helper_schedule_reader for each path in input lists.
 
     @param schedule_data_paths_P1: The schedule data paths for Phase 1
     @param schedule_data_paths_P2: The schedule data paths for Phase 2
