@@ -83,7 +83,7 @@ class Schedule_Model:
 		"load_kW": float(line_arr[4]),
 		"duration": float(line_arr[5]),
 		"value_dollars": float(line_arr[6]),
-		"pensalty_dollars": float(line_arr[7]),
+		"penalty_dollars": float(line_arr[7]),
 		"num_precedences": int(line_arr[8]),
 		"precedence_activity_lst": pre_act_lst
     }
