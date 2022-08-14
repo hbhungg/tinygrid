@@ -1,5 +1,5 @@
-class Schedual_Model:
-  def __init__(self, phase, path) -> None:
+class Schedule_Model:
+  def __init__(self, phase: int, path: str) -> None:
     self.ppoi = {}
     self.buildings = []
     self.solars = []
@@ -19,7 +19,7 @@ class Schedual_Model:
     if "small" in sPath[-1]:
       self.size_tag = "small"
 
-  def add_ppoi(self, line_arr):
+  def add_ppoi(self, line_arr: str) -> None:
     self.ppoi = {
       "buildings": int(line_arr[1]),
       "solar": int(line_arr[2]),
@@ -28,7 +28,7 @@ class Schedual_Model:
       "once-off": int(line_arr[5])
     }
 
-  def add_building(self, line_arr):
+  def add_building(self, line_arr: str) -> None:
     temp = {
       "building_id": line_arr[1],
       "num_small_rooms": int(line_arr[2]),
@@ -36,14 +36,14 @@ class Schedual_Model:
     }
     self.buildings.append(temp)
 
-  def add_solar(self, line_arr):
+  def add_solar(self, line_arr: str) -> None:
     temp = {
       "solar_id": line_arr[1],
       "building_id": line_arr[2]
     }
     self.solars.append(temp)
 
-  def add_battery(self, line_arr):
+  def add_battery(self, line_arr: str) -> None:
     temp = {
       "battery_id": line_arr[1],
       "building_id": line_arr[2],
@@ -53,7 +53,8 @@ class Schedual_Model:
     }
     self.batteries.append(temp)
 
-  def add_act(self, line_arr):
+  def add_act(self, line_arr: str) -> None:
+    # Check if there are precedence activites
     pre_act_lst = []
     if len(line_arr) > 7:
       pre_act_lst = line_arr[7:len(line_arr)]
@@ -69,7 +70,8 @@ class Schedual_Model:
       }
     self.acts.append(temp)
 
-  def add_once_off_act(self, line_arr):
+  def add_once_off_act(self, line_arr: str) -> None:
+    # Check if there are precedence activites
     pre_act_lst = []
     if len(line_arr) > 9:
       pre_act_lst = line_arr[9:len(line_arr)]

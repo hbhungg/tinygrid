@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from dataset.tsf_loader import convert_tsf_to_dataframe
-from dataset.schedual_data_model import Schedual_Model
+from dataset.schedule_data_model import Schedule_Model
 
 class IEEE_CIS:
   def __init__(self) -> None:
@@ -18,75 +18,98 @@ class IEEE_CIS:
     self.base_dir = _BASE_DIR
 
 
-  def helper_schedule_data_paths(self, phase_num, _BASE_DIR):
+  def helper_schedule_data_paths(self, phase_num: int) -> list[str]:
     """
-    Takes phase_num and _BASE_DIR, creates all file paths for phase phase_num.
-    Return:
-      arr
+    # Creates all file paths for phase phase_num
+
+    @param phase_num: The phase number
+    @complexity: Worst-Best-Case: O(c), where c represents some constant
+    @return: [path_large_0, path_small_0,path_large_1, path_small_1,...] 
+      Where, path_large are the paths with large in their name, 
+        path_small are the paths with small in their name
     """
     arr = []
     for j in range(5):
+      # Create file names for large and small instances
       fileNameLarge = "phase" + str(phase_num) + "_instance_large_" + str(j) + ".txt"
       fileNameSmall = "phase" + str(phase_num) + "_instance_small_" + str(j) + ".txt"
-      schedule_data_path_Large = os.path.join(_BASE_DIR, "schedule/" + fileNameLarge)
-      schedule_data_path_Small = os.path.join(_BASE_DIR, "schedule/" + fileNameSmall)
-      arr += [schedule_data_path_Large, schedule_data_path_Small]
+      # Join file name to the os path base_dir
+      schedule_data_path_large = os.path.join(self.base_dir, "schedule/" + fileNameLarge)
+      schedule_data_path_small = os.path.join(self.base_dir, "schedule/" + fileNameSmall)
+      # Append array to arr
+      arr += [schedule_data_path_large, schedule_data_path_small]
     return arr
 
-  def helper_schedule_reader(self, phase_num, path):
+  def helper_schedule_reader(self, phase_num: int, f_path: str) -> Schedule_Model:
     """
-    Takes path and phase_num, puts it into data model.
-    Return:
-      schedual_model object
+    # Lines are read from file path and are placed into object named Schedule_Model based on identifier at the beginning of each line.
+
+    @param phase_num: The phase number
+    @param f_path: The txt file path
+    @complexity: Worst-Best-Case: O(k), where k represents the amount of lines in file f_path
+    @return: schedule_model object
     """
     lines = []
-    with open(path) as f:
+    # Read lines of f_path
+    with open(f_path) as f:
       lines = f.read().splitlines()
 
+    # List identifiers
     identifiers = ['ppoi', 'b', 's', 'c', 'r', 'a']
-    schedual_m = Schedual_Model(phase_num, path)
+    # Init schedule model
+    schedule_m = Schedule_Model(phase_num, f_path)
+    # For each line check identifier and put data into model
     for line in lines:
       splitLine = line.split(' ')
       identifier = splitLine[0]
       # ppoi
       if identifiers[0] == identifier:
         # ppoi # buildings # solar # battery # recurring # once-off
-        schedual_m.add_ppoi(splitLine)
+        schedule_m.add_ppoi(splitLine)
       # b
       elif identifiers[1] == identifier:
         # b # building id # small # large
-        schedual_m.add_building(splitLine)
+        schedule_m.add_building(splitLine)
       # s
       elif identifiers[2] == identifier:
         # s # solar id # building id
-        schedual_m.add_solar(splitLine)
+        schedule_m.add_solar(splitLine)
       # c
       elif identifiers[3] == identifier:
         # c # battery id # building id # capacity kWh # max power kW # efficiency
-        schedual_m.add_battery(splitLine)
+        schedule_m.add_battery(splitLine)
       # r
       elif identifiers[4] == identifier:
         # r # activity # precedences
-        schedual_m.add_act(splitLine)
+        schedule_m.add_act(splitLine)
       # a
       elif identifiers[5] == identifier:
         # a # activity # $value # $penalty # precedences
-        schedual_m.add_once_off_act(splitLine)
-    return schedual_m
+        schedule_m.add_once_off_act(splitLine)
+    return schedule_m
 
-  def load_schedule_data(self, schedule_data_paths_P1, schedule_data_paths_P2):
+  def load_schedule_data(self, schedule_data_paths_P1: list, schedule_data_paths_P2: list) -> list[list[Schedule_Model]]:
+    """
+    # Calls self.helper_schedule_reader for each path in input lists.
+
+    @param schedule_data_paths_P1: The schedule data paths for Phase 1
+    @param schedule_data_paths_P2: The schedule data paths for Phase 2
+    @complexity: Worst-Best-Case: O(N), where N represents the len(schedule_data_paths_P1)+len(schedule_data_paths_P2)
+    @return: lst = [[schedule_model object],[schedule_model object]]
+      Where, lst[0] is Phase 1, lst[1] is Phase 2
+    """
     arr1 = []
     arr2 = []
     # Phase 1
     for path in schedule_data_paths_P1:
-      # helper schedule reader
+      # Call helper schedule reader and append to array
       arr1.append(self.helper_schedule_reader(1, path))
     # Phase 2
     for path in schedule_data_paths_P2:
-      # helper schedule reader
+      # Call helper schedule reader and append to array
       arr2.append(self.helper_schedule_reader(2, path))
     return [arr1, arr2]
-
+  
   def load_energy_data(self) -> dict[str, pd.DataFrame]:
     """
     Transform the atrocious format from "convert_tsf_to_dataframe" function to a sane format.
