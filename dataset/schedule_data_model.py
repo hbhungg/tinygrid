@@ -1,3 +1,5 @@
+from dataset.graph_data_model import Node, Edge, Digraph
+
 class Schedule_Model:
   def __init__(self, phase: int, path: str) -> None:
     self.ppoi = {}
@@ -88,3 +90,27 @@ class Schedule_Model:
 		"precedence_activity_lst": pre_act_lst
     }
     self.once_off_acts.append(temp)
+
+    # NOT WORKING
+  def add_graph_act(self) -> str:
+    self.graph_act = Digraph()
+
+    # Get ids off all recurring activities
+    act_ids = []
+    act_id_precedences = []
+    for act in self.acts:
+      act_ids.append(act["act_id"])
+      act_id_precedences.append(act["precedence_activity_lst"])
+
+    # For each act_id in act_ids add a Node in digraph
+    for act_id in act_ids:
+      self.graph_act.add_node(Node(act_id))
+    
+    # For each act in act_id_precedences, add edges
+    for i in range(len(act_id_precedences)):
+      current_node_id = act_id[i]
+      precedences = act_id_precedences[i]
+      for precdence_id in precedences:
+        self.graph_act.add_edge(Edge(Node(precdence_id), Node(current_node_id)))
+
+    return str(self.graph_act)
