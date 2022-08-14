@@ -150,16 +150,16 @@ class IEEE_CIS:
     return weather_data
 
   def load_AEMO_nov_price_data(self) -> pd.DataFrame:
-      """
-      Load AEMO price data from csv to pandas DataFrame. Transform the datetime string to appropriate type.
-      Set the dataframe index to the datetime column.
+    """
+    Load AEMO price data from csv to pandas DataFrame. Transform the datetime string to appropriate type.
+    Set the dataframe index to the datetime column.
 
-      Return:
-        DataFrame object
-      """
-      price_data = pd.read_csv(self.nov_price_data_path)
-      # Parse the time from string to 
-      price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'], format="%Y-%m-%d %H:%M:%S")
-      price_data = price_data.set_index('SETTLEMENTDATE')
-      return price_data
+    Return:
+      DataFrame object
+    """
+    price_data = pd.read_csv(self.nov_price_data_path)
+    # Parse the time from string to 
+    price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'], format="%Y-%m-%d %H:%M:%S")
+    price_data = price_data.set_index('SETTLEMENTDATE')
+    return price_data
 

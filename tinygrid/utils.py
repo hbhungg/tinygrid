@@ -22,3 +22,11 @@ def mase(pred: np.array, true: np.array, training: np.array, cycle: int=2688) ->
   up = np.sum(np.absolute(pred - true))
   down = f_horizon/(M - cycle) * np.sum(np.absolute(training[cycle:] - training[:-cycle]))
   return up/down
+
+
+def denormalize(vals, mx, mi):
+  return vals * (mx - mi) - mi
+
+
+def normalize(vals, mx, mi):
+  return (vals-mi)/(mx-mi)
