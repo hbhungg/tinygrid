@@ -67,6 +67,20 @@ class Digraph(object):
     def has_node(self, node):
         return node in self.nodes
 
+    def find_node_by_name(self, name):
+        for node in self.nodes:
+            if node.get_name() == name:
+                return node
+        return None
+
+    def parents_of(self, f_node):
+        parent_list = []
+        for key in self.edges:
+            nodes = self.edges[key]
+            if f_node in nodes:
+                parent_list.append(key)
+        return parent_list
+
     def __str__(self):
         result = ''
         for src in self.nodes:

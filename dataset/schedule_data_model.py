@@ -91,7 +91,6 @@ class Schedule_Model:
     }
     self.once_off_acts.append(temp)
 
-    # NOT WORKING
   def add_graph_act(self) -> str:
     self.graph_act = Digraph()
 
@@ -104,13 +103,22 @@ class Schedule_Model:
 
     # For each act_id in act_ids add a Node in digraph
     for act_id in act_ids:
-      self.graph_act.add_node(Node(act_id))
+      n = Node(act_id)
+      self.graph_act.add_node(n)
     
     # For each act in act_id_precedences, add edges
     for i in range(len(act_id_precedences)):
-      current_node_id = act_id[i]
+      current_node_id = act_ids[i]
       precedences = act_id_precedences[i]
-      for precdence_id in precedences:
-        self.graph_act.add_edge(Edge(Node(precdence_id), Node(current_node_id)))
 
-    return str(self.graph_act)
+      # Check if there are no precedences
+      if len(precedences) == 0:
+        continue
+
+      # Find the exact node object in graph
+      c_node = self.graph_act.find_node_by_name(current_node_id)
+
+      for precdence_id in precedences:
+        # Find the exact node object in graph
+        p_node = self.graph_act.find_node_by_name(precdence_id)
+        self.graph_act.add_edge(Edge(c_node, p_node))
