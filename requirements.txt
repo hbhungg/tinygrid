@@ -4,5 +4,6 @@ numpy
 scipy
 pulp
 scikit-learn
+tqdm
 
 pytorch == 1.11.0
