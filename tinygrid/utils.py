@@ -24,9 +24,9 @@ def mase(pred: np.array, true: np.array, training: np.array, cycle: int=2688) ->
   return up/down
 
 
-def denormalize(vals, mx, mi):
+def denormalize(vals, mx: int, mi: int):
   return vals * (mx - mi) - mi
 
 
-def normalize(vals, mx, mi):
+def normalize(vals, mx: int, mi: int):
   return (vals-mi)/(mx-mi)

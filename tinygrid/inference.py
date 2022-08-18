@@ -3,23 +3,30 @@ import torch
 from net import LSTM2
 from dataloader import load_data_helper
 import pandas as pd
+from tqdm import tqdm
 
 
 # TODO: complete this
-def predict_sliding(model, s_data, test_data, length):
+def predict_sliding(model, test_data, length):
   ret = []
   model.eval()
+
+  for idx in tqdm(range(length)):
+    slc = test_data[idx:idx+28]
+    slc_t = torch.tensor(slc.values).unsqueeze(0)
+    pred = model(slc_t)
+
+    ret.append(pred.detach().item())
+    test_data['energy'][idx+28] = ret[-1]
   return ret
 
 def predict_naive(model, test_data, length):
   ret = []
   model.eval()
 
-  from tqdm import tqdm
   for idx in tqdm(range(length)):
-    slc = test_data[idx:idx+28].values
-    slc = torch.tensor(slc)
-    slc = slc.unsqueeze(0)
+    slc = test_data[idx:idx+28]
+    slc = torch.tensor(slc.values).unsqueeze(0)
     ret.append(model(slc).detach().item())
   return ret
 
