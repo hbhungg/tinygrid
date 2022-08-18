@@ -57,5 +57,9 @@ def load_data_helper():
   comb_train = comb[:dm.PHASE1_TIME]
   comb_test = comb[dm.PHASE1_TIME:]
 
+  # TODO: Find a better way. This is a scuff way to fix the bug of 
+  #       clipping date between train and test.
+  comb_train = comb_train[:-1]
+
   return comb_train, comb_test
 
