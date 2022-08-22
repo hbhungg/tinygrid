@@ -13,7 +13,13 @@ def mase(pred: np.array, true: np.array, training: np.array, cycle: int=2688) ->
   Return:
     MASE value
   """
-  assert len(pred) == len(true), "Predicted and actual array must have the same length"
+  if not isinstance(pred, np.ndarray):
+    raise TypeError("'pred' must be numpy array")
+  if not isinstance(true, np.ndarray):
+    raise TypeError("'true' must be numpy array")
+  if not isinstance(training, np.ndarray):
+    raise TypeError("'training' must be numpy array")
+  assert pred.shape == true.shape, "Predicted and actual array must have the same shape"
 
   f_horizon = len(pred)
   M = len(training)
