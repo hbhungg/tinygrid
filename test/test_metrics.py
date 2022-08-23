@@ -24,18 +24,17 @@ class TestMetrics(unittest.TestCase):
 
     start = datetime.datetime(day=31, month=8, year=2020, hour=23, minute=59, second=59)
     end = datetime.datetime(day=30, month=9, year=2020, hour=23, minute=59, second=59)
-
-    pred = np.zeros(2880)
-
     du = DataUtils()
     cols = du.cols
     diff = 0.0001
+
+    pred = np.zeros(2880)
     for col, sa in zip(cols, sample_ans):
       data, _ = du.load_data_helper(col)
       training = np.array(data[:start]['energy'].values)
       true = np.array(data[start:end]['energy'].values)
-
       r_mase = mase(pred, true, training)
+
       with self.subTest(msg=col):
         self.assertTrue(math.isclose(r_mase, sa, rel_tol=diff), 
                         f"{r_mase} != {sa} with difference {diff}")
