@@ -10,8 +10,8 @@ from dataset.schedule_data_model import Schedule_Model
 class IEEE_CIS:
   def __init__(self) -> None:
     _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    self.PHASE1_TIME = datetime.datetime(day=1, month=10, year=2020, hour=0, minute=0, second=0)
-    self.PHASE2_TIME = datetime.datetime(day=1, month=11, year=2020, hour=0, minute=0, second=0)
+    self.PHASE1_TIME = datetime.datetime(day=30, month=9, year=2020, hour=23, minute=59, second=59)
+    self.PHASE2_TIME = datetime.datetime(day=31, month=10, year=2020, hour=23, minute=59, second=59)
     self.energy_data_path = os.path.join(_BASE_DIR, "energy/nov_data.tsf")
     self.weather_data_path = os.path.join(_BASE_DIR, "weather/ERA5_Weather_Data_Monash.csv")
     self.nov_price_data_path = os.path.join(_BASE_DIR, "price/PRICE_AND_DEMAND_202011_VIC1.csv")
