@@ -4,7 +4,7 @@ import numpy as np
 import math
 
 from tinygrid.utils import mase
-from tinygrid.dataloader import DataUtils
+from tinygrid.dataloader import DataCleaner
 
 class TestMetrics(unittest.TestCase):
   def test_mase_type_checking(self):
@@ -24,9 +24,9 @@ class TestMetrics(unittest.TestCase):
 
     start = datetime.datetime(day=31, month=8, year=2020, hour=23, minute=59, second=59)
     end = datetime.datetime(day=30, month=9, year=2020, hour=23, minute=59, second=59)
-    du = DataUtils()
+    du = DataCleaner()
     cols = du.cols
-    diff = 0.0001
+    diff = 0.00001
 
     pred = np.zeros(2880)
     for col, sa in zip(cols, sample_ans):
