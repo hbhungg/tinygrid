@@ -1,25 +1,28 @@
 import datetime
-import sklearn.ensemble 
+
+import sklearn.linear_model
+
 from . import _BaseForecaster
+from .utils import mase
 
 
-class RandomForestForecaster(_BaseForecaster):
+class LassoForecaster(_BaseForecaster):
   def __init__(self):
-    super(RandomForestForecaster, self).__init__()
+    super(LassoForecaster, self).__init__()
     # Each series have its own Random Forest model
     self.models = {
-      'Building0' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Building1' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Building3' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Building4' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Building5' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Building6' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Solar0'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Solar1'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Solar2'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Solar3'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Solar4'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Solar5'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20)}
+      'Building0' : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False), 
+      'Building1' : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False), 
+      'Building3' : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False), 
+      'Building4' : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False), 
+      'Building5' : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False), 
+      'Building6' : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False), 
+      'Solar0'    : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False), 
+      'Solar1'    : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False), 
+      'Solar2'    : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False), 
+      'Solar3'    : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False), 
+      'Solar4'    : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False), 
+      'Solar5'    : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False)}
 
     # Each series have its own cuts
     self.cutoffs = { 
