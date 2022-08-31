@@ -1,6 +1,5 @@
 import math
 import numpy as np
-from dataset import IEEE_CIS
 
 def mase(pred: np.array, true: np.array, training: np.array, cycle: int=2688) -> int:
   """
