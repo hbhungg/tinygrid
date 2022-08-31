@@ -1,4 +1,4 @@
-from dataset.graph_data_model import Node, Edge, Digraph
+from .graph_data_model import Node, Edge, Digraph
 
 class Schedule_Model:
   def __init__(self, phase: int, path: str) -> None:
