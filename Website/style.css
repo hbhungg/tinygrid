@@ -1,0 +1,38 @@
+.left {
+  margin: 0;
+  padding: 0;
+  width: 40%;
+  background-color: #F5F4F4;
+  position: fixed;
+  height: 100%;
+  overflow: auto;
+}
+
+div.content {
+  margin-left: 40%;
+  height: 1000px;
+}
+
+.title_head {
+  background-color: #957bbe;
+  height: 4em;
+}
+
+.right_head {
+  height: 4em;
+}
+
+.title_text {
+  font-family: Krungthep;
+  color: white;
+  text-align: left;
+  font-size: 2em;
+  /* top | right | bottom | left */
+  padding: 0.2em 0.2em 0 0.5em;
+}
+
+.text_left {
+  padding: 5%;
+  font-family: Helvetica;
+  color: #707070;
+}
