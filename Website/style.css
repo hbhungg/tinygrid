@@ -2,11 +2,11 @@
   margin: 0;
   padding: 0;
   width: 40%;
-  background-color: #F5F4F4;
-  position: fixed;
   height: 100vh;
   overflow: auto;
   min-width: 400px;
+  background-color: #F5F4F4;
+  position: fixed;
 }
 
 div.content {

@@ -1,7 +1,7 @@
 // Globals
 var current_left_btn_selected = 1;
 
-function left_btn_selected(button_num) {
+function left_btn_selected_helper(button_num) {
   // Check to do nothing
   if (button_num == current_left_btn_selected) {
     return;
@@ -11,13 +11,6 @@ function left_btn_selected(button_num) {
 
   var button_selected_text_id = document.getElementById("left_text_" + button_num.toString());
   var button_current_text_id = document.getElementById("left_text_" + current_left_btn_selected.toString());
-
-  // Send viewport to element height
-  var content_selected_id = document.getElementById("content_" + button_num.toString());
-  window.scrollTo({
-    top: window.pageYOffset + content_selected_id.getBoundingClientRect().top,
-    behavior: 'smooth'
-  });
 
   // Reveal button_selected_text_id element
   button_selected_text_id.classList.remove("hidden");
@@ -33,18 +26,38 @@ function left_btn_selected(button_num) {
   current_left_btn_selected = button_num;
 }
 
+function left_btn_selected(button_num) {
+  // Check to do nothing
+  if (button_num == current_left_btn_selected) {
+    return;
+  }
+  // Send viewport to element height
+  var content_selected = document.getElementById("content_" + button_num.toString());
+  window.scrollTo({
+    top: window.pageYOffset + content_selected.getBoundingClientRect().top,
+    behavior: 'smooth'
+  });
+  left_btn_selected_helper(button_num);
+}
 
+/*
 window.addEventListener("scroll", function() {
-  const content_ids = ["content_1", "content_2", "content_3", "content_4", "content_5"];
-  // For each content_id in content_ids 
-  for (let i = 0; i < content_ids.length; i++) {
-    var el = document.getElementById(content_ids[i]);
-    if (window.scrollY > (el.offsetTop + el.offsetHeight)) {
-
+  const current_element = document.getElementById("content_" + current_left_btn_selected.toString());
+  const above_element = document.getElementById("content_" + (current_left_btn_selected - 1).toString());
+  const bellow_element = document.getElementById("content_" + (current_left_btn_selected + 1).toString());
+  
+  if (bellow_element != null) {
+    if (window.scrollY > (bellow_element.offsetTop + bellow_element.offsetHeight - bellow_element.clientHeight) && window.scrollY > (current_element.offsetTop + current_element.offsetHeight)) {
+      left_btn_selected_helper(current_left_btn_selected + 1);
+    }
+  }
+  if (above_element != null) {
+    if (window.scrollY < (above_element.offsetTop + above_element.offsetHeight - above_element.clientHeight) && window.scrollY < (current_element.offsetTop + current_element.offsetHeight)) {
+      left_btn_selected_helper(current_left_btn_selected - 1);
     }
   }
 });
-
+*/
 
 window.addEventListener("load", function() {
   window.scrollTo({
