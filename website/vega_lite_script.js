@@ -29,4 +29,3 @@ const jsonData = {
   }
 };
 vegaEmbed('#vis1', jsonData);
-vegaEmbed('#vis2', jsonData);
