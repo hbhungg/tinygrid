@@ -1,16 +1,13 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <title>TinyGrid</title>
+    <link rel = "icon" href="assets/lightning.svg" type = "image/x-icon">
     <!-- Bootstrap -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
-    <!-- Vega lite -->
-    <script src="https://cdn.jsdelivr.net/npm/vega@5.22.1"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.5.0"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.21.0"></script>
     <!-- Style sheet -->
     <link rel="stylesheet" href="style.css">
   </head>
-
   <!-- Left content -->
   <div class="fixed-top left">
     <!-- Left content title -->
@@ -20,49 +17,65 @@
     <!-- Left content items -->
     <h3 class="text_left_heading noselect"><span class="text_line selected" id="left_heading_1" onclick="left_btn_selected(1)">Description</span></h3>
     <div class="text_left" id="left_text_1">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Duis tristique, neque accumsan interdum laoreet, metus leo semper nulla, sit amet pellentesque ipsum mi id eros. Integer sit amet venenatis velit. Pellentesque ornare auctor rhoncus. Nulla eget volutpat sapien. Fusce dictum augue non rhoncus mattis. Donec eu arcu sed eros congue elementum. Mauris scelerisque nunc quis lectus accumsan vestibulum. Suspendisse potenti. Pellentesque euismod elementum justo, at convallis nibh vulputate et. Fusce dictum ipsum sagittis lobortis commodo. Nulla mi arcu, dignissim non condimentum in, efficitur mollis massa. Fusce nisi ante, ornare ut ullamcorper eget, aliquam sed elit. Aliquam leo nisi, tincidunt vel dui eu, ultrices aliquet sem. Aliquam vel risus urna. Nunc vitae urna et erat congue congue vitae at nunc. Etiam tristique sagittis efficitur. Aliquam consequat ipsum dolor, vel placerat tellus gravida nec. In hac habitasse platea dictumst. Nullam tempus gravida dictum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue.
     </div>
     <h3 class="text_left_heading noselect"><span class="text_line" id="left_heading_2" onclick="left_btn_selected(2)">Data</span></h3>
     <div class="text_left hidden" id="left_text_2">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Duis tristique, neque accumsan interdum laoreet, metus leo semper nulla, sit amet pellentesque ipsum mi id eros. Integer sit amet venenatis velit. Pellentesque ornare auctor rhoncus. Nulla eget volutpat sapien. Fusce dictum augue non rhoncus mattis. Donec eu arcu sed eros congue elementum. Mauris scelerisque nunc quis lectus accumsan vestibulum. Suspendisse potenti. Pellentesque euismod elementum justo, at convallis nibh vulputate et. Fusce dictum ipsum sagittis lobortis commodo. Nulla mi arcu, dignissim non condimentum in, efficitur mollis massa. Fusce nisi ante, ornare ut ullamcorper eget, aliquam sed elit. Aliquam leo nisi, tincidunt vel dui eu, ultrices aliquet sem. Aliquam vel risus urna. Nunc vitae urna et erat congue congue vitae at nunc. Etiam tristique sagittis efficitur. Aliquam consequat ipsum dolor, vel placerat tellus gravida nec. In hac habitasse platea dictumst. Nullam tempus gravida dictum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue.
     </div>
     <h3 class="text_left_heading noselect"><span class="text_line" id="left_heading_3" onclick="left_btn_selected(3)">Forecasting</span></h3>
     <div class="text_left hidden" id="left_text_3">
-      Lorem ipsum dolor sit amet, consectetur aipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Duis tristique, neque accumsan interdum laoreet, metus leo semper nulla, sit amet pellentesque ipsum mi id eros. Integer sit amet venenatis velit. Pellentesque ornare auctor rhoncus. Nulla eget volutpat sapien. Fusce dictum augue non rhoncus mattis. Donec eu arcu sed eros congue elementum. Mauris scelerisque nunc quis lectus accumsan vestibulum. Suspendisse potenti. Pellentesque euismod elementum justo, at convallis nibh vulputate et. Fusce dictum ipsum sagittis lobortis commodo. Nulla mi arcu, dignissim non condimentum in, efficitur mollis massa. Fusce nisi ante, ornare ut ullamcorper eget, aliquam sed elit. Aliquam leo nisi, tincidunt vel dui eu, ultrices aliquet sem. Aliquam vel risus urna. Nunc vitae urna et erat congue congue vitae at nunc. Etiam tristique sagittis efficitur. Aliquam consequat ipsum dolor, vel placerat tellus gravida nec. In hac habitasse platea dictumst. Nullam tempus gravida dictum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue.
     </div>
     <h3 class="text_left_heading noselect"><span class="text_line" id="left_heading_4" onclick="left_btn_selected(4)">Optimisation</span></h3>
     <div class="text_left hidden" id="left_text_4">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Duis tristique, neque accumsan interdum laoreet, metus leo semper nulla, sit amet pellentesque ipsum mi id eros. Integer sit amet venenatis velit. Pellentesque ornare auctor rhoncus. Nulla eget volutpat sapien. Fusce dictum augue non rhoncus mattis. Donec eu arcu sed eros congue elementum. Mauris scelerisque nunc quis lectus accumsan vestibulum. Suspendisse potenti. Pellentesque euismod elementum justo, at convallis nibh vulputate et. Fusce dictum ipsum sagittis lobortis commodo. Nulla mi arcu, dignissim non condimentum in, efficitur mollis massa. Fusce nisi ante, ornare ut ullamcorper eget, aliquam sed elit. Aliquam leo nisi, tincidunt vel dui eu, ultrices aliquet sem. Aliquam vel risus urna. Nunc vitae urna et erat congue congue vitae at nunc. Etiam tristique sagittis efficitur. Aliquam consequat ipsum dolor, vel placerat tellus gravida nec. In hac habitasse platea dictumst. Nullam tempus gravida dictum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue.
     </div>
     <h3 class="text_left_heading noselect"><span class="text_line" id="left_heading_5" onclick="left_btn_selected(5)">Team</span></h3>
     <div class="text_left hidden" id="left_text_5">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Duis tristique, neque accumsan interdum laoreet, metus leo semper nulla, sit amet pellentesque ipsum mi id eros. Integer sit amet venenatis velit. Pellentesque ornare auctor rhoncus. Nulla eget volutpat sapien. Fusce dictum augue non rhoncus mattis. Donec eu arcu sed eros congue elementum. Mauris scelerisque nunc quis lectus accumsan vestibulum. Suspendisse potenti. Pellentesque euismod elementum justo, at convallis nibh vulputate et. Fusce dictum ipsum sagittis lobortis commodo. Nulla mi arcu, dignissim non condimentum in, efficitur mollis massa. Fusce nisi ante, ornare ut ullamcorper eget, aliquam sed elit. Aliquam leo nisi, tincidunt vel dui eu, ultrices aliquet sem. Aliquam vel risus urna. Nunc vitae urna et erat congue congue vitae at nunc. Etiam tristique sagittis efficitur. Aliquam consequat ipsum dolor, vel placerat tellus gravida nec. In hac habitasse platea dictumst. Nullam tempus gravida dictum. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae.
+      Lorem ipsum dolor sit amet, consectetur adipiscing elit. 
     </div>
   </div>
 
   <!-- Right content -->
-  <div class="container-fluid right_head"></div>
-  <div class="content">
+  <div class="container content">
+    <div class="container-fluid right_head"></div>
     <!-- 1st content -->
     <div class="row content_block" id="content_1">
-      <div class="col" style="background-color: rgb(212, 101, 49);">Description</div>
+      <div class="col" id="vis1"></div>
+      <div class="col" id="vis2"></div>
     </div>
+    <div class="container-fluid right_head"></div>
     <!-- 2nd content -->
     <div class="row content_block" id="content_2">
-      <div class="col" style="background-color: rgb(210, 77, 77);">Data</div>
+      <div class="col">Data</div>
     </div>
+    <div class="container-fluid right_head"></div>
     <!-- 3rd content -->
     <div class="row content_block" id="content_3">
-      <div class="col" style="background-color: rgb(40, 159, 40);">Forecasting</div>
+      <div class="col">Forecasting</div>
     </div>
+    <div class="container-fluid right_head"></div>
     <!-- 4th content -->
     <div class="row content_block" id="content_4">
-      <div class="col" style="background-color: rgb(180, 58, 127);">Optimisation</div>
+      <div class="col">Optimisation</div>
     </div>
+    <div class="container-fluid right_head"></div>
     <!-- 5th content -->
     <div class="row content_block" id="content_5">
-      <div class="col" style="background-color: rgb(236, 223, 42);">Team</div>
+      <div class="col">Team</div>
     </div>
+    <!-- Footer-->
+    <footer class="bg-light text-center text-lg-start">
+      <div class="text-center p-3" style="background-color: white;"></div>
+    </footer>
   </div>
-  <script src="script.js"></script>
+
+  <!-- Vega lite scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <!-- Website scripts -->
+  <script src="content_script.js"></script>
+  <script src="vega_lite_script.js"></script>
 </html>

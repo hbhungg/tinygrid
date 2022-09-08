@@ -4,38 +4,39 @@
   width: 40%;
   height: 100vh;
   overflow: auto;
-  min-width: 400px;
   background-color: #F5F4F4;
-  position: fixed;
+  min-width: 40vh;
 }
 
 div.content {
   margin-left: 40%;
   height: 100vh;
+  width: auto;
 }
 
 .title_head {
   background-color: #957bbe;
-  height: 4em;
+  height: 10vh;
 }
 
 .right_head {
-  height: 4em;
+  height: 10vh;
 }
 
 .title_text {
   font-family: Krungthep;
   color: white;
-  text-align: left;
-  font-size: 2em;
+  font-size: 4vh;
   /* top | right | bottom | left */
-  padding: 0.2em 0.2em 0 0.5em;
+  padding: 2vh 0vh 2vh 2vh;
 }
 
 .text_left {
-  padding: 1em 3em 0em 3em;
+  /* top | right | bottom | left */
+  padding: 2vh 2vh 0 4vh;
   font-family: Helvetica;
   color: #707070;
+  font-size: 2vh;
 }
 
 .hidden {
@@ -43,7 +44,9 @@ div.content {
 }
 
 .text_left_heading {
-  padding: 1em 1em 0em 1em;
+  /* top | right | bottom | left */
+  padding: 2vh 2vh 0 4vh;
+  font-size: 3vh;
   font-family:  'Courier New', monospace;
   color: #707070;
 }
@@ -68,7 +71,6 @@ div.content {
 .content_block {
   height: 100%;
 }
-
 
 /* From https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
 .noselect {
