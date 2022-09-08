@@ -33,10 +33,12 @@ div.content {
 
 .text_left {
   /* top | right | bottom | left */
-  padding: 2vh 2vh 0 4vh;
+  padding: 2vh 4vh 0 4vh;
   font-family: Helvetica;
   color: #707070;
   font-size: 2vh;
+  text-align: justify;
+  text-justify: inter-word;
 }
 
 .hidden {
