@@ -56,20 +56,20 @@ div.content {
 .text_line:hover {
   color: #acacac;
   cursor: pointer;
-  border-bottom:2px solid #acacac;
+  border-bottom:0.1em solid #acacac;
 }
 
 .text_line {
   color: #707070;
   text-decoration: none;
-  border-bottom:2px solid #707070;
+  border-bottom:0.1em solid #707070;
   display: inline-block;
   line-height: 1.5em;
 }
 
 .selected {
   color: #957bbe;
-  border-bottom:2px solid #957bbe;
+  border-bottom:0.1em solid #957bbe;
 }
 
 .content_block {
