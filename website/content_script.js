@@ -27,21 +27,19 @@ function left_btn_selected_helper(button_num) {
 }
 
 function left_btn_selected(button_num) {
-  /*
-  var content_selected = document.getElementById("content_" + button_num.toString());
-  // Send viewport to element height
-  window.scrollTo({top: window.pageYOffset + content_selected.getBoundingClientRect().top});
-
-  // Change left button style
-  left_btn_selected_helper(button_num);
-  */
+  content_id = "content_" + button_num.toString() + "_sup";
+  el = document.getElementById(content_id);
+  window.scrollTo({
+    top: el.offsetTop,
+    behavior: 'smooth'
+  });
 }
 
 function scroll_content_effect() {
   var lst_ids = [1,2,3,4,5];
   for (let i=0; i<lst_ids.length; i++) {
     var el = document.getElementById("content_" + lst_ids[i].toString());
-    if (window.scrollY <= el.offsetTop + el.offsetHeight && window.scrollY >= window.pageYOffset + el.getBoundingClientRect().top) {
+    if (window.scrollY < el.offsetTop + el.offsetHeight && window.scrollY > window.pageYOffset + el.getBoundingClientRect().top) {
       left_btn_selected_helper(lst_ids[i]);
     }
   };
@@ -50,10 +48,3 @@ function scroll_content_effect() {
 
 // Window event listeners
 window.addEventListener("scroll", function() {scroll_content_effect();}, {passive: true});
-window.addEventListener("load", function() {
-  window.scrollTo({
-    top: 0,
-    behavior: 'smooth'
-  });
-});
-
