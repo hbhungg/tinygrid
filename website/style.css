@@ -74,6 +74,12 @@ div.content {
 
 .content_block {
   height: 100%;
+  /* top | right | bottom | left */
+  padding: 5vh 2.5vw 5vh 2.5vw;
+}
+
+.content_block_inner {
+  background-color: #F5F4F4;
 }
 
 /* From https://stackoverflow.com/questions/826782/how-to-disable-text-selection-highlighting */
