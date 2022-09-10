@@ -53,6 +53,20 @@ div.content {
   color: #707070;
 }
 
+.text_right_heading {
+    font-size: 3vh;
+    font-family:  'Courier New', monospace;
+    color: #707070;
+}
+
+.text_right {
+    font-family: Helvetica;
+    color: #707070;
+    font-size: 1vw;
+    text-align: justify;
+    text-justify: inter-word;
+}
+
 .text_line:hover {
   color: #acacac;
   cursor: pointer;
@@ -74,8 +88,6 @@ div.content {
 
 .content_block {
   height: 100%;
-  /* top | right | bottom | left */
-  padding: 5vh 2.5vw 5vh 2.5vw;
 }
 
 .content_block_inner {
