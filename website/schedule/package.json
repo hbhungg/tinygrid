@@ -1,11 +1,28 @@
 {
-  "name": "schedule_app",
-  "version": "1.0.0",
-  "description": "schedule",
-  "main": "schedule_processing.js",
-  "scripts": {
+    
+    "name": "app",
+    
+    "version": "1.0.0",
+    
+    "description": "schedule",
+    
+    "main": "app.js",
+    
+    "scripts": {
+    
+        
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "author": "AP",
-  "license": "ISC"
+    
+    },
+    
+    "author": "",
+    
+    "license": "ISC",
+    
+    "dependencies": {
+    
+        
+    "csv-writer": "^1.6.0"
+    
+    }
 }
