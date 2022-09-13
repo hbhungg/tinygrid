@@ -10,7 +10,6 @@ The original script accept 2 arguments, this one accept 3, the third arg denote 
 Inside the Phase.java file, there will be paths to the energy data for each phase, suppose that would be pointing to the predicted data. Right now it is pointing to the real data.
 
 ## TODOs:
-* Create a Python wrapper around this (compile and run).
 * Port this all to Python.
 
 # Original README 
