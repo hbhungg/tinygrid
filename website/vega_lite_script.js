@@ -1,4 +1,4 @@
-// Vega lite graphs
+// Vega lite graph example
 const jsonData = {
   "data": {
     "width": "container",
@@ -28,4 +28,5 @@ const jsonData = {
     }
   }
 };
+// Call embed function on html element by id: vis1
 vegaEmbed('#vis1', jsonData);
