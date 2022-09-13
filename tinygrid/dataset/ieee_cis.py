@@ -23,7 +23,7 @@ class IEEE_CISMixin:
 
 
   @classmethod
-  def _load_schedule_data(cls) -> dict[str, Schedule]:
+  def _load_schedule_data(cls) -> dict[str, (Schedule, str)]:
     """
     Load and parse all of the schedule .txt files from IEEE-CIS's competition
     """
@@ -32,7 +32,7 @@ class IEEE_CISMixin:
     schedule_fnames = os.listdir(cls.SCHEDULE_DATA_PATH)
     for name in schedule_fnames:
       full_path = os.path.join(cls.SCHEDULE_DATA_PATH, name)
-      schedule_data[name] = schedule_parser(full_path)
+      schedule_data[name] = (schedule_parser(full_path), full_path)
     return schedule_data
 
   
