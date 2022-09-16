@@ -1,15 +1,102 @@
 <!DOCTYPE html>
 <html>
-
-<head>
-  
-</head>
-
 <body>
-<script type="text/javascript" src="schedule_processing.js"> </script>
 
-<button type="button" onclick="myFunction()">Test</button>
-    
+
+
 <p id="demo"></p>
 
+<script src="https://cdn.jsdelivr.net/npm/vega@5.22.1"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-lite@5.5.0"></script>
+<script src="https://cdn.jsdelivr.net/npm/vega-embed@6.21.0"></script>
+
+
+
+
+
+
+
+
+<div id="vis"></div>
+<script type="text/javascript">
+      var yourVlSpec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+        description: 'A simple bar chart with embedded data.',
+        data: {
+          values: [
+            {a: 'A', b: 28},
+            {a: 'B', b: 55},
+            {a: 'C', b: 43},
+            {a: 'D', b: 91},
+            {a: 'E', b: 81},
+            {a: 'F', b: 53},
+            {a: 'G', b: 19},
+            {a: 'H', b: 87},
+            {a: 'I', b: 52}
+          ]
+        },
+        mark: 'bar',
+        encoding: {
+          x: {field: 'a', type: 'ordinal'},
+          y: {field: 'b', type: 'quantitative'}
+        }
+      };
+      vegaEmbed('#vis', yourVlSpec);
+    </script>
+
+
+
+
+
+
+
+
+
+
+
+
+<script>
+
+  var request = new XMLHttpRequest();
+  request.open('GET','https://raw.githubusercontent.com/hbhungg/tinygrid/main/website/schedule/schedule_small.txt',true);
+  request.send(null);
+  request.onreadystatechange = get_data
+  function get_data(){
+  var schedule = request.responseText
+  const schedule_array = schedule.split(/\n/);
+  var csv_array = []
+
+  var no_buildings = schedule_array[1];
+  for (var i = 0; i < schedule_array.length; i++) {
+   var row = schedule_array[i];
+   var row_arr = row.split(/ /)
+   if (row_arr[0] == "r"){
+      
+      var num_rooms = parseInt(row_arr[3]);
+      
+      for (var j = 0; j < num_rooms;j++){
+        var building_no = row_arr[4+j].charAt(0);
+        var new_row = {activity_type:row_arr[0],
+                       activity_id:row_arr[1],
+                       time:row_arr[2],
+                       building_id:building_no};
+        csv_array.push(new_row)
+    
+        
+      }}
+    
+}
+  console.log(csv_array)
+  document.getElementById("demo").innerHTML = csv_array.toString()
+  return request.responseText;}
+
+
+
+
+
+
+
+</script> 
+
 </body>
+</html>
