@@ -29,8 +29,6 @@ class Schedule:
   re_act:    dict[int, Activity] = field(default_factory=dict)
   once_act:  dict[int, Activity] = field(default_factory=dict)
 
-
-
 def schedule_parser(f_name: str) -> Schedule:
     """
     Parse the schedule .txt file according to the IEEE-CIS's Data_Description.pdf
