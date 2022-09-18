@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import os
 from subprocess import check_output, CalledProcessError
 
