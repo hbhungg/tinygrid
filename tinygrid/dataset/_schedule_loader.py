@@ -150,14 +150,14 @@ def schedule_parser(f_name: str) -> Schedule:
       elif tag == "r":
         sche.re_act[split_line[1]] = \
           ActivityInstance(start_time = split_line[2],
-                  n_rooms = split_line[3]
+                  n_rooms = split_line[3],
                   prec    = split_line[4:])
 
       # a # activity # $value # $penalty # precedences
       elif tag == "a":
         sche.once_act[split_line[1]] = \
           ActivityInstance(start_time = split_line[2],
-                  n_rooms = split_line[3]
+                  n_rooms = split_line[3],
                   prec    = split_line[4:])
 
     return sche
