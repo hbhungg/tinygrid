@@ -14,6 +14,17 @@ class BatteryInstance:
   efficiency: int
 
 @dataclass
+class BatteryScheduleSolution:
+  time:      int
+  decision:  int
+
+@dataclass
+class ActivityInstanceSolution:
+  n_rooms:    int
+  start_time: int
+  buidings:   list[int] = field(default_factory=list)
+
+@dataclass
 class ActivityInstance:
   n_room:   int
   size:     str
@@ -26,8 +37,8 @@ class ActivityInstance:
 @dataclass
 class Instance:
   buildings: dict[int, BuildingInstance] = field(default_factory=dict)
-  solars:    dict[int, int]      = field(default_factory=dict)
-  batteries: dict[int, BatteryInstance]  = field(default_factory=dict)
+  solars:    dict[int, int] = field(default_factory=dict)
+  batteries: dict[int, BatteryInstance] = field(default_factory=dict)
   re_act:    dict[int, ActivityInstance] = field(default_factory=dict)
   once_act:  dict[int, ActivityInstance] = field(default_factory=dict)
 
@@ -41,13 +52,13 @@ class BatterySchedule:
 class ActivitySchedule:
   start_time:  int
   N_room:      int
-  building_id: list[int]
+  building_id: list[int] = field(default_factory=list)
 
 @dataclass
 class Schedule:
-  re_act:   dict[int, ActivitySchedule]
-  once_act: dict[int, ActivitySchedule]
-  battery:  dict[int, BatterySchedule]
+  re_act:   dict[int, ActivitySchedule] = field(default_factory=dict)
+  once_act: dict[int, ActivitySchedule] = field(default_factory=dict)
+  battery:  dict[int, BatterySchedule] = field(default_factory=dict)
 
 
 def instance_parser(f_name: str) -> Instance:
@@ -143,22 +154,22 @@ def schedule_parser(f_name: str) -> Schedule:
       # c # battery id # time # decision
       if tag == "c":
         sche.batteries[split_line[1]] = \
-          BatterySchedule(time = split_line[2],
+          BatteryScheduleSolution(time = split_line[2],
                   decision = split_line[3])
 
       # r # act_id # start_time # n_rooms # [buildings_id]
       elif tag == "r":
         sche.re_act[split_line[1]] = \
-          ActivityInstance(start_time = split_line[2],
+          ActivityInstanceSolution(start_time = split_line[2],
                   n_rooms = split_line[3],
-                  prec    = split_line[4:])
+                  buidings = split_line[4:])
 
-      # a # activity # $value # $penalty # precedences
+      # a # act_id # start_time # n_rooms # [buildings_id]
       elif tag == "a":
         sche.once_act[split_line[1]] = \
-          ActivityInstance(start_time = split_line[2],
+          ActivityInstanceSolution(start_time = split_line[2],
                   n_rooms = split_line[3],
-                  prec    = split_line[4:])
+                  buidings = split_line[4:])
 
     return sche
 

@@ -10,9 +10,20 @@ class Sim_Annealing:
       raise Exception('phase not either 1 or 2 as integer')
 
     # Read instance data
-    data = IEEE_CISMixin._load_instance_data()
+    instance_data = IEEE_CISMixin._load_instance_data()
     # Get the specified phase file
-    self.s_schedual = data[instance_file_name]
+    self.specific_instance_data = instance_data[instance_file_name]
+
+    # Read the sample solution schedual
+    sample_solution_data = IEEE_CISMixin._load_instance_sample_solution_data()
+    frag_file_name = instance_file_name.split('_')
+    self.sample_solution_schedual = sample_solution_data[frag_file_name[0]+'_'+frag_file_name[1]+'_solution_'+frag_file_name[2]+'_'+frag_file_name[3]]
+
+    # Read the AEMO price data
+    if phase == 1:
+      self.price_data = IEEE_CISMixin._load_AEMO_oct_price_data()
+    elif phase == 2:
+      self.price_data = IEEE_CISMixin._load_AEMO_nov_price_data()
 
     # Run and save forecasting
     a = RandomForestForecaster()
@@ -45,14 +56,12 @@ class Sim_Annealing:
     random.seed(1111)
 
     # Timeline of events (each entry is 15min interval)
-    # Ignoring assignment of batteries to buildings, batteries can be accessed everywhere
-    # time_line[t] = [(rec_act_0, info...) ,(once_act_0, info...), (bat_2, toggle, info...)]
-    # time_line[t-1] = None -> nothing assigned to that time
     if phase == 1:
       self.time_line = [None for i in range(2977)]
     elif phase == 2:
-      self.time_line = [None for i in range(2976 - len(a.y_preds['Solar0']))]
-
+      self.time_line = [None for i in range(2976 - len(a.y_preds['Solar0']))]      
+    
+    
   def objective_function(self, params) -> float:
     
     s_1 = 0
@@ -74,9 +83,6 @@ class Sim_Annealing:
 
   def get_candidates(self, params):
     return []
-
-  def get_init_candidate(self):
-    return ''
 
   def assign_bats(self):
     # Batteries assigned after the assignment of activities
@@ -106,21 +112,16 @@ class Sim_Annealing:
       c_new = candidates[candidate_index]
       # Send it to the objective function
       c_new_eval = self.objective_function(c_new)
-      
       # Check if the new candidate is best
       if c_new_eval < b_eval:
         b, b_eval = c_new, c_new_eval
-      
       # Set the temperature
       t = t_0 * (1-(iteration/(max_iterations)))**curvature
-
       # Set the acceptance criterion
       acceptance_cri = math.exp(-(c_new_eval - c_eval)/t)
-      
       # Check to check c_new by chance
       if c_new_eval - c_eval < 0 or random.random() < acceptance_cri:
         c, c_eval = c_new, c_new_eval
-
       # Increment
       iteration += 1
     
@@ -136,17 +137,18 @@ print(a.solar_prod)
 print(a.building_demand)
 
 
-# Battery schedual is based on a seperate metric: charge during off-peaks, discharge during activites.
 
-# Only for activities
-# 1. Objective function f(X), Temperature T = T_0 * a^k (T_0 is the inital temperature, cooling rate (0.8 to 0.99)) or T = T_0 * (1-(k/k_max))^b (k)max is the max num of iterations, b is the curavature (between 1 and 4))
-# 2. Initial state will be a simple assignment of activities and batteries (Let this be X)
-# 3. If k != k_max:
-  # 4. Perform annealing process
-    # 5. In the neighbourhood (selecting similar scheduals) of the schedual assignment, randomly choose a new schedual X_new from this set
-      # 6. If f(X_new) - f(X) >= 0: X <- X_new
-      # 7. Elif random number < exp[-(f(X_new)-f(X))/T]: X <- X_new
-      # 8. GOTO line 5, k++
+# Battery
 
-# The set N = Neighbourhood will be definded as follows:
-# N: (for each activity act: change act to a random legal time slot.)
+# Read in solution to schedual (example solution) *DONE*
+# Read in the AEMO price data *DONE*
+# Place sample solution into timeline *RECONSIDER TIMELINE DATASTRUCTURE*
+# Read and store AEMO price data into interval format
+# Create the objective function
+# Create candidates based on randomly taking a time-interval, then randomly choosing to (Hold, Discharge, Charge) (remove battery's current state) a randomly selected battery from all batteries.
+# Initial state will be that where all batteries are on hold
+
+# Timeline
+
+# time_line[t] = [(rec_act_0, info...) ,(once_act_0, info...), (bat_2, toggle, info...)]
+# time_line[t] = None -> nothing assigned to that time
