@@ -4,15 +4,15 @@ import random
 import math
 
 class Sim_Annealing:
-  def __init__(self, phase, schedule_file_name):
+  def __init__(self, phase, instance_file_name):
     # Phase check
     if phase != 1 and phase != 2:
       raise Exception('phase not either 1 or 2 as integer')
 
-    # Read schedule data
-    data = IEEE_CISMixin._load_schedule_data()
+    # Read instance data
+    data = IEEE_CISMixin._load_instance_data()
     # Get the specified phase file
-    self.s_schedual = data[schedule_file_name]
+    self.s_schedual = data[instance_file_name]
 
     # Run and save forecasting
     a = RandomForestForecaster()
@@ -130,7 +130,7 @@ class Sim_Annealing:
 
 
 
-a = Sim_Annealing(phase = 1, schedule_file_name = 'phase1_instance_large_0.txt')
+a = Sim_Annealing(phase = 1, instance_file_name = 'phase1_instance_large_0.txt')
 
 print(a.solar_prod)
 print(a.building_demand)

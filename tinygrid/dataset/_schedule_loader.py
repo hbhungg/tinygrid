@@ -1,18 +1,20 @@
 from dataclasses import dataclass, field
 
+# NOTES: Can both of them merge? Might be confuse if merged since instance and schedule need different data.
+# Class for Instance
 @dataclass
-class Building:
+class BuildingInstance:
   n_small: int
   n_large: int
 
 @dataclass
-class Battery:
+class BatteryInstance:
   capacity:   int
   max_power:  int
   efficiency: int
 
 @dataclass
-class Activity:
+class ActivityInstance:
   n_room:   int
   size:     str
   load:     int
@@ -22,17 +24,40 @@ class Activity:
   prec:     list[int] = field(default_factory=list)
 
 @dataclass
-class Schedule:
-  buildings: dict[int, Building] = field(default_factory=dict)
+class Instance:
+  buildings: dict[int, BuildingInstance] = field(default_factory=dict)
   solars:    dict[int, int]      = field(default_factory=dict)
-  batteries: dict[int, Battery]  = field(default_factory=dict)
-  re_act:    dict[int, Activity] = field(default_factory=dict)
-  once_act:  dict[int, Activity] = field(default_factory=dict)
+  batteries: dict[int, BatteryInstance]  = field(default_factory=dict)
+  re_act:    dict[int, ActivityInstance] = field(default_factory=dict)
+  once_act:  dict[int, ActivityInstance] = field(default_factory=dict)
 
-def schedule_parser(f_name: str) -> Schedule:
+# Class for Schedule (solution)
+@dataclass
+class BatterySchedule:
+  time:     int
+  decision: int
+
+@dataclass
+class ActivitySchedule:
+  start_time:  int
+  N_room:      int
+  building_id: list[int]
+
+@dataclass
+class Schedule:
+  re_act:   dict[int, ActivitySchedule]
+  once_act: dict[int, ActivitySchedule]
+  battery:  dict[int, BatterySchedule]
+
+
+
+def instance_parser(f_name: str) -> Instance:
     """
-    Parse the schedule .txt file according to the IEEE-CIS's Data_Description.pdf
-    into Schedule class
+    Parse the instance.txt file according to the IEEE-CIS's Data_Description.pdf
+    Params:
+      f_name: path to file
+    Return: 
+      Instance object.
     """
     lines = []
 
@@ -40,7 +65,7 @@ def schedule_parser(f_name: str) -> Schedule:
       lines = f.read().splitlines()
 
     # init Schedule obj
-    schedule = Schedule()
+    ins = Instance()
 
     # For each line check tag and put data into model
     for line in lines:
@@ -52,25 +77,25 @@ def schedule_parser(f_name: str) -> Schedule:
       tag = split_line[0]
       # b # building id # small # large
       if tag == "b":
-        schedule.buildings[split_line[1]] = \
-          Building(n_small=split_line[2], 
+        ins.buildings[split_line[1]] = \
+          BuildingInstance(n_small=split_line[2], 
                    n_large=split_line[3])
 
       # s # solar id # building id
       elif tag == "s":
-        schedule.solars[split_line[1]] = split_line[2]
+        ins.solars[split_line[1]] = split_line[2]
 
       # c # battery id # building id # capacity kWh # max power kW # efficiency
       elif tag == "c":
-        schedule.batteries[split_line[1]] = \
-          Battery(capacity   = split_line[2],
+        ins.batteries[split_line[1]] = \
+          BatteryInstance(capacity   = split_line[2],
                   max_power  = split_line[3],
                   efficiency = split_line[4])
 
       # r # activity # precedences
       elif tag == "r":
-        schedule.re_act[split_line[1]] = \
-          Activity(n_room   = split_line[2],
+        ins.re_act[split_line[1]] = \
+          ActivityInstance(n_room   = split_line[2],
                    size     = split_line[3],
                    load     = split_line[4],
                    duration = split_line[5],
@@ -80,8 +105,8 @@ def schedule_parser(f_name: str) -> Schedule:
 
       # a # activity # $value # $penalty # precedences
       elif tag == "a":
-        schedule.once_act[split_line[1]] = \
-          Activity(n_room   = split_line[2],
+        ins.once_act[split_line[1]] = \
+          ActivityInstance(n_room   = split_line[2],
                    size     = split_line[3],
                    load     = split_line[4],
                    duration = split_line[5],
@@ -89,5 +114,5 @@ def schedule_parser(f_name: str) -> Schedule:
                    penalty  = split_line[7],
                    prec     = split_line[9:])
 
-    return schedule
+    return ins
 

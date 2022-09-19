@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from .tsf_loader import convert_tsf_to_dataframe
-from ._schedule_loader import Schedule, schedule_parser
+from ._schedule_loader import instance_parser, Instance
 
 class IEEE_CISMixin:
   """
@@ -16,24 +16,24 @@ class IEEE_CISMixin:
   WEATHER_DATA_PATH = os.path.join(_BASE_DIR, "weather/ERA5_Weather_Data_Monash.csv")
   NOV_PRICE_DATA_PATH = os.path.join(_BASE_DIR, "price/PRICE_AND_DEMAND_202011_VIC1.csv")
   ENERGY_DATA_PATH = os.path.join(_BASE_DIR, "energy/nov_data.tsf")
-  SCHEDULE_DATA_PATH = os.path.join(_BASE_DIR, "schedule/")
+  INSTANCE_DATA_PATH = os.path.join(_BASE_DIR, "instance/")
 
   PHASE1_TIME = datetime.datetime(day=30, month=9, year=2020, hour=23, minute=59, second=59)
   PHASE2_TIME = datetime.datetime(day=31, month=10, year=2020, hour=23, minute=59, second=59)
 
 
   @classmethod
-  def _load_schedule_data(cls) -> dict[str, (Schedule, str)]:
+  def _load_instance_data(cls) -> dict[str, Instance]:
     """
-    Load and parse all of the schedule .txt files from IEEE-CIS's competition
+    Load and parse all of the instance .txt files from IEEE-CIS's competition
     """
-    schedule_data = {}
-    # Get all of the files inside schedule/ folder.
-    schedule_fnames = os.listdir(cls.SCHEDULE_DATA_PATH)
-    for name in schedule_fnames:
-      full_path = os.path.join(cls.SCHEDULE_DATA_PATH, name)
-      schedule_data[name] = schedule_parser(full_path)
-    return schedule_data
+    instance_data = {}
+    # Get all of the files inside instance/ folder.
+    instance_fnames = os.listdir(cls.INSTANCE_DATA_PATH)
+    for name in instance_fnames:
+      full_path = os.path.join(cls.INSTANCE_DATA_PATH, name)
+      instance_data[name] = instance_parser(full_path)
+    return instance_data
 
   
   @classmethod
