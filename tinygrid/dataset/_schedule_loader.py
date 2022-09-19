@@ -50,7 +50,6 @@ class Schedule:
   battery:  dict[int, BatterySchedule]
 
 
-
 def instance_parser(f_name: str) -> Instance:
     """
     Parse the instance.txt file according to the IEEE-CIS's Data_Description.pdf
@@ -115,4 +114,51 @@ def instance_parser(f_name: str) -> Instance:
                    prec     = split_line[9:])
 
     return ins
+
+def schedule_parser(f_name: str) -> Schedule:
+    """
+    Parse the scedule.txt file according to the IEEE-CIS's Data_Description.pdf
+    Params:
+      f_name: path to file
+    Return: 
+      Schedule object.
+    """
+    lines = []
+
+    with open(f_name) as f:
+      lines = f.read().splitlines()
+
+    # init Schedule obj
+    sche = Schedule()
+
+    # For each line check tag and put data into model
+    for line in lines:
+      split_line = line.split(' ')
+
+      # Turn all int that is in string form into int
+      split_line = [int(i) if i.isdigit() else i for i in split_line]
+
+      tag = split_line[0]
+
+      # c # battery id # time # decision
+      if tag == "c":
+        sche.batteries[split_line[1]] = \
+          BatterySchedule(time = split_line[2],
+                  decision = split_line[3])
+
+      # r # act_id # start_time # n_rooms # [buildings_id]
+      elif tag == "r":
+        sche.re_act[split_line[1]] = \
+          ActivityInstance(start_time = split_line[2],
+                  n_rooms = split_line[3]
+                  prec    = split_line[4:])
+
+      # a # activity # $value # $penalty # precedences
+      elif tag == "a":
+        sche.once_act[split_line[1]] = \
+          ActivityInstance(start_time = split_line[2],
+                  n_rooms = split_line[3]
+                  prec    = split_line[4:])
+
+    return sche
 
