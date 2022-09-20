@@ -20,8 +20,10 @@ class Sim_Annealing:
     self.sample_solution_schedual = sample_solution_data[frag_file_name[0]+'_'+frag_file_name[1]+'_solution_'+frag_file_name[2]+'_'+frag_file_name[3]]
 
     # Read the AEMO price data
+    # Price data in 30min intervals (jth row in price data = math.ceiling(ith/2) in inverval form)
     if phase == 1:
       self.price_data = IEEE_CISMixin._load_AEMO_oct_price_data()
+      print(self.price_data)
     elif phase == 2:
       self.price_data = IEEE_CISMixin._load_AEMO_nov_price_data()
 
@@ -59,34 +61,75 @@ class Sim_Annealing:
     if phase == 1:
       self.time_line = [None for i in range(2977)]
     elif phase == 2:
-      self.time_line = [None for i in range(2976 - len(a.y_preds['Solar0']))]      
-    
-    
-  def objective_function(self, params) -> float:
+      self.time_line = [None for i in range(2976 - len(a.y_preds['Solar0']))]     
+
+    # Set battery charge
+    self.battery_charge = {}
+
+
+  def get_load(self, t) -> float:
+    l_t = 1
     
     s_1 = 0
-    for i in range(len()):
-      var = 0
-      s_1 += var
+    for b in range(len()):
+      s_1 += 1
 
     s_2 = 0
     for i in range(len()):
-      var = 0
-      s_2 += var
-
+      s_2 += 1
+    
     s_3 = 0
     for i in range(len()):
-      var = 0
-      s_3 += var
+      s_3 += 1
 
-    return (0.25/1000)*s_1 + 0.005*s_2 - s_3
+    return l_t + s_1 + s_2 + s_3
 
-  def get_candidates(self, params):
+  def objective_function(self, schedual_candidate) -> float:
+    s_1 = 0
+    for t in range(len()):
+      l_t = self.get_load(t)
+      e_t = 1
+      s_1 += l_t*e_t
+
+    max_l_t = 0
+    for t in range(len()):
+      l_t = self.get_load(t)
+      if max_l_t < l_t:
+        max_l_t = l_t
+    
+    s_2 = 0
+    for t in range(len()):
+      s_2 += max_l_t
+    
+    s_3 = 0
+    for i in range(len()):
+      d_i = 1
+      value_i = 1
+      o_i = 1
+      penalty_i = 1
+      s_3 += d_i*(value_i - o_i*penalty_i)
+
+    return (0.25/1000)*s_1 + 0.005*(s_2)**2 - s_3
+
+  def get_candidates(self, schedual_candidate):
+    for t in range(len(self.time_line)):
+      # Randomly pick a battery
+      battery_id = math.floor(random.random() * len(self.specific_instance_data.batteries))
+
+      # Check if battery_id exists in schedual_candidate.batteries
+      if battery_id in schedual_candidate.batteries:
+        # Get decision at time t for battery battery_id
+        d = schedual_candidate.batteries[battery_id]
+        choices = [0,1,2] - [d]
+        choice = choices[math.floor(random.random() * len(choices))]
+        # Set choice as the battery decision
+      else:
+        pass
+
     return []
 
-  def assign_bats(self):
-    # Batteries assigned after the assignment of activities
-    pass
+  def get_init_candidate(self):
+    return self.sample_solution_schedual
 
   def run(self, t_0, curvature, max_iterations):
     # Check if max_iterations is not zero
@@ -139,6 +182,9 @@ print(a.building_demand)
 
 
 # Battery
+
+# Fix dataloader for battery, so that there is a list of battery decisions per battery
+
 
 # Read in solution to schedual (example solution) *DONE*
 # Read in the AEMO price data *DONE*
