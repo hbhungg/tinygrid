@@ -93,23 +93,21 @@ class Sim_Annealing:
         if res[0]:
           d = schedule.batteries[battery][res[1]].decision
           if d == 0: # Charge decision
-            # Check if the battery is not at capacity
-            if self.battery_charge[battery] >= self.specific_instance_data.batteries[battery].capacity:
-              charge_amount = self.specific_instance_data.batteries[battery].max_power/((self.specific_instance_data.batteries[battery].efficiency)**(1/2))
-              # Check if charge_amount is ok
-              if self.battery_charge[battery] + charge_amount - self.specific_instance_data.batteries[battery].capacity <= 0:
-                s_1 += charge_amount
-                # Update charge
-                self.battery_charge[battery] += charge_amount
+            charge_amount = self.specific_instance_data.batteries[battery].max_power/((self.specific_instance_data.batteries[battery].efficiency)**(1/2))
+            # Check if charge_amount is ok
+            if self.battery_charge[battery] + 0.25*charge_amount <= self.specific_instance_data.batteries[battery].capacity:
+              s_1 += charge_amount
+              # Update charge
+              self.battery_charge[battery] += 0.25*charge_amount
           elif d == 2: # Discharge decision
             # Check if the battery is not empty
             if self.battery_charge[battery] >= 0:
               discharge_amount = self.specific_instance_data.batteries[battery].max_power*((self.specific_instance_data.batteries[battery].efficiency)**(1/2))
               # Check if discharge_amount is ok
-              if self.battery_charge[battery] - discharge_amount >= 0:
+              if self.battery_charge[battery] - 0.25*discharge_amount >= 0:
                 s_1 -= discharge_amount
                 # Update charge
-                self.battery_charge[battery] -= discharge_amount
+                self.battery_charge[battery] -= 0.25*discharge_amount
 
     # Once-off sum
     s_2 = 0
@@ -119,7 +117,7 @@ class Sim_Annealing:
       # Check if recurring activity act is in t
       if t >= schedule.once_act[act].start_time and t <= schedule.once_act[act].start_time + self.specific_instance_data.once_act[act].duration:
         # 15mins of activity load
-        act_total_load = (15/60)*self.specific_instance_data.once_act[act].load*self.specific_instance_data.once_act[act].n_room
+        act_total_load = (1/(4*self.specific_instance_data.once_act[act].duration))*self.specific_instance_data.once_act[act].load*self.specific_instance_data.once_act[act].n_room
         s_2 += act_total_load
     
     # Recurring sum
@@ -130,7 +128,7 @@ class Sim_Annealing:
       # Check if recurring activity act is in t
       if t >= schedule.re_act[act].start_time and t <= schedule.re_act[act].start_time + self.specific_instance_data.re_act[act].duration:
         # 15mins of activity load
-        act_total_load = (15/60)*self.specific_instance_data.re_act[act].load*self.specific_instance_data.re_act[act].n_room
+        act_total_load = (1/(4*self.specific_instance_data.re_act[act].duration))*self.specific_instance_data.re_act[act].load*self.specific_instance_data.re_act[act].n_room
         s_3 += act_total_load
 
     return l_t + s_1 + s_2 + s_3
@@ -245,21 +243,21 @@ class Sim_Annealing:
       t = t_0 * (1-(iteration/(max_iterations)))**curvature
       # Set the acceptance criterion
       acceptance_cri = 0
-      if t > 0.1:
+      if t > 0.01 or abs(c_eval-c_new_eval) >= 10000:
         acceptance_cri = math.exp(-(c_eval-c_new_eval)/t)
       # Check to take c_new by chance
-      if c_new_eval - c_eval < 0 or random.random() < acceptance_cri:
+      if c_new_eval < c_eval or random.random() < acceptance_cri:
         c, c_eval = c_new, c_new_eval
       # Increment
       iteration += 1
       # Console update
-      if iteration % 50 == 0:
-        print('iteration: ' + str(iteration))
+      if iteration % 25 == 0:
+        print('iteration: ' + str(iteration) + ', improvement: ' + str(b_eval - self.init_score) + ', temp: ' + str(t))
     
     # Return the best
     return (b, b_eval)
 
 
 sim_an = Sim_Annealing(phase = 1, instance_file_name = 'phase1_instance_large_0.txt')
-sol = sim_an.run(t_0 = 10000, curvature = 2, max_iterations = 10000)
+sol = sim_an.run(t_0 = 10, curvature = 2, max_iterations = 10000)
 print('Improvement :' + str(sol[1] - sim_an.init_score))

@@ -12,6 +12,7 @@ class BatteryInstance:
   capacity:   int
   max_power:  int
   efficiency: int
+  building_id: int
 
 @dataclass
 class ActivityInstance:
@@ -87,9 +88,10 @@ def instance_parser(f_name: str) -> Instance:
       # c # battery id # building id # capacity kWh # max power kW # efficiency
       elif tag == "c":
         ins.batteries[split_line[1]] = \
-          BatteryInstance(capacity   = split_line[2],
-                  max_power  = split_line[3],
-                  efficiency = split_line[4])
+          BatteryInstance( building_id = split_line[2],
+                  capacity   = split_line[3],
+                  max_power  = split_line[4],
+                  efficiency = float(split_line[5]))
 
       # r # activity # precedences
       elif tag == "r":
