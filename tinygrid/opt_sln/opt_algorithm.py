@@ -1,10 +1,11 @@
-import sched
 from tinygrid.dataset import IEEE_CISMixin
 from tinygrid import RandomForestForecaster, LassoForecaster
 from tinygrid.dataset._schedule_loader import BatterySchedule, Schedule
 import random
 import math
 import pandas as pd
+import numpy as np
+from scipy.special import logsumexp
 
 class Sim_Annealing:
   def __init__(self, phase, instance_file_name):
@@ -23,7 +24,7 @@ class Sim_Annealing:
     self.sample_solution_schedule = sample_solution_data[frag_file_name[0]+'_'+frag_file_name[1]+'_solution_'+frag_file_name[2]+'_'+frag_file_name[3]]
 
     # Read the AEMO price data
-    # Price data in 30min intervals (jth row in price data = math.ceiling(ith/2) in inverval form)
+    # Price data in 30min intervals (jth row in price data = math.floor(ith/2) in inverval form)
     if phase == 1:
       self.price_data = IEEE_CISMixin._load_AEMO_oct_price_data()
     elif phase == 2:
@@ -70,6 +71,9 @@ class Sim_Annealing:
     for battery in self.specific_instance_data.batteries:
       self.battery_charge[battery] = self.specific_instance_data.batteries[battery].capacity
 
+    # Initial score
+    self.init_score = 0
+
   def get_load(self, schedule: Schedule, t: int) -> float:
     # Get the load prior to scheduling at time t
     buildings_demand_t = 0
@@ -85,7 +89,7 @@ class Sim_Annealing:
     s_1 = 0
     for battery in self.specific_instance_data.batteries:
       if battery in schedule.batteries:
-        res = self.check_existence_bat(schedule.batteries, t)
+        res = self.check_existence_bat(schedule.batteries[battery], t)
         if res[0]:
           d = schedule.batteries[battery][res[1]].decision
           if d == 0: # Charge decision
@@ -99,7 +103,7 @@ class Sim_Annealing:
                 self.battery_charge[battery] += charge_amount
           elif d == 2: # Discharge decision
             # Check if the battery is not empty
-            if self.battery_charge[battery] <= 0:
+            if self.battery_charge[battery] >= 0:
               discharge_amount = self.specific_instance_data.batteries[battery].max_power*((self.specific_instance_data.batteries[battery].efficiency)**(1/2))
               # Check if discharge_amount is ok
               if self.battery_charge[battery] - discharge_amount >= 0:
@@ -140,7 +144,7 @@ class Sim_Annealing:
       # Attempt to update max load value
       if max_l_t < l_t:
         max_l_t = l_t
-      e_t = (self.price_data[[math.ceil(t/2)]])['RRP']
+      e_t = self.price_data['RRP'].iloc[math.floor(t/2)]
       s_1 += l_t*e_t
 
     # Middle sum of objective function
@@ -158,23 +162,23 @@ class Sim_Annealing:
 
   """
   """
-  def check_existence_bat(self, lst: list[BatterySchedule], t: int) -> tuple(bool, int):
-    for i in range(len(lst)):
-      if lst[i].time == t: return (True, i)
-    return (False, None)
+  def check_existence_bat(self, bats: list[BatterySchedule], t: int) -> list:
+    for i in range(len(bats)):
+      if bats[i].time == t: return [True, i]
+    return [False, None]
 
   """
   Not finished
   1 for true
   0 for false
   """
-  def is_during_office_hours(start: int, duration: int) -> bool:
+  def is_during_office_hours(start: int, duration: int) -> int:
     return 1
 
   def get_candidate(self, schedule_candidate: Schedule) -> Schedule:
 
     # Get a random time based on time_line_len
-    t = math.floor(random.random() * len(self.time_line_len))
+    t = math.floor(random.random() * self.time_line_len)
 
     # Randomly pick a battery
     battery_id = random.choice(list(self.specific_instance_data.batteries.keys()))
@@ -186,10 +190,12 @@ class Sim_Annealing:
       if not res[0]:
         # Add BatterySchedule class to dict, id=battery_id and time=t with decision=1 
         schedule_candidate.batteries[battery_id].append(BatterySchedule(time=t, decision=1))
+        res[1] = -1
 
       # Get decision at time t for battery battery_id
       d = schedule_candidate.batteries[battery_id][res[1]].decision
-      choices = [0,1,2] - [d]
+      choices = [0,1,2]
+      choices.remove(d)
       choice = choices[math.floor(random.random() * len(choices))]
       # Set choice as battery battery_id's decision
       schedule_candidate.batteries[battery_id][res[1]].decision = choice
@@ -222,7 +228,8 @@ class Sim_Annealing:
     # Get the initial candidate
     b = self.get_init_candidate()
     # Send it to the objective function
-    b_eval = self.objective_function(c)
+    b_eval = self.objective_function(b)
+    self.init_score = b_eval
     c, c_eval = b, b_eval
 
     # Run the annealing
@@ -237,26 +244,22 @@ class Sim_Annealing:
       # Set the temperature
       t = t_0 * (1-(iteration/(max_iterations)))**curvature
       # Set the acceptance criterion
-      acceptance_cri = math.exp(-(c_new_eval - c_eval)/t)
+      acceptance_cri = 0
+      if t > 0.1:
+        acceptance_cri = math.exp(-(c_eval-c_new_eval)/t)
       # Check to take c_new by chance
       if c_new_eval - c_eval < 0 or random.random() < acceptance_cri:
         c, c_eval = c_new, c_new_eval
       # Increment
       iteration += 1
+      # Console update
+      if iteration % 50 == 0:
+        print('iteration: ' + str(iteration))
     
     # Return the best
     return (b, b_eval)
 
 
 sim_an = Sim_Annealing(phase = 1, instance_file_name = 'phase1_instance_large_0.txt')
-#sol = sim_an.run(t_0 = 0.1,curavature = 1,max_iterations = 100)
-#print(sim_an.objective_function(sim_an.sample_solution_schedule) - sol[1])
-
-
-# Battery
-
-# Place sample solution into timeline *RECONSIDER TIMELINE DATASTRUCTURE*
-# Read and store AEMO price data into interval format
-# Create the objective function
-# Create candidates based on randomly taking a time-interval, then randomly choosing to (Hold, Discharge, Charge) (remove battery's current state) a randomly selected battery from all batteries.
-# Initial state will be that where all batteries are on hold
+sol = sim_an.run(t_0 = 10000, curvature = 2, max_iterations = 10000)
+print('Improvement :' + str(sol[1] - sim_an.init_score))
