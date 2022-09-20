@@ -230,29 +230,41 @@ class Sim_Annealing:
     self.init_score = b_eval
     c, c_eval = b, b_eval
 
+    failed = False
     # Run the annealing
     while iteration <= max_iterations:
       # Set the new candidate
       c_new = self.get_candidate(c)
       # Send it to the objective function
       c_new_eval = self.objective_function(c_new)
+
       # Check if the new candidate is best
       if c_new_eval < b_eval:
         b, b_eval = c_new, c_new_eval
+
       # Set the temperature
       t = t_0 * (1-(iteration/(max_iterations)))**curvature
       # Set the acceptance criterion
       acceptance_cri = 0
-      if t > 0.01 or abs(c_eval-c_new_eval) >= 10000:
-        acceptance_cri = math.exp(-(c_eval-c_new_eval)/t)
+      if t > 0.01:
+        try:
+          acceptance_cri = math.exp(-(c_new_eval-c_eval)/t)
+        except:
+          if failed == False:
+            print('acceptance_cri calculation failed')
+          failed = True
+          continue
+
       # Check to take c_new by chance
-      if c_new_eval < c_eval or random.random() < acceptance_cri:
+      if c_new_eval - c_eval <= 0 or random.random() < acceptance_cri:
         c, c_eval = c_new, c_new_eval
+
       # Increment
       iteration += 1
+
       # Console update
       if iteration % 25 == 0:
-        print('iteration: ' + str(iteration) + ', improvement: ' + str(b_eval - self.init_score) + ', temp: ' + str(t))
+        print('iteration: ' + str(iteration) + ', current_eval: ' + str(c_eval) + ', temp: ' + str(t), ', best_eval: ' + str(b_eval))
     
     # Return the best
     return (b, b_eval)
@@ -261,3 +273,9 @@ class Sim_Annealing:
 sim_an = Sim_Annealing(phase = 1, instance_file_name = 'phase1_instance_large_0.txt')
 sol = sim_an.run(t_0 = 10, curvature = 2, max_iterations = 10000)
 print('Improvement :' + str(sol[1] - sim_an.init_score))
+
+
+# At 625 to 800 iteration, objective function stayed static, most likely because the acceptance_cri was 0, or something else
+# May be a problem with discharging logic or battery logic as a whole
+# Why is the objective function changing by a small amount (only by 1 to 10)?
+# Try write better objective function for batteries only
