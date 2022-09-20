@@ -1,7 +1,5 @@
 from dataclasses import dataclass, field
 
-from macpath import split
-
 # NOTES: Can both of them merge? Might be confuse if merged since instance and schedule need different data.
 # Class for Instance
 @dataclass
