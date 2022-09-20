@@ -15,10 +15,10 @@ class Sim_Annealing:
     # Get the specified phase file
     self.specific_instance_data = instance_data[instance_file_name]
 
-    # Read the sample solution schedual
+    # Read the sample solution schedule
     sample_solution_data = IEEE_CISMixin._load_instance_sample_solution_data()
     frag_file_name = instance_file_name.split('_')
-    self.sample_solution_schedual = sample_solution_data[frag_file_name[0]+'_'+frag_file_name[1]+'_solution_'+frag_file_name[2]+'_'+frag_file_name[3]]
+    self.sample_solution_schedule = sample_solution_data[frag_file_name[0]+'_'+frag_file_name[1]+'_solution_'+frag_file_name[2]+'_'+frag_file_name[3]]
 
     # Read the AEMO price data
     # Price data in 30min intervals (jth row in price data = math.ceiling(ith/2) in inverval form)
@@ -68,8 +68,16 @@ class Sim_Annealing:
     for battery in self.specific_instance_data.batteries:
       self.battery_charge[battery] = 1
 
-  def get_load(self, schedual, t) -> float:
-    l_t = 1
+  def get_load(self, schedule, t) -> float:
+    # Get the load prior to scheduling at time t
+    buildings_demand_t = 0
+    for building_id in self.building_demand:
+      buildings_demand_t += self.building_demand[building_id][t]
+    solars_production_t = 0
+    for solar_id in self.solar_prod:
+      solars_production_t += self.solar_prod[solar_id][t]
+    # Calculate load
+    l_t = buildings_demand_t - solars_production_t
     
     s_1 = 0
     for b in range(len()):
@@ -85,16 +93,16 @@ class Sim_Annealing:
 
     return l_t + s_1 + s_2 + s_3
 
-  def objective_function(self, schedual) -> float:
+  def objective_function(self, schedule) -> float:
     s_1 = 0
     for t in range(len()):
-      l_t = self.get_load(schedual, t)
+      l_t = self.get_load(schedule, t)
       e_t = 1
       s_1 += l_t*e_t
 
     max_l_t = 0
     for t in range(len()):
-      l_t = self.get_load(schedual, t)
+      l_t = self.get_load(schedule, t)
       if max_l_t < l_t:
         max_l_t = l_t
     
@@ -112,51 +120,51 @@ class Sim_Annealing:
 
     return (0.25/1000)*s_1 + 0.005*(s_2)**2 - s_3
 
-  def get_candidate(self, schedual_candidate):
+  def get_candidate(self, schedule_candidate):
 
     # Get a random time based on time_line_len
     t = math.floor(random.random() * len(self.time_line_len))
 
     # Randomly pick a battery
-    battery_id = math.floor(random.random() * len(self.specific_instance_data.batteries))
+    battery_id = random.choice(list(self.specific_instance_data.batteries.keys()))
 
-    # Check if battery_id exists in schedual_candidate.batteries
-    if battery_id in schedual_candidate.batteries:
-      # Check if schedual_candidate.batteries[battery_id].time != t
-      if schedual_candidate.batteries[battery_id].time != t:
+    # Check if battery_id exists in schedule_candidate.batteries
+    if battery_id in schedule_candidate.batteries:
+      # Check if schedule_candidate.batteries[battery_id].time != t
+      if schedule_candidate.batteries[battery_id].time != t:
         # Add BatterySchedule class to dict, id=battery_id and time=t with decision=1 
-        schedual_candidate.batteries[battery_id].append(BatterySchedule(time=t, decision=1))
+        schedule_candidate.batteries[battery_id].append(BatterySchedule(time=t, decision=1))
 
       # Get decision at time t for battery battery_id
-      d = schedual_candidate.batteries[battery_id].decision
+      d = schedule_candidate.batteries[battery_id].decision
       choices = [0,1,2] - [d]
       choice = choices[math.floor(random.random() * len(choices))]
         
-      # Copy schedual_candidate
-      new_schedual_candidate = schedual_candidate.copy()
+      # Copy schedule_candidate
+      new_schedule_candidate = schedule_candidate.copy()
       # Set choice as battery battery_id's decision
-      new_schedual_candidate.batteries[battery_id].decision = choice
+      new_schedule_candidate.batteries[battery_id].decision = choice
 
-      return new_schedual_candidate
+      return new_schedule_candidate
     else:
       # Current decision for battery battery_id is 1=hold as it does not exist in list
       # Add BatterySchedule class to dict, id=battery_id and time=t with decision=1 
-      schedual_candidate.batteries[battery_id] = [BatterySchedule(time=t, decision=1)]
+      schedule_candidate.batteries[battery_id] = [BatterySchedule(time=t, decision=1)]
 
       # Get decision at time t for battery battery_id
-      d = schedual_candidate.batteries[battery_id].decision
+      d = schedule_candidate.batteries[battery_id].decision
       choices = [0,1,2] - [d]
       choice = choices[math.floor(random.random() * len(choices))]
 
-      # Copy schedual_candidate
-      new_schedual_candidate = schedual_candidate.copy()
+      # Copy schedule_candidate
+      new_schedule_candidate = schedule_candidate.copy()
       # Set choice as battery battery_id's decision
-      new_schedual_candidate.batteries[battery_id].decision = choice
+      new_schedule_candidate.batteries[battery_id].decision = choice
 
-      return new_schedual_candidate
+      return new_schedule_candidate
 
   def get_init_candidate(self):
-    return self.sample_solution_schedual
+    return self.sample_solution_schedule
 
   def run(self, t_0, curvature, max_iterations) -> tuple:
     # Check if max_iterations is not zero
@@ -197,7 +205,7 @@ class Sim_Annealing:
 
 sim_an = Sim_Annealing(phase = 1, instance_file_name = 'phase1_instance_large_0.txt')
 #sol = sim_an.run(t_0 = 0.1,curavature = 1,max_iterations = 100)
-#print(sim_an.objective_function(sim_an.sample_solution_schedual) - sol[1])
+#print(sim_an.objective_function(sim_an.sample_solution_schedule) - sol[1])
 
 
 # Battery
