@@ -47,7 +47,7 @@ class ActivitySchedule:
 class Schedule:
   re_act:   dict[int, ActivitySchedule] = field(default_factory=dict)
   once_act: dict[int, ActivitySchedule] = field(default_factory=dict)
-  battery:  dict[int, list[BatterySchedule]] = field(default_factory=dict)
+  batteries:  dict[int, list[BatterySchedule]] = field(default_factory=dict)
 
 
 def instance_parser(f_name: str) -> Instance:

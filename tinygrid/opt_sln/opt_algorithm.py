@@ -1,8 +1,10 @@
+import sched
 from tinygrid.dataset import IEEE_CISMixin
 from tinygrid import RandomForestForecaster, LassoForecaster
-from tinygrid.dataset._schedule_loader import BatterySchedule
+from tinygrid.dataset._schedule_loader import BatterySchedule, Schedule
 import random
 import math
+import pandas as pd
 
 class Sim_Annealing:
   def __init__(self, phase, instance_file_name):
@@ -66,9 +68,9 @@ class Sim_Annealing:
     # Set battery charge
     self.battery_charge = {}
     for battery in self.specific_instance_data.batteries:
-      self.battery_charge[battery] = 1
+      self.battery_charge[battery] = self.specific_instance_data.batteries[battery].capacity
 
-  def get_load(self, schedule, t) -> float:
+  def get_load(self, schedule: Schedule, t: int) -> float:
     # Get the load prior to scheduling at time t
     buildings_demand_t = 0
     for building_id in self.building_demand:
@@ -76,51 +78,100 @@ class Sim_Annealing:
     solars_production_t = 0
     for solar_id in self.solar_prod:
       solars_production_t += self.solar_prod[solar_id][t]
-    # Calculate load
+    # Calculate load sum
     l_t = buildings_demand_t - solars_production_t
     
+    # Battery sum
     s_1 = 0
-    for b in range(len()):
-      s_1 += 1
+    for battery in self.specific_instance_data.batteries:
+      if battery in schedule.batteries:
+        res = self.check_existence_bat(schedule.batteries, t)
+        if res[0]:
+          d = schedule.batteries[battery][res[1]].decision
+          if d == 0: # Charge decision
+            # Check if the battery is not at capacity
+            if self.battery_charge[battery] >= self.specific_instance_data.batteries[battery].capacity:
+              charge_amount = self.specific_instance_data.batteries[battery].max_power/((self.specific_instance_data.batteries[battery].efficiency)**(1/2))
+              # Check if charge_amount is ok
+              if self.battery_charge[battery] + charge_amount - self.specific_instance_data.batteries[battery].capacity <= 0:
+                s_1 += charge_amount
+                # Update charge
+                self.battery_charge[battery] += charge_amount
+          elif d == 2: # Discharge decision
+            # Check if the battery is not empty
+            if self.battery_charge[battery] <= 0:
+              discharge_amount = self.specific_instance_data.batteries[battery].max_power*((self.specific_instance_data.batteries[battery].efficiency)**(1/2))
+              # Check if discharge_amount is ok
+              if self.battery_charge[battery] - discharge_amount >= 0:
+                s_1 -= discharge_amount
+                # Update charge
+                self.battery_charge[battery] -= discharge_amount
 
+    # Once-off sum
     s_2 = 0
-    for i in range(len()):
-      s_2 += 1
+    for act in self.specific_instance_data.once_act:
+      # Check if activity is not in schedule, stop program if so.
+      if act not in schedule.once_act: continue
+      # Check if recurring activity act is in t
+      if t >= schedule.once_act[act].start_time and t <= schedule.once_act[act].start_time + self.specific_instance_data.once_act[act].duration:
+        # 15mins of activity load
+        act_total_load = (15/60)*self.specific_instance_data.once_act[act].load*self.specific_instance_data.once_act[act].n_room
+        s_2 += act_total_load
     
+    # Recurring sum
     s_3 = 0
-    for i in range(len()):
-      s_3 += 1
+    for act in self.specific_instance_data.re_act:
+      # Check if activity is not in schedule, stop program if so.
+      if act not in schedule.re_act: raise Exception('Provided schedule file invalid: a re_act is not in solution')
+      # Check if recurring activity act is in t
+      if t >= schedule.re_act[act].start_time and t <= schedule.re_act[act].start_time + self.specific_instance_data.re_act[act].duration:
+        # 15mins of activity load
+        act_total_load = (15/60)*self.specific_instance_data.re_act[act].load*self.specific_instance_data.re_act[act].n_room
+        s_3 += act_total_load
 
     return l_t + s_1 + s_2 + s_3
 
-  def objective_function(self, schedule) -> float:
+  def objective_function(self, schedule: Schedule) -> float:
+    # First sum of objective function
     s_1 = 0
-    for t in range(len()):
-      l_t = self.get_load(schedule, t)
-      e_t = 1
-      s_1 += l_t*e_t
-
     max_l_t = 0
-    for t in range(len()):
+    for t in range(self.time_line_len):
       l_t = self.get_load(schedule, t)
+      # Attempt to update max load value
       if max_l_t < l_t:
         max_l_t = l_t
+      e_t = (self.price_data[[math.ceil(t/2)]])['RRP']
+      s_1 += l_t*e_t
+
+    # Middle sum of objective function
+    s_2 = self.time_line_len * max_l_t
     
-    s_2 = 0
-    for t in range(len()):
-      s_2 += max_l_t
-    
+    # Last sum of objective function
     s_3 = 0
-    for i in range(len()):
-      d_i = 1
-      value_i = 1
-      o_i = 1
-      penalty_i = 1
-      s_3 += d_i*(value_i - o_i*penalty_i)
+    for act in schedule.once_act:
+      value_i = self.specific_instance_data.once_act[act].value
+      o_i = self.is_during_office_hours(schedule.once_act[act].start_time, self.specific_instance_data.once_act[act].duration)
+      penalty_i = self.specific_instance_data.once_act[act].penalty
+      s_3 += value_i - o_i*penalty_i
 
     return (0.25/1000)*s_1 + 0.005*(s_2)**2 - s_3
 
-  def get_candidate(self, schedule_candidate):
+  """
+  """
+  def check_existence_bat(self, lst: list[BatterySchedule], t: int) -> tuple(bool, int):
+    for i in range(len(lst)):
+      if lst[i].time == t: return (True, i)
+    return (False, None)
+
+  """
+  Not finished
+  1 for true
+  0 for false
+  """
+  def is_during_office_hours(start: int, duration: int) -> bool:
+    return 1
+
+  def get_candidate(self, schedule_candidate: Schedule) -> Schedule:
 
     # Get a random time based on time_line_len
     t = math.floor(random.random() * len(self.time_line_len))
@@ -130,43 +181,37 @@ class Sim_Annealing:
 
     # Check if battery_id exists in schedule_candidate.batteries
     if battery_id in schedule_candidate.batteries:
-      # Check if schedule_candidate.batteries[battery_id].time != t
-      if schedule_candidate.batteries[battery_id].time != t:
+      # Check if there exists a battery with time != t
+      res = self.check_existence_bat(schedule_candidate.batteries[battery_id], t)
+      if not res[0]:
         # Add BatterySchedule class to dict, id=battery_id and time=t with decision=1 
         schedule_candidate.batteries[battery_id].append(BatterySchedule(time=t, decision=1))
 
       # Get decision at time t for battery battery_id
-      d = schedule_candidate.batteries[battery_id].decision
+      d = schedule_candidate.batteries[battery_id][res[1]].decision
       choices = [0,1,2] - [d]
       choice = choices[math.floor(random.random() * len(choices))]
-        
-      # Copy schedule_candidate
-      new_schedule_candidate = schedule_candidate.copy()
       # Set choice as battery battery_id's decision
-      new_schedule_candidate.batteries[battery_id].decision = choice
+      schedule_candidate.batteries[battery_id][res[1]].decision = choice
 
-      return new_schedule_candidate
+      return schedule_candidate
     else:
       # Current decision for battery battery_id is 1=hold as it does not exist in list
       # Add BatterySchedule class to dict, id=battery_id and time=t with decision=1 
       schedule_candidate.batteries[battery_id] = [BatterySchedule(time=t, decision=1)]
 
       # Get decision at time t for battery battery_id
-      d = schedule_candidate.batteries[battery_id].decision
-      choices = [0,1,2] - [d]
+      choices = [0, 2]
       choice = choices[math.floor(random.random() * len(choices))]
-
-      # Copy schedule_candidate
-      new_schedule_candidate = schedule_candidate.copy()
       # Set choice as battery battery_id's decision
-      new_schedule_candidate.batteries[battery_id].decision = choice
+      schedule_candidate.batteries[battery_id][0].decision = choice
 
-      return new_schedule_candidate
+      return schedule_candidate
 
   def get_init_candidate(self):
     return self.sample_solution_schedule
 
-  def run(self, t_0, curvature, max_iterations) -> tuple:
+  def run(self, t_0: float, curvature: float, max_iterations: int) -> tuple:
     # Check if max_iterations is not zero
     if max_iterations <= 0:
       raise Exception('max_iterations must be between 1 and inf')

@@ -91,7 +91,7 @@ class IEEE_CISMixin:
     price_data = pd.read_csv(cls.NOV_PRICE_DATA_PATH)
     # Parse the time from string to 
     price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'], format="%Y-%m-%d %H:%M:%S")
-    price_data = price_data.set_index('SETTLEMENTDATE')
+    #price_data = price_data.set_index('SETTLEMENTDATE')
     return price_data
   
   @classmethod
