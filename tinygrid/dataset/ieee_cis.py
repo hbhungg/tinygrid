@@ -1,15 +1,14 @@
-from multiprocessing.dummy import Array
 import os
 import datetime
 import numpy as np
 import pandas as pd
 
 from .tsf_loader import convert_tsf_to_dataframe
-from ._schedule_loader import instance_parser, Instance, schedule_parser
+from ._schedule_loader import instance_parser, Instance, schedule_parser, Schedule
 
 class IEEE_CISMixin:
   """
-  This is a mixin class, design to
+  This is a mixin class, design to be inherited by other class to access the method.
   """
   _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
@@ -38,7 +37,7 @@ class IEEE_CISMixin:
     return instance_data
 
   @classmethod
-  def _load_instance_sample_solution_data(cls) -> dict[str, Instance]:
+  def _load_instance_sample_solution_data(cls) -> dict[str, Schedule]:
     """
     Load and parse all of the instance sample solution .txt files from IEEE-CIS's competition
     """

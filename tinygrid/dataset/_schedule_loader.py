@@ -1,5 +1,7 @@
 from dataclasses import dataclass, field
 
+from macpath import split
+
 # NOTES: Can both of them merge? Might be confuse if merged since instance and schedule need different data.
 # Class for Instance
 @dataclass
@@ -142,9 +144,11 @@ def schedule_parser(f_name: str) -> Schedule:
 
       # c # battery id # time # decision
       if tag == "c":
-        sche.batteries[split_line[1]] = \
-          BatterySchedule(time = split_line[2],
-                  decision = split_line[3])
+        b = BatterySchedule(time = split_line[2], decision = split_line[3])
+        if split_line[1] in sche.battery:
+          sche.battery[split_line[1]].append(b)
+        else:
+          sche.battery[split_line[1]] = [b]
 
       # r # act_id # start_time # n_room # [buildings_id]
       elif tag == "r":
