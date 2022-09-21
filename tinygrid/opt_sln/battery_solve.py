@@ -29,7 +29,7 @@ def solve_battery(ins, sol, y_preds, price_data, from_java):
   bat_cap = {}
 
   for bidx in bat_idxs:
-    for t in range(START_MONDAY, END+1):
+    for t in range(1, END+1):
       # Variables for battery decision at each time step
       bat_charge[(bidx, t)] = \
         model.NewBoolVar(f"c{bidx} at {t}")
@@ -47,26 +47,22 @@ def solve_battery(ins, sol, y_preds, price_data, from_java):
       # Each battery can only hold, charge or discharge at a time.
       model.AddExactlyOne([bat_hold[ii], bat_discharge[ii], bat_charge[ii]])
 
-  # FIXME: Something is wrong with this
-  # Capacity seem to not be following the action.
-  # Leading to overcharge or overdischarge
   for bidx in bat_idxs:
-    for t in range(START_MONDAY, END+1):
+    for t in range(1, END+1):
       ii = (bidx, t)
-      if t == START_MONDAY:
+      if t == 1:
         # Battery start at 100%
         model.Add(4*bat_cap[ii] == 4*ins.batteries[bidx].capacity + ins.batteries[bidx].max_power*(bat_charge[ii] - bat_discharge[ii]))
       else:
         # current battery capacity depends on previous capacity values
         model.Add(4*bat_cap[ii] == 4*bat_cap[(bidx, t-1)] + ins.batteries[bidx].max_power*(bat_charge[ii] - bat_discharge[ii]))
-        print(4*bat_cap[ii] == 4*bat_cap[(bidx, t-1)] + ins.batteries[bidx].max_power*(bat_charge[ii] - bat_discharge[ii]))
 
   # Abolghasemi, M., Esmaeilbeigi, R., 2021
   # State-of-the-art predictive and prescriptive analytics for IEEE CIS 3rd Technical Challenge
   # at https://arxiv.org/pdf/2112.03595.pdf
   # TODO: Something is wrong here, val is too big
   obj = 0.0
-  for t in range(START_MONDAY, END+1):
+  for t in range(1, END+1):
     # Price and base load at time t
     pp = price.iloc[t//2-1].item()
     bb = y_preds[t]
@@ -96,7 +92,7 @@ def solve_battery(ins, sol, y_preds, price_data, from_java):
 
     bat_plan = []
     for (idxc, c), (idxd, d), (idxh, h), (key, v) in zip(bat_charge.items(), bat_discharge.items(), bat_hold.items(), bat_cap.items()):
-      c, d, h = solver.Value(c), solver.Value(h), solver.Value(h)
+      c, d, h = solver.Value(c), solver.Value(d), solver.Value(h)
       # Parse the output according to the format
       # c # battery_id # time # decision (0, 1, 2)
       # Can skip decision 1 since no entry means hold.
@@ -109,9 +105,10 @@ def solve_battery(ins, sol, y_preds, price_data, from_java):
         bat_plan.append(f"c {idxc[0]} {idxc[1]} 2\n")
         #print(f"{key}, {solver.Value(v)} discharge")
         #print(f"{key}, {solver.Value(v)} hold")
-      # Hold (seem to be discharge)
-      #print(f"{key}, {solver.Value(v)} hold")
-      #bat_plan.append(f"c {idxc[0]} {idxc[1]} 2\n")
+      if h == 1:
+        # Hold (seem to be discharge)
+        #print(f"{key}, {solver.Value(v)} hold")
+        bat_plan.append(f"c {idxc[0]} {idxc[1]} 1\n")
   else:
     print('No solution found.')
 
@@ -147,16 +144,18 @@ if __name__ == "__main__":
   price = IEEE_CISMixin._load_AEMO_oct_price_data()['RRP']
   bat_plan = solve_battery(ins0, sol0, ddiff, price, 112112)
 
-  #with open("tt.txt", "w") as temp:
-  #  with open("../dataset/instance_sample_solution/phase1_instance_solution_small_0.txt", "r") as f:
-  #    # copy
-  #    for l in f:
-  #      temp.write(l)
-  #  for b in bat_plan:
-  #    temp.write(b)
-  #
-  #import os 
-  #dir_path = os.path.dirname(os.path.realpath(__file__))
-  #f_ins_path = os.path.join(dir_path, "../dataset/instance/phase1_instance_small_0.txt")
-  #f_sol_path = os.path.join(dir_path, "tt.txt")
-  #print(schedule_eval_wrapper(f_ins_path, f_sol_path, 1))
+  WRITE = True
+  if WRITE:
+    with open("tt.txt", "w") as temp:
+      with open("../dataset/instance_sample_solution/phase1_instance_solution_small_0.txt", "r") as f:
+        # copy
+        for l in f:
+          temp.write(l)
+      for b in bat_plan:
+        temp.write(b)
+    
+    import os 
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    f_ins_path = os.path.join(dir_path, "../dataset/instance/phase1_instance_small_0.txt")
+    f_sol_path = os.path.join(dir_path, "tt.txt")
+    print(schedule_eval_wrapper(f_ins_path, f_sol_path, 1))
