@@ -29,7 +29,7 @@ def solve_battery(ins, sol, y_preds, price_data, from_java):
   bat_cap = {}
 
   for bidx in bat_idxs:
-    for t in range(1, END+1):
+    for t in range(0, END):
       # Variables for battery decision at each time step
       bat_charge[(bidx, t)] = \
         model.NewBoolVar(f"c{bidx} at {t}")
@@ -42,15 +42,15 @@ def solve_battery(ins, sol, y_preds, price_data, from_java):
         model.NewIntVar(0, ins.batteries[bidx].capacity, f"cap{bidx} at {t}")
 
   for bidx in bat_idxs:
-    for t in range(START_MONDAY, END+1):
+    for t in range(0, END):
       ii = (bidx, t)
       # Each battery can only hold, charge or discharge at a time.
       model.AddExactlyOne([bat_hold[ii], bat_discharge[ii], bat_charge[ii]])
 
   for bidx in bat_idxs:
-    for t in range(1, END+1):
+    for t in range(0, END):
       ii = (bidx, t)
-      if t == 1:
+      if t == 0:
         # Battery start at 100%
         model.Add(4*bat_cap[ii] == 4*ins.batteries[bidx].capacity + ins.batteries[bidx].max_power*(bat_charge[ii] - bat_discharge[ii]))
       else:
@@ -60,9 +60,8 @@ def solve_battery(ins, sol, y_preds, price_data, from_java):
   # Abolghasemi, M., Esmaeilbeigi, R., 2021
   # State-of-the-art predictive and prescriptive analytics for IEEE CIS 3rd Technical Challenge
   # at https://arxiv.org/pdf/2112.03595.pdf
-  # TODO: Something is wrong here, val is too big
   obj = 0.0
-  for t in range(1, END+1):
+  for t in range(0, END):
     # Price and base load at time t
     pp = price.iloc[t//2-1].item()
     bb = y_preds[t]
@@ -101,12 +100,11 @@ def solve_battery(ins, sol, y_preds, price_data, from_java):
         bat_plan.append(f"c {idxc[0]} {idxc[1]} 0\n")
         #print(f"{key}, {solver.Value(v)} charge")
       if d == 1:
-        # Discharge (seem to be hold)?
+        # Discharge
         bat_plan.append(f"c {idxc[0]} {idxc[1]} 2\n")
         #print(f"{key}, {solver.Value(v)} discharge")
-        #print(f"{key}, {solver.Value(v)} hold")
       if h == 1:
-        # Hold (seem to be discharge)
+        # Hold 
         #print(f"{key}, {solver.Value(v)} hold")
         bat_plan.append(f"c {idxc[0]} {idxc[1]} 1\n")
   else:
