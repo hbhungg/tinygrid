@@ -19,7 +19,7 @@ FIRST_WEEK_IN_OFFICE = list(zip(FIRST_WEEK_9AM, FIRST_WEEK_5PM))
 END = 2976
 
 
-def solve_battery(ins, sol, y_preds, price_data, from_java): 
+def solve_battery(ins, sol, y_preds, price_data):
   model = cp_model.CpModel()
   bat_idxs = list(ins.batteries)
 
@@ -84,10 +84,10 @@ def solve_battery(ins, sol, y_preds, price_data, from_java):
   if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
     print(f"Total hold: {sum([solver.Value(v) for v in bat_hold.values()]) :>9}")
     print(f"Total discharge: {sum([solver.Value(v) for v in bat_discharge.values()])}")
-    print(f"Total charge: {sum([solver.Value(v) for v in bat_charge.values()]):>4}")
+    print(f"Total charge: {sum([solver.Value(v) for v in bat_charge.values()]):>6}")
     # Why is f string allign so dumb?
     print(f"Solution eval:   {solver.ObjectiveValue()}")
-    print(f"From java eval:  {from_java}")
+
 
     bat_plan = []
     for (idxc, c), (idxd, d), (idxh, h), (key, v) in zip(bat_charge.items(), bat_discharge.items(), bat_hold.items(), bat_cap.items()):
@@ -140,8 +140,10 @@ if __name__ == "__main__":
   sol0 = sol['phase1_instance_solution_small_0.txt']
 
   price = IEEE_CISMixin._load_AEMO_oct_price_data()['RRP']
-  bat_plan = solve_battery(ins0, sol0, ddiff, price, 112112)
+  bat_plan = solve_battery(ins0, sol0, ddiff, price)
 
+  print()
+  print("Java eval original: 112112")
   WRITE = True
   if WRITE:
     with open("tt.txt", "w") as temp:
@@ -156,4 +158,4 @@ if __name__ == "__main__":
     dir_path = os.path.dirname(os.path.realpath(__file__))
     f_ins_path = os.path.join(dir_path, "../dataset/instance/phase1_instance_small_0.txt")
     f_sol_path = os.path.join(dir_path, "tt.txt")
-    print(schedule_eval_wrapper(f_ins_path, f_sol_path, 1))
+    print(f"Java eval score: {schedule_eval_wrapper(f_ins_path, f_sol_path, 1)}")
