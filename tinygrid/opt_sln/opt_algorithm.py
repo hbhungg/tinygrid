@@ -24,9 +24,9 @@ class Sim_Annealing:
     # Read the AEMO price data
     # Price data in 30min intervals (jth row in price data = math.floor(ith/2) in inverval form)
     if phase == 1:
-      self.price_data = IEEE_CISMixin._load_AEMO_oct_price_data()
+      self.price_data = IEEE_CISMixin._load_AEMO_oct_price_data()['RRP']
     elif phase == 2:
-      self.price_data = IEEE_CISMixin._load_AEMO_nov_price_data()
+      self.price_data = IEEE_CISMixin._load_AEMO_nov_price_data()['RRP']
 
     # Run and save forecasting or get from CACHE
     CACHE = True
@@ -121,10 +121,11 @@ class Sim_Annealing:
     for act in self.specific_instance_data.re_act:
       # Check if activity is not in schedule, stop program if so.
       if act not in schedule.re_act: raise Exception('Provided schedule file invalid: a re_act is not in solution')
-      # Check if recurring activity act is in t
-      if t >= schedule.re_act[act].start_time and t <= schedule.re_act[act].start_time + self.specific_instance_data.re_act[act].duration:
-        act_total_load = self.specific_instance_data.re_act[act].load*self.specific_instance_data.re_act[act].n_room
-        s_3 += act_total_load
+      # Check if recurring activity act is scheduled at t during the 4 weeks
+      for w in range(4):
+        if t >= schedule.re_act[act].start_time + 672*w and t <= schedule.re_act[act].start_time + 672*w + self.specific_instance_data.re_act[act].duration:
+          act_total_load = self.specific_instance_data.re_act[act].load*self.specific_instance_data.re_act[act].n_room
+          s_3 += act_total_load
 
     return l_t + s_1 + s_3
 
@@ -137,7 +138,8 @@ class Sim_Annealing:
       # Attempt to update max load value
       if max_l_t < l_t:
         max_l_t = l_t
-      e_t = self.price_data['RRP'].iloc[math.floor(t/2)]
+
+      e_t = self.price_data.iloc[t//2-1].item()
       s_1 += l_t*e_t
 
     return (0.25/1000)*s_1 + 0.005*((max_l_t)**2)
@@ -224,18 +226,24 @@ class Sim_Annealing:
       # Set the acceptance criterion
       acceptance_cri = 0
       if t > 0.01:
-        acceptance_cri = math.exp(-(current_eval-previous_eval)/t)
-
+        try:
+          acceptance_cri = math.exp(-(current_eval-previous_eval)/t)
+        except OverflowError:
+          continue
+      
       # Check to take current by chance
-      if current_eval - previous_eval <= 0 or random.random() < acceptance_cri:
-        previous, previous_eval = current, current_eval
+      if (current_eval - previous_eval < 100):
+        if current_eval - previous_eval <= 0 or random.random() < acceptance_cri:
+          previous, previous_eval = current, current_eval
+      else:
+        print((current, current_eval))
 
       # Increment
       iteration += 1
 
       # Print every 25th iteration 
       if iteration % 25 == 0:
-        print('iteration: ' + str(iteration) + ', current_eval: ' + str(current_eval) + ', temp: ' + str(t), ', best_eval: ' + str(best_eval))
+        print('iteration: ' + str(iteration) + ', current_eval: ' + str(current_eval) +', temp: ' + str(t) + ', best_eval: ' + str(best_eval))
 
       # Print intermediate to file
       if iteration % 1000 == 0:
@@ -251,10 +259,6 @@ class Sim_Annealing:
 
 
 sim_an = Sim_Annealing(phase = 1, instance_file_name = 'phase1_instance_large_0.txt')
-sol = sim_an.run(t_0 = 1, curvature = 2, max_iterations = 100000)
-print('Improvement :' + str(sol[1] - sim_an.init_score))
-
-
 #print(sim_an.objective_function(sim_an.sample_solution_schedule))
-
-# Java score initial: 112112
+sol = sim_an.run(t_0 = 1, curvature = 4, max_iterations = 100000)
+print('Improvement :' + str(sol[1] - sim_an.init_score))
