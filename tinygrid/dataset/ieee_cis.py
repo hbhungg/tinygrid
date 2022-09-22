@@ -13,6 +13,7 @@ class IEEE_CISMixin:
   _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
   WEATHER_DATA_PATH = os.path.join(_BASE_DIR, "weather/ERA5_Weather_Data_Monash.csv")
+  SEPT_PRICE_DATA_PATH = os.path.join(_BASE_DIR, "price/PRICE_AND_DEMAND_202009_VIC1.csv")
   OCT_PRICE_DATA_PATH = os.path.join(_BASE_DIR, "price/PRICE_AND_DEMAND_202010_VIC1.csv")
   NOV_PRICE_DATA_PATH = os.path.join(_BASE_DIR, "price/PRICE_AND_DEMAND_202011_VIC1.csv")
   ENERGY_DATA_PATH = os.path.join(_BASE_DIR, "energy/nov_data.tsf")
@@ -82,6 +83,7 @@ class IEEE_CISMixin:
     weather_data = weather_data.set_index('datetime (UTC)')
     return weather_data
 
+  # NOTES: Do we really need 2 seperate method for price like this?
   @classmethod
   def _load_AEMO_nov_price_data(cls) -> pd.DataFrame:
     """
@@ -105,3 +107,19 @@ class IEEE_CISMixin:
     price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'], format="%Y-%m-%d %H:%M:%S")
     price_data = price_data.set_index('SETTLEMENTDATE')
     return price_data
+  
+  @classmethod
+  def _load_AEMO_price_data(cls) -> pd.DataFrame:
+    """
+    Load AEMO price data from Sept to Nov. (Cover training, phase 1 and phase 2)
+    Set the dataframe index to the datetime column.
+    """
+    p1 = pd.read_csv(cls.SEPT_PRICE_DATA_PATH)
+    p2 = pd.read_csv(cls.OCT_PRICE_DATA_PATH)
+    p3 = pd.read_csv(cls.NOV_PRICE_DATA_PATH)
+    price_data = pd.concat([p1, p2, p3])
+    price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'], format="%Y-%m-%d %H:%M:%S")
+    price_data = price_data.set_index('SETTLEMENTDATE')
+    # Resample to 15 min instead of 30 min, and do bfill.
+    return price_data.resample("15min").asfreq().fillna(method="bfill")
+
