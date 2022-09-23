@@ -9,6 +9,8 @@ import numpy as np
 from .dataset import IEEE_CISMixin
 from .utils import mase
 
+#import warnings
+#warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
 
 # Flags
 # How to invoke: DEBUG=1 python3 script.py
@@ -87,6 +89,8 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
     """
     Prepare data per series basis
     """
+    no_lag = []
+
     self.weather = self.weather.interpolate()
     energy = self.energy[name]
     # Join weather and energy data, date as shared col
@@ -101,6 +105,17 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
     comb['hour_cos'] = np.cos(time_stamp * (2 * np.pi/HOUR))
     comb['day_sin'] = np.sin(time_stamp * (2 * np.pi/DAY))
     comb['day_cos'] = np.cos(time_stamp * (2 * np.pi/DAY))
+    no_lag += ['hour_sin', 'hour_cos', 'day_sin', 'day_cos']
+
+    # Monday-Friday 1, else 0
+    comb['weekday'] = comb.index.weekday < 5
+    comb['weekday1'] = (comb.index.weekday < 4) & (comb.index.weekday > 0)
+    no_lag.append('weekday')
+    no_lag.append('weekday1')
+    # Boolean mask for weekdays
+    for i in range(7):
+      comb[f"wdx{i}"] = comb.index.weekday == i
+      no_lag.append(f"wdx{i}")
 
     # Split train and test (test is phase1 + phase2)
     comb_train = comb[:_BaseForecaster.PHASE1_TIME].copy()
@@ -112,16 +127,17 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
 
     # Cutoff data
     comb_train = comb_train[self.cutoffs[name]:]
+    no_lag.append('energy')
 
     for col in comb:
-      if col != 'energy':
+      if col not in no_lag:
         for lag in range(1, 4):
           # Forward lag all columns 
-          comb_train[f"{col}_lag_{lag}"] = comb_train[col].shift(lag)
-          comb_test[f"{col}_lag_{lag}"] = comb_test[col].shift(lag)
+          comb_train[f"{col}_lag_{lag}"] = comb_train[col].copy().shift(lag).copy()
+          comb_test[f"{col}_lag_{lag}"] = comb_test[col].copy().shift(lag).copy()
           # Backward lag all columns
-          comb_train[f"{col}_lag_{-lag}"] = comb_train[col].shift(-lag)
-          comb_test[f"{col}_lag_{-lag}"] = comb_test[col].shift(-lag)
+          comb_train[f"{col}_lag_{-lag}"] = comb_train[col].copy().shift(-lag).copy()
+          comb_test[f"{col}_lag_{-lag}"] = comb_test[col].copy().shift(-lag).copy()
 
     # Fill nan with means
     comb_train = comb_train.fillna(comb_train.mean())
