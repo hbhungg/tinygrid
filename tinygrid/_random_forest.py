@@ -7,19 +7,20 @@ class RandomForestForecaster(_BaseForecaster):
   def __init__(self):
     super(RandomForestForecaster, self).__init__()
     # Each series have its own Random Forest model
+    # n_jobs=-1 means use all available cores.
     self.models = {
-      'Building0' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Building1' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Building3' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Building4' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Building5' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Building6' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Solar0'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Solar1'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Solar2'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Solar3'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Solar4'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20),
-      'Solar5'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=20)}
+      'Building0' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=-1),
+      'Building1' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=-1),
+      'Building3' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=-1),
+      'Building4' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=-1),
+      'Building5' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=-1),
+      'Building6' : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=-1),
+      'Solar0'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=-1),
+      'Solar1'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=-1),
+      'Solar2'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=-1),
+      'Solar3'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=-1),
+      'Solar4'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=-1),
+      'Solar5'    : sklearn.ensemble.RandomForestRegressor(n_estimators=200, n_jobs=-1)}
 
     # Each series have its own cuts
     self.cutoffs = { 

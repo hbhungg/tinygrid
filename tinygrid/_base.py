@@ -103,20 +103,31 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
     comb['day_cos'] = np.cos(time_stamp * (2 * np.pi/DAY))
 
     # Split train and test (test is phase1 + phase2)
-    comb_train = comb[:_BaseForecaster.PHASE1_TIME]
-    comb_test =  comb[_BaseForecaster.PHASE1_TIME:]
+    comb_train = comb[:_BaseForecaster.PHASE1_TIME].copy()
+    comb_test =  comb[_BaseForecaster.PHASE1_TIME:].copy()
 
     # Non drop nan training data (used for mase calc)
     org_y_train = comb_train['energy'].to_numpy()
-    x_test      = comb_test.drop('energy', axis=1).to_numpy()
     y_test      = comb_test['energy'].to_numpy()
 
     # Cutoff data
     comb_train = comb_train[self.cutoffs[name]:]
 
-    # Drop nan training data, used for fitting
-    x_train = comb_train.dropna().drop('energy', axis=1).to_numpy()
-    y_train = comb_train.dropna()['energy'].to_numpy()
+    for col in comb:
+      # Forward lag all columns 
+      for lag in range(1, 4):
+        comb_train[f"{col}_lag_{lag}"] = comb_train[col].shift(lag)
+        comb_test[f"{col}_lag_{lag}"] = comb_test[col].shift(lag)
+
+    # Fill nan with means
+    comb_train = comb_train.fillna(comb_train.mean())
+    comb_test = comb_test.fillna(comb_test.mean())
+    #x_train = comb_train.dropna().drop('energy', axis=1).to_numpy()
+    #y_train = comb_train.dropna()['energy'].to_numpy()
+
+    x_test = comb_test.drop('energy', axis=1).to_numpy()
+    x_train = comb_train.drop('energy', axis=1).to_numpy()
+    y_train = comb_train['energy'].to_numpy()
 
     if DEBUG >= 1:
       print("Series:", name)
