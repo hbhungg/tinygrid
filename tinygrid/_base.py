@@ -114,10 +114,14 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
     comb_train = comb_train[self.cutoffs[name]:]
 
     for col in comb:
-      # Forward lag all columns 
-      for lag in range(1, 4):
-        comb_train[f"{col}_lag_{lag}"] = comb_train[col].shift(lag)
-        comb_test[f"{col}_lag_{lag}"] = comb_test[col].shift(lag)
+      if col != 'energy':
+        for lag in range(1, 4):
+          # Forward lag all columns 
+          comb_train[f"{col}_lag_{lag}"] = comb_train[col].shift(lag)
+          comb_test[f"{col}_lag_{lag}"] = comb_test[col].shift(lag)
+          # Backward lag all columns
+          comb_train[f"{col}_lag_{-lag}"] = comb_train[col].shift(-lag)
+          comb_test[f"{col}_lag_{-lag}"] = comb_test[col].shift(-lag)
 
     # Fill nan with means
     comb_train = comb_train.fillna(comb_train.mean())
