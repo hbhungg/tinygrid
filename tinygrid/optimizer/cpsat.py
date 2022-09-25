@@ -1,4 +1,5 @@
 import json
+import os
 import math
 import datetime
 import numpy as np
@@ -15,14 +16,16 @@ START_MONDAY = 384
 END = 2976
 START_MONDAY_9AM = 384 + 9 * PERIOD_IN_HOUR 
 START_MONDAY_5PM = 384 + 17 * PERIOD_IN_HOUR
-FIRST_WEEK_9AM = [(START_MONDAY_9AM + 24 * i * PERIOD_IN_HOUR)+1 for i in range(5)]
-FIRST_WEEK_5PM = [(START_MONDAY_5PM + 24 * i * PERIOD_IN_HOUR)-1 for i in range(5)]
+FIRST_WEEK_9AM = [(START_MONDAY_9AM + 24 * i * PERIOD_IN_HOUR) for i in range(5)]
+FIRST_WEEK_5PM = [(START_MONDAY_5PM + 24 * i * PERIOD_IN_HOUR)+1 for i in range(5)]
 FIRST_WEEK_IN_OFFICE = list(zip(FIRST_WEEK_9AM, FIRST_WEEK_5PM))
 OFFICE_PERIOD = 8 * PERIOD_IN_HOUR
 DAY_PERIOD = 24 * PERIOD_IN_HOUR
 
 ss = datetime.datetime.strptime("2020-9-30 14:00", "%Y-%m-%d %H:%M")
 ee = datetime.datetime.strptime("2020-10-31 13:59", "%Y-%m-%d %H:%M")
+
+DEBUG = int(os.getenv('DEBUG', 0))
 
 
 class CP_SAT_Solver(IEEE_CISMixin):
@@ -49,7 +52,7 @@ class CP_SAT_Solver(IEEE_CISMixin):
     for key, val in self.re_act.items():
       # Activity cannot start at time [(end-duration) -> end]
       self.act_start_time[key] = \
-        self.model.NewIntVar(START_MONDAY_9AM, START_MONDAY_5PM * 24 * 4-1, f"act_start_time_{key}")
+        self.model.NewIntVar(START_MONDAY_9AM, START_MONDAY_5PM * 24 * 4+1, f"act_start_time_{key}")
 
     # Binary array for if activity is in duration
     self.act_in_duration = {}
@@ -79,8 +82,9 @@ class CP_SAT_Solver(IEEE_CISMixin):
         for t in range(s, e-val.duration):
           temp.append(self.act_start_bool[(key, t)])
           st += t * self.act_start_bool[(key, t)]
+        # Activity in duration
         for t in range(s, e):
-          zt = sum([self.act_start_bool.get((key, tt), 0) for tt in range(t-val.duration+1, t)])
+          zt = sum([self.act_start_bool.get((key, tt), 0) for tt in range(t-val.duration+1, t+1)])
           self.model.Add(self.act_in_duration[(key, t)] == zt)
       # Activity must be scheduled and can only be schedule once
       self.model.AddExactlyOne(temp)
@@ -122,6 +126,7 @@ class CP_SAT_Solver(IEEE_CISMixin):
     curr_large = [None] * self.total_large
     curr_small_bmap = []
     curr_large_bmap = []
+    debug_r = {}
     for key, val in self.instances.buildings.items():
         for i in range(val.n_small):
           curr_small_bmap.append(key)
@@ -164,10 +169,10 @@ class CP_SAT_Solver(IEEE_CISMixin):
                       curr_large[idx] = key
                       temp.append(curr_large_bmap[idx])
                       break
-              #print(key, val.size, curr_small, curr_large)
               lb = " ".join(map(str, temp))
-              #print(lb)
               ret.append(f"r {key} {self.solver.Value(self.act_start_time[key])} {self.re_act[key].n_room} {lb}\n")
+          if DEBUG:
+            debug_r[t] = ((curr_small[::], curr_large[::]))
 
       with open("../cache/tt.txt", "w") as f:
         with open("../dataset/instance/phase1_instance_small_0.txt", "r") as tt:
@@ -176,11 +181,43 @@ class CP_SAT_Solver(IEEE_CISMixin):
           for r in ret:
             f.write(r)
 
-      import os
       dir_path = os.path.dirname(os.path.realpath(__file__))
       f_ins_path = os.path.join(dir_path, "../dataset/instance/phase1_instance_small_0.txt")
       f_sol_path = os.path.join(dir_path, "../cache/tt.txt")
       print(f"Java eval score: {schedule_eval_wrapper(f_ins_path, f_sol_path, 1)}")
+
+      if DEBUG:
+        for key, val in self.instances.buildings.items():
+          print(key, val)
+
+        print("       ", end="")
+        for i in range(len(self.re_act)//10):
+          print(i, " "*18, end ="")
+        print()
+
+        print("       ", end="")
+        for key, val in self.re_act.items():
+          print(key%10, end=" ")
+        print()
+
+        print("       ", end="")
+        for key, val in self.re_act.items():
+          print(val.size, end=" ")
+        print()
+
+        tg = '\033[32m'
+        endg = '\033[m'
+        for s, e in FIRST_WEEK_IN_OFFICE:
+          for t in range(s, e):
+            print("t=",t, end=" ")
+            for key, val in self.re_act.items():
+              vv = self.solver.Value(self.act_in_duration[(key, t)])
+              if vv == 1:
+                print(tg + str(vv) + endg, end=" ")
+              else:
+                print(vv, end=" ")
+            print(debug_r[t])
+          print()
     else:
       print("No solution found")
 
