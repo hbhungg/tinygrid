@@ -77,6 +77,14 @@ class Sim_Annealing:
     # Initial score
     self.init_score = 0
 
+    # Calc average price
+    price_sum = 0
+    for t in range(self.time_line_len):
+      price_sum += self.price_data.iloc[t//2-1].item()
+    self.month_avg_price = price_sum / self.time_line_len
+
+
+
   def get_load(self, schedule: Schedule, t: int) -> float:
     # Get the load prior to scheduling at time t
     buildings_demand_t = 0
@@ -182,11 +190,38 @@ class Sim_Annealing:
 
       # Get decision at time t for battery battery_id
       choices = [0, 2]
-      choice = choices[math.floor(random.random() * len(choices))]
+      choice = 2
       # Set choice as battery battery_id's decision
       schedule_candidate.batteries[battery_id][0].decision = choice
 
       return schedule_candidate
+
+  def assign_battery(self, schedule_candidate: Schedule, t: int, battery_id) -> Schedule:
+
+    # Check if battery_id exists in schedule_candidate.batteries
+    if battery_id in schedule_candidate.batteries:
+      # Check if there exists a battery with time != t
+      res = self.check_existence_bat(schedule_candidate.batteries[battery_id], t)
+      if not res[0]:
+        # Add BatterySchedule class to dict, id=battery_id and time=t with decision=1 
+        schedule_candidate.batteries[battery_id].append(BatterySchedule(time=t, decision=0))
+        res[1] = -1
+
+      choice = 0
+      # Set choice as battery battery_id's decision
+      schedule_candidate.batteries[battery_id][res[1]].decision = choice
+
+      return schedule_candidate
+    else:
+      # Current decision for battery battery_id is 1=hold as it does not exist in list
+      # Add BatterySchedule class to dict, id=battery_id and time=t with decision=1 
+      schedule_candidate.batteries[battery_id] = [BatterySchedule(time=t, decision=0)]
+      choice = 0
+      # Set choice as battery battery_id's decision
+      schedule_candidate.batteries[battery_id][0].decision = choice
+
+      return schedule_candidate
+
 
   def run(self, t_0: float, curvature: float, max_iterations: int) -> tuple:
     # Check if max_iterations is not zero
@@ -196,8 +231,15 @@ class Sim_Annealing:
     # Set the number of iterations
     iteration = 1
 
+    # Assign charges at or bellow the monthly avg
+    temp = self.sample_solution_schedule
+    for k in range(self.time_line_len):
+      for battery in self.specific_instance_data.batteries:
+        if self.price_data.iloc[k//2-1].item() < self.month_avg_price:
+          temp = self.assign_battery(previous, k, battery)
+
     # Get the initial candidate and set it as best
-    best = self.sample_solution_schedule
+    best = temp
     # Send it to the objective function
     best_eval = self.objective_function(best)
 

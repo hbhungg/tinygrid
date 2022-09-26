@@ -8,4 +8,3 @@ pyvenv.cfg
 share/
 venv/
 *.icloud
-*.tsf
