@@ -63,7 +63,6 @@ class CP_SAT_Solver(IEEE_CISMixin):
     self.act_in_duration = {}
     # Binary array for activity start time
     self.act_start_bool = {}
-
     for key, val in self.re_act.items():
       for s, e in FIRST_WEEK_IN_OFFICE:
         for t in range(s, e):
@@ -72,6 +71,18 @@ class CP_SAT_Solver(IEEE_CISMixin):
         for t in range(s, e-val.duration):
           self.act_start_bool[(key, t)] = \
               self.model.NewBoolVar(f"act_start_bool_{key}_{t}")
+
+    # Batteries charge action time step t
+    self.bat_charge = {}
+    # Batteries discharge action time step t
+    self.bat_discharge = {}
+    # Battery capacity at time step t
+    self.bat_cap = {}
+    for key, val in self.instances.batteries.items():
+      for t in range(0, END):
+        self.bat_charge[(key, t)] = self.model.NewBoolVar(f"bat_c_{key}_{t}") 
+        self.bat_discharge[(key, t)] = self.model.NewBoolVar(f"bat_d_{key}_{t}") 
+        self.bat_cap[(key, t)] = self.model.NewIntVar(0, val.capacity, f"bat_c_{key}_{t}")
 
     # Cummulative energy at each time step
     self.cum_en = {}
@@ -86,6 +97,7 @@ class CP_SAT_Solver(IEEE_CISMixin):
     #  self.act_scheduled[key] = self.model.NewBoolVar(f"act_scheduled_{key}")
 
   def create_constraint(self):
+    # ****** Activity constraint ******
     for key, val in self.re_act.items():
       temp = []
       st = 0
@@ -107,6 +119,7 @@ class CP_SAT_Solver(IEEE_CISMixin):
       for prec in val.prec:
         self.model.Add(self.act_start_day[key] > self.act_start_day[prec])
 
+    # ****** Room constraint ******
     for s, e in FIRST_WEEK_IN_OFFICE:
       for t in range(s, e):
         c_small = 0
@@ -116,41 +129,76 @@ class CP_SAT_Solver(IEEE_CISMixin):
             c_small += self.act_in_duration[(key, t)] * self.instances.re_act[key].n_room
           elif self.instances.re_act[key].size == "L":
             c_large += self.act_in_duration[(key, t)] * self.instances.re_act[key].n_room
-          
-        # At every timestep, total number of small room and large room must not exceed the total large and small room available.
+        # At every timestep, total small room and large room must not exceed the total large and small room.
         self.model.Add(c_small <= self.total_small)
         self.model.Add(c_large <= self.total_large)
 
-    def map_to_first_week(t, start):
+
+    # *** Battery constraint ***
+    # Battery can only hold, charge or discharge at a time.
+    for key, val in self.instances.batteries.items():
+      for t in range(0, END):
+        self.model.AddAtMostOne([self.bat_charge[(key, t)], self.bat_discharge[(key, t)]])
+        # current battery capacity depends on previous capacity values
+        if t == 0:
+          self.model.Add(4*self.bat_cap[(key, t)] == \
+              4*val.capacity + val.max_power*(self.bat_charge[(key, t)] - self.bat_discharge[(key, t)]))
+        else:
+          self.model.Add(4*self.bat_cap[(key, t)] == \
+              4*self.bat_cap[(key, t-1)] + val.max_power*(self.bat_charge[(key, t)] - self.bat_discharge[(key, t)]))
+    
+
+    def _map_to_first_week(t: int, start:int) -> int:
+      """
+      Map arbitrary timestep t to corresponding timestep in the first week. Use for recurrence activity
+      since they are schedule for every week.
+      """
       if t > start:
         return (t - start + (0 % PERIOD_IN_WEEK) + PERIOD_IN_WEEK) % PERIOD_IN_WEEK + start
-      else:
+      else: 
         return t
 
-    # TODO: Add minimizing obj function
+    # Abolghasemi, M., Esmaeilbeigi, R., 2021
+    # State-of-the-art predictive and prescriptive analytics for IEEE CIS 3rd Technical Challenge
+    # at https://arxiv.org/pdf/2112.03595.pdf
     obj = 0
     for t in range(0, END):
       cum = 0
-      mt = map_to_first_week(t, START_MONDAY)
+      mt = _map_to_first_week(t, START_MONDAY)
       # Sum all energy from buildings at time step t
       for key, val in self.re_act.items():
         if (key, mt) in self.act_in_duration:
           cum += val.load * val.n_room * self.act_in_duration[(key, mt)] 
+      # Sum all energy from buildings at time step t
+      for key, val in self.instances.batteries.items():
+        mxp = self.instances.batteries[key].max_power
+        eff = self.instances.batteries[key].efficiency
+        cc = self.bat_charge[(key, t)]
+        dd = self.bat_discharge[(key, t)]
+        cum += (mxp // math.sqrt(eff)) * (cc - eff * dd)
       # Add base load (base building - solar)
       cum += math.ceil(self.ddiff[t])
-      self.model.Add(self.cum_en[t] == cum)
-      self.model.Add(self.max_cum_em >= self.cum_en[t])
+      #self.model.Add(self.cum_en[t] == cum)
+      #self.model.Add(self.max_cum_em >= self.cum_en[t])
       obj += self.price[t] * cum
 
-    self.model.Minimize((0.25/1000)*obj + 0.0005*self.max_cum_em*2)
+    # Minimize the objective function
+    #self.model.Minimize((0.25/1000)*obj + 0.0005*self.max_cum_em*2)
+    self.model.Minimize((0.25/1000)*obj)
 
 
   def create_hint(self):
+    """
+    Provide the CP-SAT hints from the sample solution.
+    """
     re_act = self.sample_solution.re_act
     for key, val in re_act.items():
       self.model.AddHint(self.act_start_bool[(key, val.start_time)], 1)
 
   def fix_start(self):
+    """
+    Fix the CP-SAT with sample solution.
+    """
     re_act = self.sample_solution.re_act
     for key, val in re_act.items():
       self.model.Add(self.act_start_bool[(key, val.start_time)] == 1)
@@ -222,6 +270,15 @@ class CP_SAT_Solver(IEEE_CISMixin):
           f.write(f"sched {len(self.re_act)} 0\n")
           for r in ret:
             f.write(r)
+          for (keyc, c), (keyd, d) in zip(self.bat_charge.items(), self.bat_discharge.items()):
+            cc = self.solver.Value(c)
+            dd = self.solver.Value(d)
+            # Write charge
+            if cc == 1:
+              f.write(f"c {keyc[0]} {keyc[1]} 0\n")
+            # Write discharge
+            if dd == 1:
+              f.write(f"c {keyd[0]} {keyd[1]} 2\n")
 
       dir_path = os.path.dirname(os.path.realpath(__file__))
       f_ins_path = os.path.join(dir_path, "../dataset/instance/phase1_instance_small_0.txt")
@@ -229,6 +286,9 @@ class CP_SAT_Solver(IEEE_CISMixin):
       print(f"Java eval score: {schedule_eval_wrapper(f_ins_path, f_sol_path, 1)}")
 
       if DEBUG:
+        for key, val in self.act_start_day.items():
+          print(key, self.solver.Value(val))
+
         for i in range(len(self.re_act)//10):
           print(i, " "*18, end ="")
         print()
@@ -269,6 +329,6 @@ if __name__ == "__main__":
   a = CP_SAT_Solver()
   a.create_variables()
   #a.create_hint()
-  a.fix_start()
+  #a.fix_start()
   a.create_constraint()
   a.solve()
