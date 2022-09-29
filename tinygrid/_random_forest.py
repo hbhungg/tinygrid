@@ -4,8 +4,8 @@ from . import _BaseForecaster
 
 
 class RandomForestForecaster(_BaseForecaster):
-  def __init__(self):
-    super(RandomForestForecaster, self).__init__()
+  def __init__(self, verbose=0, profile="default"):
+    super(RandomForestForecaster, self).__init__(verbose, profile)
     # Each series have its own Random Forest model
     # n_jobs=-1 means use all available cores.
     self.models = {
@@ -34,6 +34,6 @@ class RandomForestForecaster(_BaseForecaster):
       'Solar1'    : datetime.datetime(day=21, month=5,  year=2020, hour=0, minute=0, second=0),  
       'Solar2'    : datetime.datetime(day=21, month=5,  year=2020, hour=0, minute=0, second=0),  
       'Solar3'    : datetime.datetime(day=21, month=5,  year=2020, hour=0, minute=0, second=0),  
-      'Solar4'    : 0,
+      'Solar4'    : None,
       'Solar5'    : datetime.datetime(day=31, month=5,  year=2020, hour=0, minute=0, second=0)}
 

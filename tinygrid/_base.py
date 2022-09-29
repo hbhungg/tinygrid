@@ -1,6 +1,7 @@
 import os
 from abc import ABC, abstractmethod
 from functools import partialmethod
+from datetime import datetime, timedelta
 
 from tqdm import tqdm
 import pandas as pd
@@ -9,16 +10,10 @@ import numpy as np
 from .dataset import IEEE_CISMixin
 from .utils import mase
 
-#import warnings
-#warnings.simplefilter(action='ignore', category=pd.errors.PerformanceWarning)
-
 # Flags
 # How to invoke: DEBUG=1 python3 script.py
 DEBUG = int(os.getenv('DEBUG', 0))
-VERBOSE = int(os.getenv('VERBOSE', 0))
 
-# Disable tqdm if VERBOSE=0
-tqdm.__init__ = partialmethod(tqdm.__init__, disable=VERBOSE<1)
 
 class _BaseForecaster(ABC, IEEE_CISMixin):
   """
@@ -30,7 +25,17 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
   CACHE_FOLDER = "./cache/"
   CHECKPOINTS  = "./checkpoints/"
 
-  def __init__(self) -> None:
+
+  def __init__(self, verbose: int=0, profile="default") -> None:
+    """
+    Params:
+      verbose: level of verbosity, 0 is silent, >=1 for more info
+      profile: how to split data
+        - "default" is phase1 and phase2 prediction
+        - "phase1" is just phase1 prediction
+        - "phase2" is phase2 prediction, with phase1 include in the training data
+
+    """
     self.energy = self._load_energy_data()
     self.weather = self._load_ERA5_weather_data()
     # Drop unused cols, upsample to 15 minutes
@@ -49,13 +54,25 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
     self.evals = dict()
     self.models = dict()
     self.cutoffs = dict()
+    self.verbose = verbose
+    # Disable tqdm if self.verbose=0
+    tqdm.__init__ = partialmethod(tqdm.__init__, disable=self.verbose<1)
+    self.profile = profile
+
+    # Weather data is instances agnostic, so we should only transform once
+    self._prepare_weather_data()
+
+    self.s1 = datetime(day=19, month=6, year=2020, hour=23, minute=59, second=59) # 20th June 
+    self.s4 = datetime(day=1,  month=8, year=2020, hour=23, minute=59, second=59) # 2nd Aug
+    self.s5 = datetime(day=14, month=9, year=2020, hour=23, minute=59, second=59) # 13th Sept
+    self.s6 = datetime(day=17, month=10, year=2020, hour=23, minute=59, second=59) # 18th Oct
 
 
   def fit(self) -> None:
     """
     Fit every series with its own model.
     """
-    if VERBOSE>=1: print("Fitting...")
+    if self.verbose>=1: print("Fitting...")
     for name in tqdm(self.names): 
       _, _, _, x_train, y_train = self._prepare_data(name)
       self.models[name].fit(x_train, y_train)
@@ -66,7 +83,7 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
     Run predict on all series with its own trained model.
     Can only be invoke after training.
     """
-    if VERBOSE>=1: print("Predicting...")
+    if self.verbose>=1: print("Predicting...")
     for name in tqdm(self.names):
       _, x_test, _, _, _= self._prepare_data(name)
       self.y_preds[name] = self.models[name].predict(x_test)
@@ -77,7 +94,7 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
     Run evaludation on all predicted series.
     Can only be invoke after predict.
     """
-    if VERBOSE>=1: print("Evaluation...")
+    if self.verbose>=1: print("Evaluation...")
     for name in self.names:
       org_y_train, _, y_test, _, _ = self._prepare_data(name)
       y_pred = self.y_preds[name]
@@ -89,12 +106,12 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
     """
     Prepare data per series basis
     """
-    no_lag = []
-
-    self.weather = self.weather.interpolate()
+    #energy = self.energy[name][self.cutoffs[name]:]
+    #weather = self.weather[self.cutoffs[name]:]
     energy = self.energy[name]
+    weather = self.weather
     # Join weather and energy data, date as shared col
-    comb = energy.join(self.weather)
+    comb = energy.join(weather)
 
     HOUR = 24*60
     DAY = 24*60*60
@@ -105,46 +122,59 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
     comb['hour_cos'] = np.cos(time_stamp * (2 * np.pi/HOUR))
     comb['day_sin'] = np.sin(time_stamp * (2 * np.pi/DAY))
     comb['day_cos'] = np.cos(time_stamp * (2 * np.pi/DAY))
-    no_lag += ['hour_sin', 'hour_cos', 'day_sin', 'day_cos']
 
     # Monday-Friday 1, else 0
     comb['weekday'] = comb.index.weekday < 5
     comb['weekday1'] = (comb.index.weekday < 4) & (comb.index.weekday > 0)
-    no_lag.append('weekday')
-    no_lag.append('weekday1')
     # Boolean mask for weekdays
     for i in range(7):
       comb[f"wdx{i}"] = comb.index.weekday == i
-      no_lag.append(f"wdx{i}")
 
-    # Split train and test (test is phase1 + phase2)
-    comb_train = comb[:_BaseForecaster.PHASE1_TIME].copy()
-    comb_test =  comb[_BaseForecaster.PHASE1_TIME:].copy()
+    # Full capacity at before 20th June
+    comb["restriction"] = ((comb.index < self.s1) == True) * 1
+    # 10% occupancy 20th June - 2nd Aug
+    comb["restriction"] += ((comb.index > self.s1) & (comb.index < self.s4) == True) * 0.1
+    # 5% occupancy 2nd Aug - 13th Sept
+    comb["restriction"] += ((comb.index > self.s4) & (comb.index < self.s5) == True) * 0.05
+    # 25% occupancy 13th Sept - 18th Oct
+    comb["restriction"] += ((comb.index > self.s5) & (comb.index < self.s6) == True) * 0.25
+    # 30% occupancy 13th Sept - 18th Oct
+    comb["restriction"] += ((comb.index > self.s6) == True) * 0.3
+
+    # Split train and test
+    if self.profile == "default":
+      # Default train on historic data and predict on both phase1 and phase2
+      comb_train = comb[:self.PHASE1_TIME]
+      comb_test =  comb[self.PHASE1_TIME:]
+    elif self.profile == "phase1":
+      # Predict on phase1 only
+      comb_train = comb[:self.PHASE1_TIME]
+      comb_test =  comb[self.PHASE1_TIME:self.PHASE2_TIME]
+    elif self.profile == "phase2":
+      # Train data is now historic data and phase1 data, predict on phase2
+      comb_train = comb[:self.PHASE2_TIME]
+      comb_test =  comb[self.PHASE2_TIME:]
 
     # Non drop nan training data (used for mase calc)
     org_y_train = comb_train['energy'].to_numpy()
     y_test      = comb_test['energy'].to_numpy()
 
-    # Cutoff data
-    comb_train = comb_train[self.cutoffs[name]:]
-    no_lag.append('energy')
-
-    for col in comb:
-      if col not in no_lag:
-        for lag in range(1, 4):
-          # Forward lag all columns 
-          comb_train[f"{col}_lag_{lag}"] = comb_train[col].copy().shift(lag).copy()
-          comb_test[f"{col}_lag_{lag}"] = comb_test[col].copy().shift(lag).copy()
-          # Backward lag all columns
-          comb_train[f"{col}_lag_{-lag}"] = comb_train[col].copy().shift(-lag).copy()
-          comb_test[f"{col}_lag_{-lag}"] = comb_test[col].copy().shift(-lag).copy()
+    # High and low data threshold.
+    # TODO: Find a general way of doing this?
+    if name == "Building0":
+      comb_train = comb_train[comb_train['energy'] <=606.5]
+    elif name == "Building3":
+      comb_train = comb_train[(comb_train['energy']>=193) & (comb_train['energy']<=2264)]
 
     # Fill nan with means
     comb_train = comb_train.fillna(comb_train.mean())
     comb_test = comb_test.fillna(comb_test.mean())
-    #x_train = comb_train.dropna().drop('energy', axis=1).to_numpy()
-    #y_train = comb_train.dropna()['energy'].to_numpy()
 
+    ## Cutoff data, we have to do this late because we are impute data using mean
+    ## Cutting off early would result in garbage impute.
+    comb_train = comb_train[self.cutoffs[name]:]
+
+    # Turn to numpy for training
     x_test = comb_test.drop('energy', axis=1).to_numpy()
     x_train = comb_train.drop('energy', axis=1).to_numpy()
     y_train = comb_train['energy'].to_numpy()
@@ -157,3 +187,11 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
 
     return org_y_train, x_test, y_test, x_train, y_train
 
+  def _prepare_weather_data(self):
+    for col in list(self.weather.columns):
+      for lag in range(1, 4):
+        # Forward lag all columns 
+        self.weather[f"{col}_lag_{lag}"] = self.weather[col].shift(lag)
+        # Backward lag all columns
+        self.weather[f"{col}_lag_{-lag}"] = self.weather[col].shift(-lag)
+    self.weather = self.weather.interpolate()
