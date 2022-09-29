@@ -1,10 +1,7 @@
 matplotlib
 pandas
 numpy
-scipy
-pulp
 scikit-learn
 tqdm
 ortools
 protobuf
-
