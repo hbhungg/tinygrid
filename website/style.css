@@ -104,3 +104,12 @@ div.content {
             user-select: none; /* Non-prefixed version, currently
                                   supported by Chrome, Edge, Opera and Firefox */
 }
+
+.vis-container {
+  width: 100%;
+  font-size: 1vw;
+}
+
+.pure-g {
+  margin-bottom: 0.1em;
+}

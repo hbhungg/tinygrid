@@ -8,6 +8,7 @@
     <!-- Style sheet -->
     <link rel="stylesheet" href="style.css">
   </head>
+  
   <!-- Left content -->
   <div class="fixed-top left">
     <!-- Left content title -->
@@ -58,12 +59,49 @@
         <div class="col" id="vis1"></div>
       </div>
     </div>
+    
     <!-- 3rd content -->
     <div class="row content_block p-5" id="content_3">
       <div id="content_3_sup" class="p-3">
         <h3 class="text_right_heading">Forecasting</h3>
+
+        <div class="row">
+          <div class="col text_right"><strong>Energy demand</strong> for all 6 buildings are forecasted. The forecasted energy demand spands from 1st October 2020 to 30th November 2020 which is given in a 15 minute time steps. Every unit of energy is measured in kW. This is calculated using the historical 15-minutely</div>
+          <div class="col text_right">energy demand of 6 buildings from Monash University, Melbourne, Australia. We neeed the predicted energy demand to get the amount of energy that might be needed to optimally schedule the battery and activity.</div>
+        </div>
+
+        <!-- pure grid group -->
+        <div class="pure-g">
+          <div class="pure-u-1-2">
+           <div id="forecast1" class="vis-container"></div>
+          </div>
+          <div class="pure-u-1-2">
+            <div id="forecast2" class="vis-container" style="margin-left: 15px;"></div>
+          </div>
+
+        </div>
+        <!-- end pure grid group -->
+
+        <div class="row">
+          <div class="col text_right"><strong>Solar production</strong> for all 6 solar panels are forecasted. Power production is forecasted from 1st October 2020 to 30th November 2020 which is given in a 15 minute time steps. Every unit of power is measured in kW. This is calculated using the historical 15-minutely</div>
+          <div class="col text_right">energy demand of 6 buildings from Monash University, Melbourne, Australia. The predicted power production is used to get the amount of energy that is produced in order to get the optimal battery and activity schedule.</div>
+        </div>
+
+        <!-- pure grid group -->
+        <div class="pure-g">
+          <div class="pure-u-1-2">
+           <div id="forecast3" class="vis-container"></div>
+          </div>
+          <div class="pure-u-1-2">
+            <div id="forecast4" class="vis-container" style="margin-left: 15px;"></div>
+          </div>
+
+        </div>
+        <!-- end pure grid group -->
+    
       </div>
     </div>
+    
     <!-- 4th content -->
     <div class="row content_block p-5" id="content_4">
       <div id="content_4_sup" class="p-3">
@@ -80,11 +118,39 @@
     <div class="container-fluid right_head"></div>
   </div>
 
-  <!-- Vega lite scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/vega@5"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5"></script>
-  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6"></script>
+  <!-- Import Vega & Vega-Lite (does not have to be from CDN) -->
+  <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
+  <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
   <!-- Website scripts -->
   <script src="content_script.js"></script>
   <script src="vega_lite_script.js"></script>
+  <!-- Import pure.css -->
+  <link rel="stylesheet" href="https://unpkg.com/purecss@2.0.3/build/pure-min.css"
+    integrity="sha384-cg6SkqEOCV1NbJoCu11+bm0NvBRc8IYLRGXkmNrqUBfTjmMYwNKPWBTIKyw9mHNJ" crossorigin="anonymous">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- CSS file -->
+  <link rel="stylesheet" type="text/css" href="styles.css" media="all">
+
+
+  <script type="text/javascript">
+    var specVis1 = "./forecast/building03_Visualisation.json";
+    var specVis2 = "./forecast/building46_Visualization.vl.json";
+    var specVis3 = "./forecast/solar02_Visualization.vl.json";
+    var specVis4 = "./forecast/solar35_Visualization.vl.json";
+
+    vegaEmbed('#forecast1', specVis1, { "actions": false });
+
+    vegaEmbed('#forecast2', specVis2, { "actions": false }).then(function (result) {
+      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
+    }).catch(console.error);
+
+    vegaEmbed('#forecast3', specVis3, { "actions": false }).then(function (result) {
+      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
+    }).catch(console.error);
+
+    vegaEmbed('#forecast4', specVis4, { "actions": false }).then(function (result) {
+      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
+    }).catch(console.error);
+  </script>
 </html>
