@@ -1,7 +1,7 @@
 {
   "$schema": "https://vega.github.io/schema/vega-lite/v5.json",
   "data": {
-    "url": "https://raw.githubusercontent.com/hbhungg/tinygrid/main/cache/final_forecast_building46.csv"
+    "url": "https://raw.githubusercontent.com/hbhungg/tinygrid/main/website/forecast/data/final_forecast_building46.csv"
   },
   "width": 400,
   "height": 300,
