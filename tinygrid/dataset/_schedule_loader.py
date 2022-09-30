@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+import os
 
 # NOTES: Can both of them merge? Might be confuse if merged since instance and schedule need different data.
 # Class for Instance
@@ -53,16 +54,18 @@ class Schedule:
 
 def instance_parser(f_name: str) -> Instance:
     """
-    Parse the instance.txt file according to the IEEE-CIS's Data_Description.pdf
+    Parse the instance.txt file according to the IEEE-CIS's Data_Description.pdf in docs
     Params:
       f_name: path to file
     Return: 
       Instance object.
     """
     lines = []
-
-    with open(f_name) as f:
-      lines = f.read().splitlines()
+    if os.path.exists(f_name):
+      with open(f_name) as f:
+        lines = f.read().splitlines()
+    else:
+      return 1
 
     # init Schedule obj
     ins = Instance()
@@ -119,7 +122,7 @@ def instance_parser(f_name: str) -> Instance:
 
 def schedule_parser(f_name: str) -> Schedule:
     """
-    Parse the scedule.txt file according to the IEEE-CIS's Data_Description.pdf
+    Parse the scedule.txt file according to the IEEE-CIS's Data_Description.pdf in docs
     Params:
       f_name: path to file
     Return: 
@@ -127,8 +130,23 @@ def schedule_parser(f_name: str) -> Schedule:
     """
     lines = []
 
-    with open(f_name) as f:
-      lines = f.read().splitlines()
+    # Check if path exists
+    if os.path.exists(f_name):
+      with open(f_name) as f:
+        lines = f.read().splitlines()
+    else:
+      raise Exception("file path " + f_name + " does not exist.")
+
+    # Check if file is empty
+    if len(lines) == 0:
+      raise Exception("file " + f_name + " does not contain lines")
+    
+    # Check if file is only newlines
+    for line in lines:
+      if line != '\n' or line != '':
+        break
+    else:
+      raise Exception("file " + f_name + " does not contain lines")
 
     # init Schedule obj
     sche = Schedule()
