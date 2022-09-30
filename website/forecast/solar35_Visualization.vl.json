@@ -3,9 +3,8 @@
   "data": {
     "url": "https://raw.githubusercontent.com/hbhungg/tinygrid/main/website/forecast/data/final_forecast_solar35.csv"
   },
-  "width": 400,
-  "height": 300,
-  "title": "Forecasted Power Production for Solar 3, 1 and 2 from 1st October to 30th November 2020",
+  "width": "container",
+  "title": "Solar 3, 1 and 2 from 1st October to 30th November 2020",
   "layer": [
     {
       "encoding": {

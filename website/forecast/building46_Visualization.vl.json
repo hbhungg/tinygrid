@@ -3,9 +3,8 @@
   "data": {
     "url": "https://raw.githubusercontent.com/hbhungg/tinygrid/main/website/forecast/data/final_forecast_building46.csv"
   },
-  "width": 400,
-  "height": 300,
-  "title": "Forecasted Energy Demand for Buildings 4, 5 and 6 from 1st October to 30th November 2020",
+  "width": "container",
+  "title": "Buildings 4, 5 and 6 from 1st October to 30th November 2020",
   "layer": [
     {
       "encoding": {
