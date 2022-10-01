@@ -1,5 +1,7 @@
+from array import array
 from dataclasses import dataclass, field
 import os
+from socket import send_fds
 
 # NOTES: Can both of them merge? Might be confuse if merged since instance and schedule need different data.
 # Class for Instance
@@ -135,18 +137,11 @@ def schedule_parser(f_name: str) -> Schedule:
       with open(f_name) as f:
         lines = f.read().splitlines()
     else:
-      raise Exception("file path " + f_name + " does not exist.")
+      raise Exception("file " + f_name + " does not exist.")
 
-    # Check if file is empty
-    if len(lines) == 0:
-      raise Exception("file " + f_name + " does not contain lines")
-    
-    # Check if file is only newlines
-    for line in lines:
-      if line != '\n' or line != '':
-        break
-    else:
-      raise Exception("file " + f_name + " does not contain lines")
+    # Seen ppoi tag and seen sched tag
+    ppoi = []
+    sched = []
 
     # init Schedule obj
     sche = Schedule()
@@ -157,6 +152,9 @@ def schedule_parser(f_name: str) -> Schedule:
 
       # Turn all int that is in string form into int
       split_line = [int(i) if i.isdigit() else i for i in split_line]
+
+      if not is_schedule_line_valid(split_line):
+        raise Exception("provided schedule was invalid")
 
       tag = split_line[0]
 
@@ -181,6 +179,98 @@ def schedule_parser(f_name: str) -> Schedule:
           ActivitySchedule(start_time = split_line[2],
                   n_room = split_line[3],
                   building_id = split_line[4:])
+      # ppoi ⟨# buildings⟩ ⟨# solar⟩ ⟨# battery⟩ ⟨# recurring⟩ ⟨# once-off⟩
+      elif tag == "ppoi":
+        # Check if the ppoi has been seen before
+        if len(ppoi) != 0:
+          raise Exception("provided schedule was invalid")
+        else:
+          # Store it
+          ppoi = split_line
+      # sched ⟨# recurring scheduled⟩ ⟨# once-off scheduled⟩
+      elif tag == "sched":
+        # Check if the sched has been seen before
+        if len(sched) != 0:
+          raise Exception("provided schedule was invalid")
+        else:
+          # Store it
+          sched = split_line
 
+    if not is_schedule_valid(sche, [ppoi, sched]):
+      raise Exception("provided schedule was invalid")
     return sche
 
+def is_schedule_valid(sche: Schedule, params: list) -> bool:
+  # Check if no recurring activities where scheduled
+  if len(sche.re_act) == 0:
+    return False
+  if len(sche.batteries) == 0 and len(sche.once_act) == 0 and len(sche.re_act) == 0:
+    return False
+  
+  # Unpack variables
+  ppoi = params[0]
+  sched = params[1]
+
+  # Check their lengths
+  if len(ppoi) != 6 or len(sched) != 3:
+    return False
+  # Check if ppoi elements (apart from tag) are all integers
+  for el in ppoi[1:]:
+    if not isinstance(el, int):
+      return False
+  # Check if sched elements (apart from tag) are all integers
+  for el in sched[1:]:
+    if not isinstance(el, int):
+      return False
+  # Check if number of sched elements match the number received
+  if len(sche.re_act) != sched[1] or len(sche.once_act) != sched[2]:
+    return False
+  return True
+
+def is_schedule_line_valid(split_line: array) -> bool:
+  tag = split_line[0]
+  if tag == "c":
+    # Check length of battery line
+    if len(split_line) != 4:
+      return False
+    # Check if battery_id is integer
+    if not isinstance(split_line[1], int):
+      return False
+    # Check if time is integer
+    if not isinstance(split_line[2], int):
+      return False    
+    # Check if decision is in [0, 1, 2] as integer
+    if (not isinstance(split_line[3], int)) or (split_line[3] not in [0,1,2]):
+      return False
+  elif tag == "r" or tag == "a":
+    # Check length of activity line
+    if len(split_line) >= 4:
+      return False
+    # Check if act_id is integer
+    if not isinstance(split_line[1], int):
+      return False
+    # Check if start_time is integer
+    if not isinstance(split_line[2], int):
+      return False
+    # Check if n_room is integer
+    if not isinstance(split_line[3], int):
+      return False
+    # Check if n_rooms match listed buildings length
+    if len(split_line[4:]) != split_line[3]:
+      return False
+    # Check if building ids are integers
+    for b_id in split_line[4:]:
+      if not isinstance(b_id, int):
+        return False
+  elif tag == "sched":
+    # Check length of line
+    if len(split_line) == 6:
+      return False
+  elif tag == "ppoi":
+    # Check length of line
+    if len(split_line) == 3:
+      return False
+  # Check for different tags, but ignore empty lines
+  elif tag != '':
+    return False
+  return True
