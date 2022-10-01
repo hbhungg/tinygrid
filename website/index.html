@@ -22,7 +22,7 @@
     </div>
     <h3 class="text_left_heading noselect"><a class="text_line" id="left_heading_2" onclick="left_btn_selected(2)">Data</a></h3>
     <div class="text_left hidden" id="left_text_2">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue.
+      Dataset needed in order to complete the forecasting and optimisation part of our project.
     </div>
     <h3 class="text_left_heading noselect"><a class="text_line" id="left_heading_3" onclick="left_btn_selected(3)">Forecasting</a></h3>
     <div class="text_left hidden" id="left_text_3">
@@ -33,7 +33,7 @@
     </div>
     <h3 class="text_left_heading noselect"><a class="text_line" id="left_heading_5" onclick="left_btn_selected(5)">Team</a></h3>
     <div class="text_left hidden" id="left_text_5">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Praesent id scelerisque felis. Aliquam ac lacus sed lorem tristique convallis pulvinar sit amet augue.
+      In honour of our team members who have poured their heart and soul into doing this project.
     </div>
   </div>
 
@@ -54,8 +54,58 @@
     <div class="row content_block p-5" id="content_2">
       <div id="content_2_sup" class="p-3">
         <h3 class="text_right_heading">Data</h3>
-        <!-- graph -->
-        <div class="col" id="vis1"></div>
+        <!-- empty space -->
+        <div class="row"> 
+          <div class="col text_right"> 
+              <br>
+          </div>
+        </div>
+        <!-- weather data -->
+        <div class="row"> 
+          <div class="col text_right">
+            <strong>Weather data</strong><br>
+            The daily minimum temperature (C), maximum temperature (C), rainfall (mm) and solar exposure (MJm^2) of three weather stations near Melbourne: Olympic Park, Moorabbin Airport and Oakleigh (Metropolitan Golf Club) from http://www.bom.gov.au/climate/data/. Each weather series starts from 1st of January 2016 and contains corresponding values until November 2022). This is needed to forecast the solar power production.
+          </div>
+        </div>
+        <!-- empty space -->
+        <div class="row"> 
+          <div class="col text_right"> 
+            <br>
+          </div>
+        </div>
+        <!-- electricity price data -->
+        <div class="row"> 
+          <div class="col text_right">
+            <strong>Electricity price data</strong><br>
+            Australian electricity price data from https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem/aggregated-data to achieve the lowest energy cost when scheduling the activities.
+          </div>
+        </div>
+        <!-- empty space -->
+        <div class="row"> 
+          <div class="col text_right"> 
+            <br>
+          </div>
+        </div>
+        <!-- historical energy demand and power production -->
+        <div class="row"> 
+          <div class="col text_right">
+            <strong>Historical energy demand and power production</strong><br>
+            Historical 15-minutely energy demand of 6 buildings and 15-minutely power production of 6 solar panels from Monash University, Melbourne, Australia. Given as a time series format to forecast the energy demand and power production in October and November 2020.
+          </div>
+        </div>
+        <!-- empty space -->
+        <div class="row"> 
+          <div class="col text_right"> 
+            <br>
+          </div>
+        </div>
+        <!-- problem instance -->
+        <div class="row"> 
+          <div class="col text_right">
+            <strong>Problem instance</strong><br>
+              Instances of buildings, solar panels, batteries and activities that will be optimised. This is given in a text format with the first line being ppoi (predict-plus-optimize instance) which is the summary of the problem instance. It also has Buildings with attributes id, number of large rooms and number of small rooms; Solar panels with attributes solar id and building id; Batteries with attributes building id, capacity (kWh), max power kW and efficiency; Reccuring activities with an activity object and precendeces; Once-off activities with an activity object, value($), penalty($) and precedences; where activity object has attributes id, number of rooms, room size, load (kW) and duration.
+          </div>
+        </div>
       </div>
     </div>
     
@@ -120,6 +170,17 @@
     <div class="row content_block p-5" id="content_5" style="padding-bottom: 0 !important;">
       <div id="content_5_sup" class="p-3">
         <h3 class="text_right_heading">Team</h3>
+        <!-- weather data -->
+        <div class="row"> 
+          <div class="col text_right">
+            <br>
+            <strong>Ordered alphabetically</strong><br>
+            Aldrich Buntoro<br>
+            Anirudh Prakash<br>
+            Ba Hung Huynh<br>
+            Harris Perdikoyiannis<br>
+          </div>
+        </div>
       </div>
     </div>
     <div class="container-fluid right_head"></div>
