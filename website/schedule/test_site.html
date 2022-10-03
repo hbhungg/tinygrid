@@ -1,14 +1,82 @@
 <!DOCTYPE html>
 <html>
-<body>
-
-
-
-<p id="demo"></p>
-
+  
+<head>
 <script src="https://cdn.jsdelivr.net/npm/vega@5.22.1"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.5.0"></script>
 <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.21.0"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"> </script>
+<script src=https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js></script>
+
+<script type="text/javascript" src="test_fetch.js"></script>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+<link rel="stylesheet" href="style.css">  
+  
+</head>
+  
+  
+  
+<body onload = "make_header()">
+
+<div>
+
+<br><br>
+
+<div class="container" id = "optim_grid">
+  <div class="row">
+    <div class="colh">
+      Building 0
+    </div>
+    <div class="colh">
+      Building 1
+    </div>
+    <div class="colh">
+      Building 2
+    </div>
+  </div>
+  
+    <div class="row">
+    <div class="col" id = "table_0">
+      building 0 table
+
+
+
+      
+    </div>
+    <div class="col" id = "table_1">
+      building 1 table
+    </div>
+    <div class="col" id = "table_2">
+      building 2 table
+    </div>
+  </div>
+  
+    <div class="row">
+    <div class="colh">
+      
+    </div>
+    <div class="colh">
+      
+    </div>
+    <div class="colh">
+      
+    </div>
+  </div>
+  
+    <div class="row">
+    <div class="col" id = "table_3">
+      Building 3 Table
+    </div>
+    <div class="col" id = "table_4">
+      Building 4 Table
+    </div>
+    <div class="col" id = "table_5">
+      Building 5 Table
+    </div>
+  </div>
+  
+</div>
 
 
 
@@ -16,87 +84,33 @@
 
 
 
-
-<div id="vis"></div>
-<script type="text/javascript">
-      var yourVlSpec = {
-        $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-        description: 'A simple bar chart with embedded data.',
-        data: {
-          values: [
-            {a: 'A', b: 28},
-            {a: 'B', b: 55},
-            {a: 'C', b: 43},
-            {a: 'D', b: 91},
-            {a: 'E', b: 81},
-            {a: 'F', b: 53},
-            {a: 'G', b: 19},
-            {a: 'H', b: 87},
-            {a: 'I', b: 52}
-          ]
-        },
-        mark: 'bar',
-        encoding: {
-          x: {field: 'a', type: 'ordinal'},
-          y: {field: 'b', type: 'quantitative'}
-        }
-      };
-      vegaEmbed('#vis', yourVlSpec);
-    </script>
+     
 
 
-
-
-
-
-
-
-
-
-
+<div class="slidecontainer">
+  <input type="range" step = "1" min="1" max="30" value="1" class="slider" id="myRange">
+  <p>Value: <span id="demo"></span></p>
+</div>
 
 <script>
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+output.innerHTML = "October " + slider.value;
+myFunction()
+slider.oninput = function() {
+  
+  output.innerHTML = "October " + slider.value;
+  myFunction()
+  remove_table()
 
-  var request = new XMLHttpRequest();
-  request.open('GET','https://raw.githubusercontent.com/hbhungg/tinygrid/main/website/schedule/schedule_small.txt',true);
-  request.send(null);
-  request.onreadystatechange = get_data
-  function get_data(){
-  var schedule = request.responseText
-  const schedule_array = schedule.split(/\n/);
-  var csv_array = []
-
-  var no_buildings = schedule_array[1];
-  for (var i = 0; i < schedule_array.length; i++) {
-   var row = schedule_array[i];
-   var row_arr = row.split(/ /)
-   if (row_arr[0] == "r"){
-      
-      var num_rooms = parseInt(row_arr[3]);
-      
-      for (var j = 0; j < num_rooms;j++){
-        var building_no = row_arr[4+j].charAt(0);
-        var new_row = {activity_type:row_arr[0],
-                       activity_id:row_arr[1],
-                       time:row_arr[2],
-                       building_id:building_no};
-        csv_array.push(new_row)
-    
-        
-      }}
-    
+  
+  
 }
-  console.log(csv_array)
-  document.getElementById("demo").innerHTML = csv_array.toString()
-  return request.responseText;}
 
+</script>
 
+</div>
 
-
-
-
-
-</script> 
 
 </body>
 </html>
