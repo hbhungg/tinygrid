@@ -36,7 +36,7 @@ function parse_schedule(schedule){
 function myFunction() {
   
   
-    fetch('https://raw.githubusercontent.com/hbhungg/tinygrid/main/website/schedule/schedule_small.txt')
+    fetch('https://raw.githubusercontent.com/hbhungg/tinygrid/main/website/schedule/schedule_large.txt')
   .then((response) => response.text())
   .then((data) => {
     var sl = document.getElementById("myRange")
