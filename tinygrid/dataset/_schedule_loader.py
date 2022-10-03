@@ -244,7 +244,7 @@ def is_schedule_line_valid(split_line: array) -> bool:
       return False
   elif tag == "r" or tag == "a":
     # Check length of activity line
-    if len(split_line) >= 4:
+    if len(split_line) < 4:
       return False
     # Check if act_id is integer
     if not isinstance(split_line[1], int):
