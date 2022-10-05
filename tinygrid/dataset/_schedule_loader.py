@@ -1,7 +1,6 @@
-from array import array
 from dataclasses import dataclass, field
 import os
-from socket import send_fds
+from typing import Any
 
 # NOTES: Can both of them merge? Might be confuse if merged since instance and schedule need different data.
 # Class for Instance
@@ -67,7 +66,10 @@ def instance_parser(f_name: str) -> Instance:
       with open(f_name) as f:
         lines = f.read().splitlines()
     else:
-      return 1
+      raise Exception("file " + f_name + " does not exist.")
+
+    # Seen ppoi tag
+    ppoi = []
 
     # init Schedule obj
     ins = Instance()
@@ -78,6 +80,9 @@ def instance_parser(f_name: str) -> Instance:
 
       # Turn all int that is in string form into int
       split_line = [int(i) if i.isdigit() else i for i in split_line]
+
+      if not is_instance_line_valid(split_line):
+        raise Line_exception("line in instance is invalid", line)
 
       tag = split_line[0]
       # b # building id # small # large
@@ -119,7 +124,17 @@ def instance_parser(f_name: str) -> Instance:
                    value    = split_line[6],
                    penalty  = split_line[7],
                    prec     = split_line[9:])
+      # ppoi ⟨# buildings⟩ ⟨# solar⟩ ⟨# battery⟩ ⟨# recurring⟩ ⟨# once-off⟩
+      elif tag == "ppoi":
+        # Check if the ppoi has been seen before
+        if len(ppoi) != 0:
+          raise Instance_exception("provided instance has too many ppoi lines", ins)
+        else:
+          # Store it
+          ppoi = split_line
 
+    if not is_instance_valid(ins, ppoi):
+      raise Instance_exception("provided instance was parsed, but invalid", ins)
     return ins
 
 def schedule_parser(f_name: str) -> Schedule:
@@ -154,7 +169,7 @@ def schedule_parser(f_name: str) -> Schedule:
       split_line = [int(i) if i.isdigit() else i for i in split_line]
 
       if not is_schedule_line_valid(split_line):
-        raise Exception("provided schedule was invalid")
+        raise Line_exception("line in schedule is invalid", line)
 
       tag = split_line[0]
 
@@ -183,7 +198,7 @@ def schedule_parser(f_name: str) -> Schedule:
       elif tag == "ppoi":
         # Check if the ppoi has been seen before
         if len(ppoi) != 0:
-          raise Exception("provided schedule was invalid")
+          raise Schedule_exception("provided schedule has too many ppoi lines", sche)
         else:
           # Store it
           ppoi = split_line
@@ -191,20 +206,18 @@ def schedule_parser(f_name: str) -> Schedule:
       elif tag == "sched":
         # Check if the sched has been seen before
         if len(sched) != 0:
-          raise Exception("provided schedule was invalid")
+          raise Schedule_exception("provided schedule has too many sched lines", sche)
         else:
           # Store it
           sched = split_line
 
     if not is_schedule_valid(sche, [ppoi, sched]):
-      raise Exception("provided schedule was invalid")
+      raise Schedule_exception("provided schedule was parsed, but invalid", sche)
     return sche
 
 def is_schedule_valid(sche: Schedule, params: list) -> bool:
   # Check if no recurring activities where scheduled
   if len(sche.re_act) == 0:
-    return False
-  if len(sche.batteries) == 0 and len(sche.once_act) == 0 and len(sche.re_act) == 0:
     return False
   
   # Unpack variables
@@ -227,7 +240,7 @@ def is_schedule_valid(sche: Schedule, params: list) -> bool:
     return False
   return True
 
-def is_schedule_line_valid(split_line: array) -> bool:
+def is_schedule_line_valid(split_line: list) -> bool:
   tag = split_line[0]
   if tag == "c":
     # Check length of battery line
@@ -246,15 +259,9 @@ def is_schedule_line_valid(split_line: array) -> bool:
     # Check length of activity line
     if len(split_line) < 4:
       return False
-    # Check if act_id is integer
-    if not isinstance(split_line[1], int):
-      return False
-    # Check if start_time is integer
-    if not isinstance(split_line[2], int):
-      return False
-    # Check if n_room is integer
-    if not isinstance(split_line[3], int):
-      return False
+    for i in range(1, 4):
+      if not isinstance(split_line[i], int):
+        return False
     # Check if n_rooms match listed buildings length
     if len(split_line[4:]) != split_line[3]:
       return False
@@ -262,15 +269,94 @@ def is_schedule_line_valid(split_line: array) -> bool:
     for b_id in split_line[4:]:
       if not isinstance(b_id, int):
         return False
-  elif tag == "sched":
-    # Check length of line
-    if len(split_line) == 6:
-      return False
-  elif tag == "ppoi":
-    # Check length of line
-    if len(split_line) == 3:
-      return False
   # Check for different tags, but ignore empty lines
-  elif tag != '':
+  elif tag != '' and tag != "sched" and tag != "ppoi":
     return False
   return True
+
+def is_instance_line_valid(split_line: list) -> bool:
+  tag = split_line[0]
+  
+  # b # building id # small # large
+  if tag == 'b':
+    if len(split_line) != 4:
+      return False
+    for i in range(1,len(split_line)):
+      if not isinstance(split_line[i], int):
+        return False 
+  # s # solar id # building id
+  elif tag == 's':
+    if len(split_line) != 3:
+      return False
+    for i in range(1,len(split_line)):
+      if not isinstance(split_line[i], int):
+        return False 
+  # c # battery id # building id # capacity kWh # max power kW # efficiency
+  elif tag == 'c':
+    if len(split_line) != 6:
+      return False
+    for i in range(1,len(split_line) - 1):
+      if not isinstance(split_line[i], int):
+        return False 
+    if not is_float(split_line[5]):
+      return False
+  # r ⟨act. id⟩ ⟨# rooms⟩ ⟨{S, L} room size⟩ ⟨load kW⟩ ⟨duration⟩ ⟨# precedences⟩ ⟨act. Id⟩∗
+  elif tag == 'r':
+    if len(split_line) < 7:
+      return False
+    for i in [1,2,4,5,6]:
+      if not isinstance(split_line[i], int):
+        return False
+    if split_line[6] != len(split_line[7:]):
+      return False
+    if split_line[3] not in ['S','L']:
+      return False
+  # a # activity # $value # $penalty # precedences
+  elif tag == 'a':
+    if len(split_line) < 9:
+      return False
+    for i in [1,2,4,5,6,7]:
+      if not isinstance(split_line[i], int):
+        return False
+    if split_line[8] != len(split_line[9:]):
+      return False
+    if split_line[3] not in ['S','L']:
+      return False
+  elif tag != '' and tag != "ppoi":
+    return False
+  return True
+
+def is_instance_valid(ins: Instance, ppoi: list) -> bool:
+  # Check if there are buildings, solars, batteries, activities
+  if len(ins.buildings) == 0 or len(ins.solars) == 0 or len(ins.batteries) == 0 or len(ins.re_act) == 0 or len(ins.once_act) == 0:
+    return False
+  return True
+
+class Line_exception():
+  def __init__(self, message, line):
+    self.message = message
+    self.line = line
+  def __str__(self):
+    return self.message
+
+class Schedule_exception():
+  def __init__(self, message, sche):
+    self.message = message
+    self.sched = sche
+  def __str__(self):
+    return self.message
+
+class Instance_exception():
+  def __init__(self, message, ins):
+    self.message = message
+    self.ins = ins
+  def __str__(self):
+    return self.message
+
+# FROM https://stackoverflow.com/questions/736043/checking-if-a-string-can-be-converted-to-float-in-python
+def is_float(element: Any) -> bool:
+    try:
+        float(element)
+        return True
+    except ValueError:
+        return False

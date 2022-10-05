@@ -1,6 +1,24 @@
 import unittest
 import os
-from _schedule_loader import instance_parser, schedule_parser, Schedule, Instance
+from _schedule_loader import instance_parser, schedule_parser
+
+class instance_parser_tests(unittest.TestCase):
+  _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+  INSTANCE_PATH = os.path.join(_BASE_DIR, "instance/")
+
+  def setUp(self):
+    self.instance_fnames = os.listdir(self.INSTANCE_PATH)
+
+  def tearDown(self):
+    pass
+
+  def test_valid_files(self):
+    for name in self.instance_fnames:
+      full_path = os.path.join(self.INSTANCE_PATH, name)
+      try:
+        instance_parser(full_path)
+      except:
+        self.fail("Instance failed at " + full_path)
 
 class schedule_parser_tests(unittest.TestCase):
   _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -18,7 +36,7 @@ class schedule_parser_tests(unittest.TestCase):
       try:
         schedule_parser(full_path)
       except:
-        self.fail("Instance failed at " + full_path)
+        self.fail("Instance solution failed at " + full_path)
 
   def test_incorrect_f_names(self):
     f_paths = ['qwerty#/asd\n','/e-sf/\n', '\n']

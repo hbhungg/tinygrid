@@ -122,4 +122,3 @@ class IEEE_CISMixin:
     price_data = price_data.set_index('SETTLEMENTDATE')
     # Resample to 15 min instead of 30 min, and do bfill.
     return price_data.resample("15min").asfreq().fillna(method="bfill")
-
