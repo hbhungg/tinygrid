@@ -102,6 +102,7 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
       self.evals[name] = r_mase
 
 
+  # TODO: Does processing building and solar seperately improve the result and runtime?
   def _prepare_data(self, name: str) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
     """
     Prepare data per series basis

@@ -1,14 +1,11 @@
 import datetime
-
 import sklearn.linear_model
-
 from . import _BaseForecaster
-from .utils import mase
 
 
 class LassoForecaster(_BaseForecaster):
-  def __init__(self):
-    super(LassoForecaster, self).__init__()
+  def __init__(self, verbose=1, profile="default"):
+    super(LassoForecaster, self).__init__(verbose, profile)
     # Each series have its own Random Forest model
     self.models = {
       'Building0' : sklearn.linear_model.LassoLarsCV(max_iter=10, normalize=False), 
