@@ -28,7 +28,7 @@ function parse_schedule(schedule){
                       
                       csv_array.push(new_row)}}}
           
-          
+    if (row_arr[0] == "c")      
         return(csv_array)};
 
 
