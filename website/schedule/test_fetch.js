@@ -15,6 +15,9 @@ function parse_schedule(schedule){
         var building_no = row_arr[4+j].charAt(0);
         var hours = math.floor((row_arr[2] % 96)/4) 
         var minutes = (row_arr[2] * 15) %60
+        if (minutes == 0){
+          var minutes = "00"
+        }
         var days = math.floor(math.floor(row_arr[2] /4) /24)
 
         var new_row = {activity_type:row_arr[0],
@@ -95,9 +98,9 @@ for (var i = 0; i < 6; i++) {
   let row_1 = document.createElement('tr');
   row_1.className ="row_entry"
   let heading_1 = document.createElement('th');
-  heading_1.innerHTML = "Activity ID";
+  heading_1.innerHTML = "Activity Type";
   let heading_2 = document.createElement('th');
-  heading_2.innerHTML = "Activity_type";
+  heading_2.innerHTML = "Activity ID";
   let heading_3 = document.createElement('th');
   heading_3.innerHTML = "Time";
   row_1.appendChild(heading_1);
