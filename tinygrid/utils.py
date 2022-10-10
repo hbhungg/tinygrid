@@ -13,13 +13,13 @@ def mase(pred: np.array, true: np.array, training: np.array, cycle: int=2688) ->
     MASE value
   """
   if not isinstance(pred, np.ndarray):
-    raise TypeError("'pred' must be numpy array")
+    raise TypeError(f"'pred' type {type(pred)} is not numpy array")
   if not isinstance(true, np.ndarray):
-    raise TypeError("'true' must be numpy array")
+    raise TypeError(f"'true' type {type(true)} is not numpy array")
   if not isinstance(training, np.ndarray):
-    raise TypeError("'training' must be numpy array")
-  if pred.shape == true.shape:
-    raise ValueError("'pred' and 'true' must have the same shape")
+    raise TypeError(f"'training' type {type(training)} is not numpy array")
+  if pred.shape != true.shape:
+    raise ValueError(f"{pred.shape} does not match {true.shape}")
 
   # Remove NaN values
   pred = pred[~np.isnan(true), ...]

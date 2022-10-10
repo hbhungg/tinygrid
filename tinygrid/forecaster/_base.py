@@ -7,8 +7,8 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 
-from .dataset import IEEE_CISMixin
-from .utils import mase
+from ..dataset import IEEE_CISMixin
+from ..utils import mase
 
 # Flags
 # How to invoke: DEBUG=1 python3 script.py
@@ -45,8 +45,7 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
                 'utc_offset (hrs)', 
                 'model elevation (surface)',
                 "mean_sea_level_pressure (Pa)",
-                "wind_speed (m/s)",
-                "relative_humidity ((0-1))"], 
+                "wind_speed (m/s)"],
                axis=1).resample('15min').asfreq()
 
     self.names = [i for i in self.energy]
@@ -68,35 +67,18 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
     self.s6 = datetime(day=17, month=10, year=2020, hour=23, minute=59, second=59) # 18th Oct
 
 
-  def fit(self) -> None:
+  def run(self) -> None:
     """
     Fit every series with its own model.
     """
     if self.verbose>=1: print("Fitting...")
     for name in tqdm(self.names): 
-      _, _, _, x_train, y_train = self._prepare_data(name)
+      org_y_train, x_test, y_test, x_train, y_train = self._prepare_data(name)
+      # Fit
       self.models[name].fit(x_train, y_train)
-
-
-  def predict(self) -> None:
-    """
-    Run predict on all series with its own trained model.
-    Can only be invoke after training.
-    """
-    if self.verbose>=1: print("Predicting...")
-    for name in tqdm(self.names):
-      _, x_test, _, _, _= self._prepare_data(name)
+      # Predict
       self.y_preds[name] = self.models[name].predict(x_test)
-
-
-  def evaluation(self) -> None:
-    """
-    Run evaludation on all predicted series.
-    Can only be invoke after predict.
-    """
-    if self.verbose>=1: print("Evaluation...")
-    for name in self.names:
-      org_y_train, _, y_test, _, _ = self._prepare_data(name)
+      # Evaluation
       y_pred = self.y_preds[name]
       r_mase = mase(y_pred, y_test, org_y_train)
       self.evals[name] = r_mase
@@ -107,11 +89,14 @@ class _BaseForecaster(ABC, IEEE_CISMixin):
     """
     Prepare data per series basis
     """
-    #energy = self.energy[name][self.cutoffs[name]:]
-    #weather = self.weather[self.cutoffs[name]:]
     energy = self.energy[name]
+    #if "Solar" in name:
+    #  weather = self.weather
+    #  # Join weather and energy data, date as shared col
+    #  comb = energy.join(weather)
+    #else:
+    #  comb = energy
     weather = self.weather
-    # Join weather and energy data, date as shared col
     comb = energy.join(weather)
 
     HOUR = 24*60

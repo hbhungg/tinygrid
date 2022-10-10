@@ -83,31 +83,7 @@ class IEEE_CISMixin:
     weather_data = weather_data.set_index('datetime (UTC)')
     return weather_data
 
-  # NOTES: Do we really need 2 seperate method for price like this?
-  @classmethod
-  def _load_AEMO_nov_price_data(cls) -> pd.DataFrame:
-    """
-    Load AEMO price data from csv to pandas DataFrame. Transform the datetime string to appropriate type.
-    Set the dataframe index to the datetime column.
-    """
-    price_data = pd.read_csv(cls.NOV_PRICE_DATA_PATH)
-    # Parse the time from string to 
-    price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'], format="%Y-%m-%d %H:%M:%S")
-    #price_data = price_data.set_index('SETTLEMENTDATE')
-    return price_data
-  
-  @classmethod
-  def _load_AEMO_oct_price_data(cls) -> pd.DataFrame:
-    """
-    Load AEMO price data from csv to pandas DataFrame. Transform the datetime string to appropriate type.
-    Set the dataframe index to the datetime column.
-    """
-    price_data = pd.read_csv(cls.OCT_PRICE_DATA_PATH)
-    # Parse the time from string to 
-    price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'], format="%Y-%m-%d %H:%M:%S")
-    price_data = price_data.set_index('SETTLEMENTDATE')
-    return price_data
-  
+
   @classmethod
   def _load_AEMO_price_data(cls) -> pd.DataFrame:
     """
