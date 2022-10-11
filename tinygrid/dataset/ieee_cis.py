@@ -68,6 +68,7 @@ class IEEE_CISMixin:
       # Frequency is 15 minutes
       time_column = [stime + datetime.timedelta(minutes=15*i) for i in range(len(value))]
       energy_data[name] = pd.DataFrame({'datetime': time_column, 'energy': value}).set_index('datetime')
+      energy_data[name] = energy_data[name].tz_localize("UTC")
     return energy_data
 
 
@@ -81,6 +82,7 @@ class IEEE_CISMixin:
     # Parse the time from string to 
     weather_data['datetime (UTC)'] = pd.to_datetime(weather_data['datetime (UTC)'], format="%Y-%m-%d %H:%M:%S")
     weather_data = weather_data.set_index('datetime (UTC)')
+    weather_data = weather_data.tz_localize("UTC")
     return weather_data
 
 
