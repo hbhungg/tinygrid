@@ -66,12 +66,22 @@ def weekday_range(start: datetime, end: datetime, office=False) -> tuple[int, in
         yield (idx, isow)
 
 
-def first_dow(dow: int, start: datetime, end: datetime):
+def first_dow(dow: int, start: datetime, end: datetime) -> tuple[int, datetime]:
+  """
+  Return the index of the first time step of the first week day of the month
+  Params:
+    dow: iso weekday
+    start: start time
+    end: end time
+  """
   for idx, tx in enumerate(date_range(start, end)):
-    if tx.isoweekday() == dow:
-      return idx, tx
+    if tx.isoweekday() == dow: return idx, tx
 
-def first_week_map(start: datetime, end: datetime, office=False):
+def first_week_map(start: datetime, end: datetime, office=False) -> int:
+  """
+  Similar to weekday_range, but map all day to the first week
+  Use for the recurrence activity.
+  """
   fw = False
   fmonday, _ = first_dow(1, start, end)
   idx = fmonday
