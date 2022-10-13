@@ -4,7 +4,9 @@ const math = require('mathjs')
 function parse_schedule(schedule,day_num){
   var min_step = (day_num) * 24 * 4
   var max_step = (day_num+1) *24 *4
-  
+  var num_batteries = 2
+  var charge_arr = []
+  for (var i = 0; i < num_batteries;++i){charge_arr.push(100)}
   var schedule = schedule
   const schedule_array = schedule.split(/\n/);
   var csv_array = []
@@ -29,13 +31,15 @@ function parse_schedule(schedule,day_num){
                       csv_array.push(new_row)}}
     
     if (row_arr[0] == "c"){
-      
+      if(row_arr[3] == 0){charge_arr[row_arr[1]] = charge_arr[row_arr[1]]- 10}
+      if(row_arr[3] == 2){charge_arr[row_arr[1]] = charge_arr[row_arr[1]]+ 10}
       
       var new_row = {activity_type: "Charge",
                      time: "OCT" + days +" " +(hours)+ ":" + minutes,
-                     day: day,
+                     day: days,
+                     battery_id:row_arr[1],
                      charge_dec: row_arr[3],
-                     battery_level: 
+                     battery_level: charge_arr[row_arr[1]]
                      }      
       csv_array.push(new_row)
     }
@@ -59,9 +63,7 @@ function fetch_schedule(){
   
   
   
-function make_table(schedule_array){
-
-console.log(schedule_array)}
+function make_table(schedule_array){console.log(schedule_array)}
 
 
 fetch_schedule()
