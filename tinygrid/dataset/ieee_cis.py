@@ -96,7 +96,9 @@ class IEEE_CISMixin:
     p2 = pd.read_csv(cls.OCT_PRICE_DATA_PATH)
     p3 = pd.read_csv(cls.NOV_PRICE_DATA_PATH)
     price_data = pd.concat([p1, p2, p3])
-    price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'], format="%Y-%m-%d %H:%M:%S")
+    price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'], format="%Y/%m/%d %H:%M:%S")
     price_data = price_data.set_index('SETTLEMENTDATE')
+    # Price data is AEST (GMT+10), no daylight time saving
+    price_data = price_data.tz_localize("Etc/GMT+10")
     # Resample to 15 min instead of 30 min, and do bfill.
     return price_data.resample("15min").asfreq().fillna(method="bfill")
