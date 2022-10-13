@@ -1,5 +1,5 @@
 import numpy as np
-from datetime import datetime, time
+from datetime import datetime, time, timedelta
 from zoneinfo import ZoneInfo
 
 def mase(pred: np.array, true: np.array, training: np.array, cycle: int=2688) -> int:
@@ -34,6 +34,58 @@ def mase(pred: np.array, true: np.array, training: np.array, cycle: int=2688) ->
   scale = np.mean(np.absolute(diff))
   return error/scale
 
+def date_range(start: datetime, end: datetime, 
+               step=timedelta(minutes=15)) -> datetime:
+  """
+  Similar to range(), but for dates.
+  Inclusive start, exclusive end.
+  """
+  curr = start
+  while curr != end:
+    yield curr
+    curr += step
+
+def weekday_range(start: datetime, end: datetime, office=False) -> tuple[int, int]:
+  """
+  Generate all indexes of weekday (Monday - Friday)
+  Params:
+    start: start time
+    end: end time
+    office: True, take office hour timestep only, False, take all weekday timestep
+  """
+  fw = False
+  for idx, tx in enumerate(date_range(start, end)):
+    isow = tx.isoweekday()
+    # Start at the first week of the month (first Monday).
+    if isow == Const.MONDAY: 
+      fw = True
+    if isow <= Const.FRIDAY and fw is True: 
+      if office is True and (Const.OFFICE_OPEN_TIME <= tx.time() <= Const.OFFICE_CLOSE_TIME):
+        yield (idx, isow)
+      elif office is False: 
+        yield (idx, isow)
+
+
+def first_dow(dow: int, start: datetime, end: datetime):
+  for idx, tx in enumerate(date_range(start, end)):
+    if tx.isoweekday() == dow:
+      return idx, tx
+
+def first_week_map(start: datetime, end: datetime, office=False):
+  fw = False
+  fmonday, _ = first_dow(1, start, end)
+  idx = fmonday
+  curr_isow = 1
+  for _, isow in weekday_range(start, end, office):
+    if isow >= curr_isow:
+      curr_isow = isow
+      yield idx
+    else:
+      idx = fmonday
+      curr_isow = 1
+      yield idx
+    idx += 1
+
 
 class Const:
   UTC = ZoneInfo("UTC")
@@ -52,6 +104,7 @@ class Const:
   OFFICE_PERIOD = 8 * PERIOD_IN_HOUR
   PERIOD_IN_DAY = 24 * PERIOD_IN_HOUR
   PERIOD_IN_WEEK = PERIOD_IN_DAY * 7
+  PERIOD_MINUTE = timedelta(minutes=15)
   
   # ISO integer value of weekday.
   MONDAY    = 1
