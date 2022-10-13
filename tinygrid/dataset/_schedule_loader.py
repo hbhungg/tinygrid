@@ -1,4 +1,5 @@
 from dataclasses import dataclass, field
+from distutils.command.build import build
 import os
 from typing import Any
 
@@ -330,6 +331,13 @@ def is_instance_valid(ins: Instance, ppoi: list) -> bool:
   # Check if there are buildings, solars, batteries, activities
   if len(ins.buildings) == 0 or len(ins.solars) == 0 or len(ins.batteries) == 0 or len(ins.re_act) == 0 or len(ins.once_act) == 0:
     return False
+  if len(ppoi) != 6:
+    return False
+
+  # Check if the ppoi matches the instance loaded
+  if len(ins.batteries) != ppoi[3] or len(ins.buildings) != ppoi[1] or len(ins.once_act) != ppoi[5] or len(ins.re_act) != ppoi[4] or len(ins.solars) != ppoi[2]:
+    return False
+
   return True
 
 class Line_exception():

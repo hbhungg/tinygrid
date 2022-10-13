@@ -19,6 +19,87 @@ class instance_parser_tests(unittest.TestCase):
         instance_parser(full_path)
       except:
         self.fail("Instance failed at " + full_path)
+  
+  def test_incorrect_f_names(self):
+    f_paths = ['qwerty#/asd\n','/e-sf/\n', '\n']
+    for f_path in f_paths:
+      self.assertRaises(Exception, instance_parser, f_path)
+
+  def test_only_newlines_file(self):
+    f = open("test.txt", "w")
+    for i in range(3):
+      f.write("\n")
+    f.close()
+    self.assertRaises(Exception, instance_parser, "test.txt")
+    os.remove("test.txt")
+    
+  def test_empty_file(self):
+    f = open("test.txt", "w")
+    f.close()
+    self.assertRaises(Exception, instance_parser, "test.txt")
+    os.remove("test.txt")
+
+  def test_different_tags(self):
+    f = open("test.txt", "w")
+    tags = ['p\n','adsas\n','&\n']
+    for i in range(len(tags)):
+      f.write(tags[i])
+    f.close()
+    self.assertRaises(Exception, instance_parser, "test.txt")
+    os.remove("test.txt")
+  
+  def test_no_ppoi(self):
+    f = open("test.txt", "w")
+    lines = ['b 0 17 1\n',
+      'b 1 2 0\n',
+      'b 3 6 1\n',
+      'b 4 2 4\n',
+      'b 5 7 0\n',
+      'b 6 1 5\n',
+      's 0 0\n',
+      's 1 1\n',
+      's 2 3\n',
+      's 3 4\n',
+      's 4 5\n',
+      's 5 6\n',
+      'c 0 1 150 75 0.85\n',
+      'c 1 3 420 60 0.60\n',
+      'r 58 1 L 75 8 0\n',
+      'r 56 3 S 64 2 0\n',
+      'a 1 1 S 77 2 2 1 0\n']
+
+    for line in lines:
+      f.write(line)
+    f.close()
+    self.assertRaises(Exception, instance_parser, "test.txt")
+    os.remove("test.txt")
+
+  def test_wrong_sched(self):
+    f = open("test.txt", "w")
+    lines = ['ppoi 6 6 2 200 100\n',
+      'b 0 17 1\n',
+      'b 1 2 0\n',
+      'b 3 6 1\n',
+      'b 4 2 4\n',
+      'b 5 7 0\n',
+      'b 6 1 5\n',
+      's 0 0\n',
+      's 1 1\n',
+      's 2 3\n',
+      's 3 4\n',
+      's 4 5\n',
+      's 5 6\n',
+      'c 0 1 150 75 0.85\n',
+      'c 1 3 420 60 0.60\n',
+      'r 58 1 L 75 8 0\n',
+      'r 56 3 S 64 2 0\n',
+      'a 1 1 S 77 2 2 1 0']
+
+    for line in lines:
+      f.write(line)
+    f.close()
+    self.assertRaises(Exception, instance_parser, "test.txt")
+    os.remove("test.txt")
 
 class schedule_parser_tests(unittest.TestCase):
   _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
