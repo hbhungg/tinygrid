@@ -1,7 +1,3 @@
-var b = []
-for (var i = 0; i < 2;++i){
-  b.push(100)
-
-}
-
-console.log(b)
+      for (var h = 0; h < 4;h++){
+        console.log(h)
+      }
