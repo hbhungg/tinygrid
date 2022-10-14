@@ -7,6 +7,7 @@
 <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.21.0"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"> </script>
 <script src=https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js></script>
+<script src="https://code.jscharting.com/latest/jscharting.js"></script>
 
 <script type="text/javascript" src="fetch_schedule.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
@@ -19,7 +20,7 @@
   
 <body onload = "make_header()">
 
-<div>
+
 
 <br><br>
 
@@ -88,28 +89,161 @@
 
 
 <div class="slidecontainer">
-  <input type="range" step = "1" min="4" max="8" value="1" class="slider" id="myRange">
+  <input type="range" step = "1" min="0" max="31" value="1" class="slider" id="myRange">
   <p>Value: <span id="demo"></span></p>
 </div>
+
 
 <script>
 var slider = document.getElementById("myRange");
 var output = document.getElementById("demo");
-output.innerHTML = "October " + slider.value;
-myFunction()
-slider.oninput = function() {
-  
-  output.innerHTML = "October " + slider.value;
-  myFunction()
-  remove_table()
+output.innerHTML = "OCT " + slider.value;
 
-  
-  
+slider.oninput = function() {
+  fetch_schedule()
+  dothis()
+  output.innerHTML = this.value;
 }
 
+remove_table()
 </script>
 
-</div>
+
+
+
+
+<div id="vis"></div>
+
+
+<script>
+
+function dothis() {
+async function fetchMoviesAndCategories() {
+  const [moviesResponse, categoriesResponse] = await Promise.all([
+    fetch('https://raw.githubusercontent.com/hbhungg/tinygrid/main/cache/test_schedule.txt'),
+    fetch('https://raw.githubusercontent.com/hbhungg/tinygrid/main/cache/phase1_instance_small_0.txt')
+  ]);
+  const movies = await moviesResponse.text();
+  const categories = await categoriesResponse.text();
+  return [movies, categories];
+}
+fetchMoviesAndCategories().then(([movies, categories]) => {
+        var sl_val = document.getElementById("myRange").value;
+        var csv_array = parse_schedule(movies,categories,sl_val)
+        document.getElementById("demo").innerHTML = "OCT: " + sl_val
+        
+        
+        var dat_val = csv_array
+        var vlSpec = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+        data: {
+          values: dat_val
+        },
+        mark: 'bar',
+        encoding: {x: {field: 'time', timeunit: 'minute'},
+        y: {field: 'charge_level',type: 'quantitative',axis: {title: 'Battery Capacity Over Time (KwH)'}}
+        }
+      };
+
+      // Embed the visualization in the container with id `vis`
+      vegaEmbed('#vis', vlSpec);
+
+}).catch(error => {
+  // /movies or /categories request failed
+});
+
+
+  
+function parse_schedule(schedule,instance,sl_val){
+    var charge_level = 420
+  
+  const schedule_array = schedule.split(/\n/)
+  const instance_array = instance.split(/\n/)
+  
+  var day_num = sl_val
+  var grid_load = 0
+  var gridload_array = []
+  var charge_array = []
+  var load_list_rec = []
+  var duration_list_rec = []
+  var load_list_a = []
+  var duration_list_a = []
+  
+  //Initialise vaues from instance
+  for (var i = 0; i < schedule_array.length; i++) {
+    var row = schedule_array[i];
+    var row_arr = row.split(/ /)
+    var time_int = parseInt(row_arr[2]);
+    var day = math.floor(math.floor(parseInt(row_arr[2])/4)/24);
+    if((day == day_num ||day == day_num -1) && row_arr[0] == "c"){
+         var time_int = parseInt(row_arr[2]);
+         var hours = math.floor((time_int % 96)/4) ;
+         var minutes = (time_int * 15) %60;
+         var day = math.floor(math.floor(time_int/4)/24);
+         if (hours < 10){hours = "0" + hours}
+         if (minutes == 0){minutes = "00"}
+      
+        if(row_arr[3] == 0){var grid_load = 19.36;
+                            var charge_level = charge_level + 15}
+         
+        if(row_arr[3] == 2){var grid_load = -11.62;
+                             var charge_level =charge_level - 15}
+
+         var gridload_row = {time:hours + ":" + minutes,
+                             charge_level: charge_level
+                             }
+        if(day == day_num){gridload_array.push(gridload_row)}
+      
+         
+          
+        
+
+      
+      
+    }}
+    
+    
+
+         
+
+
+    
+  
+
+        
+
+  arr = gridload_array
+          
+
+  
+  
+     
+  
+  return(arr)}
+      
+      
+
+
+
+}
+
+
+  
+ 
+  
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 </body>
