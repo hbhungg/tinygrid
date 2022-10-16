@@ -1,70 +1,36 @@
 # Tinygrid
-Prediction and Optimisation for Renewable Energy Scheduling in the Monash Microgrid
+Tinygrid is a small Python library that team DS-9 use to solve the [Monash Microgrid prediction and optimization challenge](https://ieee-dataport.org/competitions/ieee-cis-technical-challenge-predictoptimize-renewable-energy-scheduling). 
 
-## Setup
-### On Macos/Linux
-Open your terminal at the project folder.
-Important: Make sure you upgrade your pip
-```
-python3 -m venv venv/
-source venv/bin/activate
-python3 -m pip install --upgrade pip
-pip3 install -r requirements.txt
-```
+This library provide:
+* Modules to load the energy dataset.
+* Module to parse and load the instance schedule text file.
+* Data augmentation and forecaster (achieved 0.80 MASE score).
+* Optimization function to schedule the instance.
 
-Export the project dir to `$PYTHONPATH`. This will make Python treat the repo as the root folder.
-
-Get your path to tinygrid folder using:
+## Setup (MacOS/Ubuntu)
+Open your terminal, clone the repository and cd into it.
 ```
-PWD
-```
-Type
-```
-cd
+git clone git@github.com:hbhungg/tinygrid.git 
+cd tinygrid/
 ```
 
-Nano into file
+Export the repository into `$PYTHONPATH`.
 ```
-nano .zshrc
+export PYTHONPATH=$(pwd)
 ```
-or
-```
-nano .bashrc
-```
+You can echo it out using `echo $PYTHONPATH` to check if the correct path has been set.
 
-Change the bellow path to your PWD path.
-At the first 2 lines type and writeout:
+The project is developed and tested with Python 3.9, but should be able to work with Python < 3.7.
+
+It is recommended to set up a Python virtual environment for dealing with Tinygrid's dependencies.
 ```
-export PYTHONPATH=path
-export JUPYTER_PATH=path
+python3 -m venv env
+source env/bin/activate
+pip install -r requirements.txt
 ```
-If you have issues in vscode using ipynb files, use instead the web version.
-Install notebook and ipykernel, then include the correct virtual kernal.
-```
-pip install notebook ipykernel
-python -m ipykernel install --user --name=venv
-```
+This will create a virtual env inside Tinygrid's folder, activate it and install all of the dependencies listed in the `requirements.txt`. 
 
-Once in web version, switch the kernal from the tab view.
-
-To Deactivate venv type the following:
-```
-deactivate
-```
-
-
-## Forecasting problem
-Using `nov_data.tsf` dataset since it is the complete dataset.
-
-- Phase 1: 2976 - 31 days of October 2020
-- Phase 2: 2880 - 30 days of November 2020
-
-## Optimization problem
-- IDK lol
-
-
-# Contributor: 
-Team DS-9
+# Contributor (Team DS-9): 
 - Aldrich Lado Buntoro
 - Anirudh Prakash
 - Ba Hung Huynh
