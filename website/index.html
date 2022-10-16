@@ -26,7 +26,10 @@
     </div>
     <h3 class="text_left_heading noselect"><a class="text_line" id="left_heading_3" onclick="left_btn_selected(3)">Forecasting</a></h3>
     <div class="text_left hidden" id="left_text_3">
-      <strong>Energy demand</strong> and <strong>Solar production</strong> for all 6 buildings and 6 solar panels are forecasted in order to get the data used to find the optimal battery and activity schedule. They are calculated using the historical 15-minutely energy demand of 6 buildings and 15-minutely power production of 6 solar panels from Monash University, Melbourne, Australia and the Melbourne weather data.</div>
+      <strong>Energy demand</strong> and <strong>Solar production</strong> for all 6 buildings and 6 solar panels are forecasted in order to get the data used to find the optimal battery and activity schedule. They are calculated using the historical 15-minutely energy demand of buildings and power production of solar panels from Monash University, Melbourne, Australia and the Melbourne weather data.
+      <br>
+      <br>
+      Several models are trained in order to forecast the power production from 1st of October to 30th of November 2020. Models that we decided to use are lasso and random forest. Out of all these models, we found out that the best model for this dataset is random forest. The mean MASE calculated of both the energy production and solar production for our model is 0.80 which puts our team in 5th position of the IEEE-CIS competition.</div>
     <h3 class="text_left_heading noselect"><a class="text_line" id="left_heading_4" onclick="left_btn_selected(4)">Optimisation</a></h3>
     <div class="text_left hidden" id="left_text_4">
       Optimised schedule which optimally schedule the battery and timetabled activities (lectures) for the month of November 2020. They are calculated using the problem instance text file and electricity price data from AEMO to minimise the cost of the battery (charge, holf and discharge).
@@ -45,8 +48,8 @@
       <div id="content_1_sup" class="p-3">
         <h3 class="text_right_heading">Description</h3>
         <div class="row">
-          <div class="col text_right">One of the most important measures to deal with climate change is through the use of renewable energy such as wind and solar. However, renewable energy cannot be produced on command, which means energy storage is required. At the same time, storing energy is very expensive and may cause a loss of energy stored. Therefore, we need to forecast the energy demand and production from renewables, in order to optimally schedule energy storage such as batteries. This enables an optimal charging and discharging schedule, based on the required demand.</div>
-          <div class="col text_right">This is where our project TinyGrid steps in.  TinyGrid at its core has a prediction module that predicts solar energy production and building energy usage from the Monash Microgrid system, and an optimization module which schedules building activities and batteries to minimise energy wastage. Presented as a website interface that lets users interact with figures and values about the evaluation of forecasting and optimization solutions. Thus, TinyGrid solves the problem of optimising renewable energy storage and usage.</div>
+          <div class="col text_right1">One of the most important measures to deal with climate change is through the use of renewable energy such as wind and solar. However, renewable energy cannot be produced on command, which means energy storage is required. At the same time, storing energy is very expensive and may cause a loss of energy stored. Therefore, we need to forecast the energy demand and production from renewables, in order to optimally schedule energy storage such as batteries. This enables an optimal charging and discharging schedule, based on the required demand.</div>
+          <div class="col text_right1">This is where our project TinyGrid steps in.  TinyGrid at its core has a prediction module that predicts solar energy production and building energy usage from the Monash Microgrid system, and an optimization module which schedules building activities and batteries to minimise energy wastage. Presented as a website interface that lets users interact with figures and values about the evaluation of forecasting and optimization solutions. Thus, TinyGrid solves the problem of optimising renewable energy storage and usage.</div>
         </div>
       </div>
     </div>
@@ -62,7 +65,7 @@
         </div>
         <!-- weather data -->
         <div class="row"> 
-          <div class="col text_right">
+          <div class="col text_right2">
             <strong>Weather data</strong><br>
             The daily minimum temperature (C), maximum temperature (C), rainfall (mm) and solar exposure (MJm^2) of three weather stations near Melbourne: Olympic Park, Moorabbin Airport and Oakleigh (Metropolitan Golf Club) from http://www.bom.gov.au/climate/data/. Each weather series starts from 1st of January 2016 and contains corresponding values until November 2022). This is needed to forecast the solar power production.
           </div>
@@ -75,7 +78,7 @@
         </div>
         <!-- electricity price data -->
         <div class="row"> 
-          <div class="col text_right">
+          <div class="col text_right2">
             <strong>Electricity price data</strong><br>
             Australian electricity price data from https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem/aggregated-data to achieve the lowest energy cost when scheduling the activities.
           </div>
@@ -88,7 +91,7 @@
         </div>
         <!-- historical energy demand and power production -->
         <div class="row"> 
-          <div class="col text_right">
+          <div class="col text_right2">
             <strong>Historical energy demand and power production</strong><br>
             Historical 15-minutely energy demand of 6 buildings and 15-minutely power production of 6 solar panels from Monash University, Melbourne, Australia. Given as a time series format to forecast the energy demand and power production in October and November 2020.
           </div>
@@ -101,7 +104,7 @@
         </div>
         <!-- problem instance -->
         <div class="row"> 
-          <div class="col text_right">
+          <div class="col text_right2">
             <strong>Problem instance</strong><br>
               Instances of buildings, solar panels, batteries and activities that will be optimised. This is given in a text format with the first line being ppoi (predict-plus-optimize instance) which is the summary of the problem instance. It also has Buildings with attributes id, number of large rooms and number of small rooms; Solar panels with attributes solar id and building id; Batteries with attributes building id, capacity (kWh), max power kW and efficiency; Reccuring activities with an activity object and precendeces; Once-off activities with an activity object, value($), penalty($) and precedences; where activity object has attributes id, number of rooms, room size, load (kW) and duration.
           </div>
@@ -114,11 +117,22 @@
       <div id="content_3_sup" class="p-3">
         <h3 class="text_right_heading">Forecasting</h3>
 
-        <!-- energy demand -->
+        <!-- empty space -->
+        <div class="row">
+          <div class="col text_right"></div>
+          <div class="col text_right">
+            <br>
+            <br>
+          </div>
+        </div>
+
+        <!--
+        energy demand
         <div class="row">
           <div class="col text_right"><strong>Energy demand</strong> for all 6 buildings are forecasted. The forecasted energy demand are done in a time series data set where a 15 minute time step is used. Several models are trained in order to forecast the energy demand from 1st of October to 30th of November 2020.</div>
           <div class="col text_right">The models used are lasso and random forest. Out of all these models, we found out that the best model for this dataset is random forest.</div>
         </div>
+        -->
 
         <!-- pure grid group -->
         <div class="pure-g">
@@ -135,14 +149,18 @@
         <!-- empty space -->
         <div class="row">
           <div class="col text_right"></div>
-          <div class="col text_right"></div>
+          <div class="col text_right">
+            <br>
+            <br>
+          </div>
         </div>
 
-        <!-- solar production -->
+        <!-- solar production 
         <div class="row">
           <div class="col text_right"><strong>Solar production</strong> for all 6 solar panels are forecasted. The forecasted solar production are done in a time series data set where a 15 minute time step is used. Several models are trained in order to forecast the power production from 1st of October to 30th of</div>
           <div class="col text_right"> November 2020. The <strong>mean MASE</strong> calculated of both the energy production and solar production for our model is <strong>0.80</strong> which puts our team in 5th position of the IEEE-CIS competition.</div>
         </div>
+        -->
 
         <!-- pure grid group -->
         <div class="pure-g">
@@ -176,7 +194,7 @@
         <h3 class="text_right_heading">Team</h3>
         <!-- weather data -->
         <div class="row"> 
-          <div class="col text_right">
+          <div class="col text_right1">
             <br>
             <strong>Ordered alphabetically</strong><br>
             Aldrich Buntoro: Forecasting solution graphs, Website layout, Optimisation<br>

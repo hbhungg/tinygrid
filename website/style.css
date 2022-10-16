@@ -67,6 +67,22 @@ div.content {
     text-justify: inter-word;
 }
 
+.text_right1 {
+  font-family: Helvetica;
+  color: #707070;
+  font-size: 1.25vw;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
+.text_right2 {
+  font-family: Helvetica;
+  color: #707070;
+  font-size: 1.1vw;
+  text-align: justify;
+  text-justify: inter-word;
+}
+
 .text_line:hover {
   color: #acacac;
   cursor: pointer;
