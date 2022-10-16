@@ -31,11 +31,11 @@ pip install -r requirements.txt
 This will create a virtual env inside Tinygrid's folder, activate it and install all of the dependencies listed in the `requirements.txt`. 
 
 ## Quick example
-_(The project is in development stage, some of the import API and modules name might change.)_
+_(The project is in development stage, some of the import API and modules name might change)._
 
-To load the IEEE-CIS dataset.
+First, load the IEEE-CIS dataset.
 ```python
-from tinygrid.dataset import IEEE-CIS
+from tinygrid.dataset import IEEE_CIS
 from tinygrid.utils import Const
 
 # Data manager object
@@ -45,7 +45,7 @@ ieee_cis = IEEE_CIS()
 energy_data = ieee_cis.load_energy_data()
 weather_data = ieee_cis.load_ERA5_weather_data()
 ```
-As an example, we will work on 2 data instance, Building0 and Solar0, and forecast 2976 datapoint on Oct 2020 (Phase 1 of the competition).
+As an example, we will work on 2 data instances, Building0 and Solar0, and forecast 2976 datapoints (15-minute time step) for the whole month Oct 2020 (Phase 1 of the competition).
 ```python
 # Data up to the end of November 2020
 solar0 = energy_data['Solar0']
@@ -63,17 +63,17 @@ To clean and augment the data, you can use Tinygrid's `generate_building_data()`
 from tinygrid.forecaster import Forecaster, generate_building_data, generate_solar_data
 
 # Generate data for training
-solar0_x_train, solar0_y_train = generate_solar_data(data=solar0_train)
-# If inputted data is None, and with start and end time, generate_building_data will generate features for forecaster to predict on. 
+building0_x_train, building0_y_train = generate_building_data(building0_train)
+# If no input data, and with start and end time, generate_building_data will generate features for forecaster to predict on. 
 # This case we input in the start and end time of Oct 2020.
-solar0_x_test = generate_solar_data(data=None, start=Const.PHASE1_TIME, end=Const.PHASE2_TIME)
+building0_x_test = generate_building_data(None, start=Const.PHASE1_TIME, end=Const.PHASE2_TIME)
 
-# The same for building data, but instead we use generate_building_data()
-building0_x_train, building0_y_train = generate_building_data(data=building0_train)
-building0_x_test = generate_building_data(data=None, start=Const.PHASE1_TIME, end=Const.PHASE2_TIME)
+# The same for solar data, but instead we use generate_building_data(), and it also required weather data.
+solar0_x_train, solar0_y_train = generate_solar_data(solar0_train, weather_data)
+solar0_x_test = generate_solar_data(None, weather_data, start=Const.PHASE1_TIME, end=Const.PHASE2_TIME)
 ```
 
-After having all of our data prepared, create a Forecaster object for each data instance to fit the dataset on, start generate forecast and evaluate the forecast performance. The IEEE-CIS challenge assess the performance using [MASE](https://www.sciencedirect.com/science/article/abs/pii/S0169207006000239?via%3Dihub) metric.
+After having all of our data processed and prepared, create Forecaster object for each data instance to fit the dataset on, generate forecast and evaluate the forecast performance. The IEEE-CIS challenge assess the performance using [MASE](https://www.sciencedirect.com/science/article/abs/pii/S0169207006000239?via%3Dihub) metric.
 ```python
 # Evaluation metric
 from tinygrid.utils import mase
