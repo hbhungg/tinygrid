@@ -20,9 +20,7 @@ export PYTHONPATH=$(pwd)
 ```
 You can echo it out using `echo $PYTHONPATH` to check if the correct path has been set.
 
-The project is developed and tested with Python 3.9, but should be able to work with Python < 3.7.
-
-It is recommended to set up a Python virtual environment for dealing with Tinygrid's dependencies.
+The project is developed and tested with Python 3.9, but should be able to work with Python >= 3.7. It is recommended to set up a Python virtual environment for dealing with Tinygrid's dependencies.
 ```
 python3 -m venv env
 source env/bin/activate
@@ -31,6 +29,7 @@ pip install -r requirements.txt
 This will create a virtual env inside Tinygrid's folder, activate it and install all of the dependencies listed in the `requirements.txt`. 
 
 ## Quick example
+### Forecasting
 _(The project is in development stage, some of the import API and modules name might change)._
 
 First, load the IEEE-CIS dataset.
@@ -73,7 +72,7 @@ solar0_x_train, solar0_y_train = generate_solar_data(solar0_train, weather_data)
 solar0_x_test = generate_solar_data(None, weather_data, start=Const.PHASE1_TIME, end=Const.PHASE2_TIME)
 ```
 
-After having all of our data processed and prepared, create Forecaster object for each data instance to fit the dataset on, generate forecast and evaluate the forecast performance. The IEEE-CIS challenge assess the performance using [MASE](https://www.sciencedirect.com/science/article/abs/pii/S0169207006000239?via%3Dihub) metric.
+Create Forecaster object for each data instance to fit the dataset, generate forecast and evaluate the forecast performance. The IEEE-CIS challenge assess the performance using [MASE](https://www.sciencedirect.com/science/article/abs/pii/S0169207006000239?via%3Dihub) metric.
 ```python
 # Evaluation metric
 from tinygrid.utils import mase
@@ -96,6 +95,9 @@ solar_pred = bf.predict(building0_x_test)
 # Evaluate the forecasted data with actual data, using MASE.
 score = mase(solar0_pred, solar0_test['energy'].to_numpy(), solar0_train['energy'].to_numpy())
  ```
+
+ ### Scheduling
+ TBD
 
 # Contributor (Team DS-9): 
 - Aldrich Lado Buntoro
