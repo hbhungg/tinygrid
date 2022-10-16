@@ -172,7 +172,7 @@ div.grid_right{
     color: white;
     font-size: 15px;
     width:300px;
-    height:300px;
+    height:250px;
     overflow: scroll;
     
 }
@@ -185,7 +185,7 @@ div.grid_right{
 
 
 .flex-container {
-    display: flex;
+    display: inline;
 }
 
 .flex-child {
@@ -194,10 +194,19 @@ div.grid_right{
 }  
 
 .flex-child:first-child {
-    margin-right: 20px;
+ 
 }
 
 
+#content_5 {
+  margin-top:500px;
+  display: inline;
+}
 
 
+tr { 
+    overflow: hidden;
+    height: 14px;
+    white-space: nowrap;
+}
 

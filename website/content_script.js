@@ -351,7 +351,7 @@ fetch_gridload().then(([schedule, instance]) => {
         var capacity_chart = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
         title:"Battery Capacity" + " October " + sl_val,
-        width: 800,
+        width: 400,
         data: {
           values: dat_val
         },
@@ -366,7 +366,7 @@ fetch_gridload().then(([schedule, instance]) => {
         var load_chart = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
         title:"Total Grid Load" + " October " + sl_val,
-        width: 800,
+        width: 400,
         data: {
           values: dat_val
         },
@@ -609,26 +609,7 @@ function forecast_parse(full_forecast){
 
 function generate_charts_onload(){
    
-    // Vega Chart Generation 
-    var specVis1 = "./forecast/building03_Visualisation.json";
-    var specVis2 = "./forecast/building46_Visualization.vl.json";
-    var specVis3 = "./forecast/solar02_Visualization.vl.json";
-    var specVis4 = "./forecast/solar35_Visualization.vl.json";
 
-    vegaEmbed('#forecast1', specVis1, { "actions": false });
-
-    vegaEmbed('#forecast2', specVis2, { "actions": false }).then(function (result) {
-      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
-    }).catch(console.error);
-
-    vegaEmbed('#forecast3', specVis3, { "actions": false }).then(function (result) {
-      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
-    }).catch(console.error);
-
-    vegaEmbed('#forecast4', specVis4, { "actions": false }).then(function (result) {
-      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
-    }).catch(console.error);
-  
 
   
     // Loading Cache files
