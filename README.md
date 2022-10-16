@@ -60,7 +60,7 @@ building0_test = building0[Const.PHASE1_TIME_S1:Const.PHASE1_TIME_S2]
 ```
 To clean and augment the data, you can use Tinygrid's `generate_building_data()` and `generate_solar_data()`.
 ```python
-from tinygrid.forecaster import Forecaster, generate_building_data, generate_solar_data
+from tinygrid.forecaster import generate_building_data, generate_solar_data
 
 # Generate data for training
 building0_x_train, building0_y_train = generate_building_data(building0_train)
@@ -77,6 +77,7 @@ After having all of our data processed and prepared, create Forecaster object fo
 ```python
 # Evaluation metric
 from tinygrid.utils import mase
+from tinygrid.forecaster import Forecaster
 
 # Init Forecaster object 
 solar0_forecaster = Forecaster()
