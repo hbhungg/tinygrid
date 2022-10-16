@@ -113,6 +113,8 @@ price = ieee_cis.load_AEMO_price_data()['RRP']
 Create a optimizer object. The optimizer underneath is Google's [ortool](https://github.com/google/or-tools), using the [CP SAT Solver](https://developers.google.com/optimization/cp/cp_solver). 
 The optimizer attempt to reframe the problem into an integer programming problem, inspired by [this paper](https://arxiv.org/pdf/2112.03595.pdf).
 ```python
+from tinygrid.optimizer import optimizer, save_schedule
+
 sol = optimizer(instance=ins, warm_start=sam_sol, price=price, start_time=p1s, end_time=p1e)
 save_schedule("oo.txt", sol)
 ```
