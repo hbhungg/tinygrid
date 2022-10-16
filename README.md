@@ -29,9 +29,8 @@ pip install -r requirements.txt
 This will create a virtual env inside Tinygrid's folder, activate it and install all of the dependencies listed in the `requirements.txt`. 
 
 ## Quick example
-### Forecasting
 _(The project is in development stage, some of the import API and modules name might change)._
-
+### Forecasting
 First, load the IEEE-CIS dataset.
 ```python
 from tinygrid.dataset import IEEE_CIS
