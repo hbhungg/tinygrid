@@ -95,8 +95,27 @@ solar_pred = bf.predict(building0_x_test)
 score = mase(solar0_pred, solar0_test['energy'].to_numpy(), solar0_train['energy'].to_numpy())
  ```
 
- ### Scheduling
- TBD
+### Scheduling
+Load the instance. As an example, we will optimize for phase 1 instance small 0.
+```python
+from tinygrid.dataset import IEEE_CIS
+
+# Data manager object
+ieee_cis = IEEE_CIS()
+# Load the instance
+ins = ieee_cis().load_instance_data()["phase1_instance_small_0.txt"]
+# Load the sample solution for warm start (optional)
+sam_sol = ieee_cis().load_instance_sample_solution_data()["phase1_instance_solution_small_0.txt"]
+# Load the price data
+price = ieee_cis().load_AEMO_price_data()['RRP']
+```
+
+Create a optimizer object. The optimizer underneath is Google's [ortool](https://github.com/google/or-tools), using the [CP SAT Solver](https://developers.google.com/optimization/cp/cp_solver). 
+The optimizer attempt to reframe the problem into an integer programming problem, inspired by [this paper](https://arxiv.org/pdf/2112.03595.pdf).
+```python
+sol = optimizer(instance=ins, warm_start=sam_sol, price=price, start_time=p1s, end_time=p1e)
+save_schedule("oo.txt", sol)
+```
 
 # Contributor (Team DS-9): 
 - Aldrich Lado Buntoro
