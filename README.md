@@ -1,5 +1,5 @@
 # Tinygrid
-Tinygrid is a small Python library that team DS-9 use to solve the [Monash Microgrid prediction and optimization challenge](https://ieee-dataport.org/competitions/ieee-cis-technical-challenge-predictoptimize-renewable-energy-scheduling). 
+Tinygrid is a small Python library that team DS-9 use to solve the [IEEE-CIS Monash Microgrid prediction and optimization challenge](https://ieee-dataport.org/competitions/ieee-cis-technical-challenge-predictoptimize-renewable-energy-scheduling). 
 
 This library provide:
 * Modules to load the energy dataset.
@@ -29,6 +29,72 @@ source env/bin/activate
 pip install -r requirements.txt
 ```
 This will create a virtual env inside Tinygrid's folder, activate it and install all of the dependencies listed in the `requirements.txt`. 
+
+## Quick example
+_(The project is in development stage, some of the import API and modules name might change.)_
+
+To load the IEEE-CIS dataset.
+```python
+from tinygrid.dataset import IEEE-CIS
+from tinygrid.utils import Const
+
+# Data manager object
+ieee_cis = IEEE_CIS()
+
+# Load the solar + building energy data and weather data
+energy_data = ieee_cis.load_energy_data()
+weather_data = ieee_cis.load_ERA5_weather_data()
+```
+As an example, we will work on 2 data instance, Building0 and Solar0, and forecast 2976 datapoint on Oct 2020 (Phase 1 of the competition).
+```python
+# Data up to the end of November 2020
+solar0 = energy_data['Solar0']
+building0 = energy_data['Building0']
+
+# Split the dataset into training (before Oct 2020) and testing dataset (Oct 2020)
+solar0_train = solar0[:Const.PHASE1_TIME_S1]
+solar0_test = solar0[Const.PHASE1_TIME_S1:Const.PHASE1_TIME_S2]
+
+building0_train = building0[:Const.PHASE1_TIME_S1]
+building0_test = building0[Const.PHASE1_TIME_S1:Const.PHASE1_TIME_S2]
+```
+To clean and augment the data, you can use Tinygrid's `generate_building_data()` and `generate_solar_data()`.
+```python
+from tinygrid.forecaster import Forecaster, generate_building_data, generate_solar_data
+
+# Generate data for training
+solar0_x_train, solar0_y_train = generate_solar_data(data=solar0_train)
+# If inputted data is None, and with start and end time, generate_building_data will generate features for forecaster to predict on. 
+# This case we input in the start and end time of Oct 2020.
+solar0_x_test = generate_solar_data(data=None, start=Const.PHASE1_TIME, end=Const.PHASE2_TIME)
+
+# The same for building data, but instead we use generate_building_data()
+building0_x_train, building0_y_train = generate_building_data(data=building0_train)
+building0_x_test = generate_building_data(data=None, start=Const.PHASE1_TIME, end=Const.PHASE2_TIME)
+```
+
+After having all of our data prepared, create a Forecaster object for each data instance to fit the dataset on, start generate forecast and evaluate the forecast performance. The IEEE-CIS challenge assess the performance using [MASE](https://www.sciencedirect.com/science/article/abs/pii/S0169207006000239?via%3Dihub) metric.
+```python
+# Evaluation metric
+from tinygrid.utils import mase
+
+# Init Forecaster object 
+solar0_forecaster = Forecaster()
+building0_forecaster = Forecaster()
+
+# Fit the processed data
+solar0_forecaster.fit(solar0_x_train, solar0_y_train)
+# Generate forecast
+solar0_pred = bf.predict(solar0_x_test)
+# Evaluate the forecasted data with actual data, using MASE.
+score = mase(solar0_pred, solar0_test['energy'].to_numpy(), solar0_train['energy'].to_numpy())
+
+# Similar to the above steps
+building_forecaster.fit(building0_x_train, building0_y_train)
+solar_pred = bf.predict(building0_x_test)
+# Evaluate the forecasted data with actual data, using MASE.
+score = mase(solar0_pred, solar0_test['energy'].to_numpy(), solar0_train['energy'].to_numpy())
+ ```
 
 # Contributor (Team DS-9): 
 - Aldrich Lado Buntoro
