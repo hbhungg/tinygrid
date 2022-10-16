@@ -36,7 +36,7 @@ public enum Phase {
 	/*
 	 * Root folder where data files are stored; adjust according to local paths.
 	 */
-	private static final String ROOT = "../../dataset/";
+	private static final String ROOT = "../../tinygrid/dataset/";
 
 	private static final String PRICE_FORMAT = "price/PRICE_AND_DEMAND_%4d%02d_VIC1.csv";
 	private static final DateTimeFormatter DATE_FORMAT = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss");

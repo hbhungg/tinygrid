@@ -45,7 +45,7 @@ def date_range(start: datetime, end: datetime,
     yield curr
     curr += step
 
-def weekday_range(start: datetime, end: datetime, office=False) -> tuple[int, int]:
+def weekday_range(start: datetime, end: datetime, office=False, offset: int=0) -> tuple[int, int]:
   """
   Generate all indexes of weekday (Monday - Friday)
   Params:
@@ -54,15 +54,23 @@ def weekday_range(start: datetime, end: datetime, office=False) -> tuple[int, in
     office: True, take office hour timestep only, False, take all weekday timestep
   """
   fw = False
+  if offset == 0 and office is True:  end_time = Const.OFFICE_CLOSE_TIME
+  if offset == 0 and office is False: end_time = time(hour=23, minute=59)
+  if offset != 0:
+    if office is True:  minute_in_day = Const.OFFICE_CLOSE_TIME.hour * 60 + Const.OFFICE_CLOSE_TIME.minute
+    if office is False: minute_in_day = 60*24
+    offset_time = minute_in_day - offset * 15 
+    end_time = time(hour=offset_time//60, minute=offset_time%60)
+  
   for idx, tx in enumerate(date_range(start, end)):
     isow = tx.isoweekday()
     # Start at the first week of the month (first Monday).
     if isow == Const.MONDAY: 
       fw = True
     if isow <= Const.FRIDAY and fw is True: 
-      if office is True and (Const.OFFICE_OPEN_TIME <= tx.time() <= Const.OFFICE_CLOSE_TIME):
+      if office is True and (Const.OFFICE_OPEN_TIME <= tx.time() <= end_time):
         yield (idx, isow)
-      elif office is False: 
+      elif office is False and not (isow == Const.FRIDAY and tx.time() > end_time):
         yield (idx, isow)
 
 
@@ -74,8 +82,11 @@ def first_dow(dow: int, start: datetime, end: datetime) -> tuple[int, datetime]:
     start: start time
     end: end time
   """
+  fw = False
   for idx, tx in enumerate(date_range(start, end)):
-    if tx.isoweekday() == dow: return idx, tx
+    isow = tx.isoweekday() 
+    if isow == Const.MONDAY: fw = True
+    if isow == dow and fw == True: return idx, tx
 
 def first_week_map(start: datetime, end: datetime, office=False) -> int:
   """
