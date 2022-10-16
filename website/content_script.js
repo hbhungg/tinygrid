@@ -607,7 +607,31 @@ function forecast_parse(full_forecast){
   return total_arr
 }
 
-function optim_onload(){
+function generate_charts_onload(){
+   
+    // Vega Chart Generation 
+    var specVis1 = "./forecast/building03_Visualisation.json";
+    var specVis2 = "./forecast/building46_Visualization.vl.json";
+    var specVis3 = "./forecast/solar02_Visualization.vl.json";
+    var specVis4 = "./forecast/solar35_Visualization.vl.json";
+
+    vegaEmbed('#forecast1', specVis1, { "actions": false });
+
+    vegaEmbed('#forecast2', specVis2, { "actions": false }).then(function (result) {
+      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
+    }).catch(console.error);
+
+    vegaEmbed('#forecast3', specVis3, { "actions": false }).then(function (result) {
+      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
+    }).catch(console.error);
+
+    vegaEmbed('#forecast4', specVis4, { "actions": false }).then(function (result) {
+      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
+    }).catch(console.error);
+  
+
+  
+    // Loading Cache files
     make_header()
     fetch_schedule()
     battery_chart()
