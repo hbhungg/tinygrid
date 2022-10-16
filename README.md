@@ -103,11 +103,11 @@ from tinygrid.dataset import IEEE_CIS
 # Data manager object
 ieee_cis = IEEE_CIS()
 # Load the instance
-ins = ieee_cis().load_instance_data()["phase1_instance_small_0.txt"]
+ins = ieee_cis.load_instance_data()["phase1_instance_small_0.txt"]
 # Load the sample solution for warm start (optional)
-sam_sol = ieee_cis().load_instance_sample_solution_data()["phase1_instance_solution_small_0.txt"]
+sam_sol = ieee_cis.load_instance_sample_solution_data()["phase1_instance_solution_small_0.txt"]
 # Load the price data
-price = ieee_cis().load_AEMO_price_data()['RRP']
+price = ieee_cis.load_AEMO_price_data()['RRP']
 ```
 
 Create a optimizer object. The optimizer underneath is Google's [ortool](https://github.com/google/or-tools), using the [CP SAT Solver](https://developers.google.com/optimization/cp/cp_solver). 
