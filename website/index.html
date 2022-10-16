@@ -8,7 +8,7 @@
     <!-- Style sheet -->
     <link rel="stylesheet" href="style.css">
   </head>
-  
+  <body onload = "optim_onload()">
   <!-- Left content -->
   <div class="fixed-top left">
     <!-- Left content title -->
@@ -191,6 +191,91 @@
         
         
         
+        <div class="container" id = "optim_grid">
+  <div class="row">
+    <div class="col grid_right" id = "table_0">
+      <p class = "table_header">building 0</p>
+  </div>
+    <div class="col grid_right" id = "table_1">
+      <p class = "table_header">building 1</p>
+  </div>
+    <div class="col grid_right" id = "table_3">
+      <p class = "table_header">building 3</p>
+  </div>
+  </div>
+  
+  <div class = "row">
+    <div class="col grid_right" id = "table_4">
+      <p class = "table_header">building 4</p>
+  </div>
+    <div class="col grid_right" id = "table_5">
+      <p class = "table_header">building 5</p>
+  </div>
+    <div class="col grid_right" id = "table_6">
+      <p class = "table_header">building 6</p>
+  </div>
+  </div>
+    
+    
+  </div>
+        
+        
+        
+        
+
+  <div class="flex-child" id = "solar_forecast">
+    placeholder txt
+  </div>
+  
+  <div class="flex-child" id = "building_forecast">
+    placeholder txt
+
+  </div>
+  
+
+        
+        
+        
+        
+
+  <div class="flex-child" id = "battery_capacity">
+    
+  </div>
+  
+  <div class="flex-child" id = "grid_load">
+    placeholder txt
+
+  </div>
+
+        
+        
+        
+        
+        <div class="slidecontainer">
+  <input type="range" step = "1" min="1" max="31" value="1" class="slider" id="myRange">
+  <p>Value: <span id="demo"></span></p>
+</div>
+        
+        
+        
+        <script>
+var slider = document.getElementById("myRange");
+var output = document.getElementById("demo");
+output.innerHTML = "OCT " + slider.value;
+
+slider.oninput = function() {
+  fetch_schedule()
+  battery_chart()
+  get_forecast()
+  
+  output.innerHTML = this.value;
+}
+
+
+</script>
+
+        
+        
 
       </div>
     </div>
@@ -213,11 +298,14 @@
     </div>
     <div class="container-fluid right_head"></div>
   </div>
+  </body>
 
-  <!-- Import Vega & Vega-Lite (does not have to be from CDN) -->
+  <!-- Import Vega , Vega-Lite & other packages (does not have to be from CDN) -->
   <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"> </script>
+  <script src=https://cdnjs.cloudflare.com/ajax/libs/mathjs/3.3.0/math.min.js></script>
   <!-- Website scripts -->
   <script src="content_script.js"></script>
   <script src="vega_lite_script.js"></script>
@@ -229,24 +317,5 @@
   <link rel="stylesheet" type="text/css" href="styles.css" media="all">
 
 
-  <script type="text/javascript">
-    var specVis1 = "./forecast/building03_Visualisation.json";
-    var specVis2 = "./forecast/building46_Visualization.vl.json";
-    var specVis3 = "./forecast/solar02_Visualization.vl.json";
-    var specVis4 = "./forecast/solar35_Visualization.vl.json";
 
-    vegaEmbed('#forecast1', specVis1, { "actions": false });
-
-    vegaEmbed('#forecast2', specVis2, { "actions": false }).then(function (result) {
-      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
-    }).catch(console.error);
-
-    vegaEmbed('#forecast3', specVis3, { "actions": false }).then(function (result) {
-      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
-    }).catch(console.error);
-
-    vegaEmbed('#forecast4', specVis4, { "actions": false }).then(function (result) {
-      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
-    }).catch(console.error);
-  </script>
 </html>
