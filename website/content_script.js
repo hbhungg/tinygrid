@@ -142,7 +142,7 @@ function parse_schedule(schedule,instance){
 
     if (row_arr[0] == "r"){
       for (var h = 0; h < 4;h++){
-        var time_int = parseInt(row_arr[2]) + 672 * h
+        var time_int = parseInt(row_arr[2]) + 672 * h + 40
         var hours = math.floor((time_int % 96)/4) 
         var minutes = (time_int * 15) %60
         var days = math.floor(time_int /96) + 1
@@ -166,7 +166,7 @@ function parse_schedule(schedule,instance){
                       
       if (row_arr[0] == "a"){
         var time_int = parseInt(row_arr[2])
-        var hours = math.floor((time_int % 96)/4) 
+        var hours = math.floor((time_int % 96)/4) + 40 
         var minutes = (time_int * 15) %60
         var days = math.floor(time_int /96) + 1
         if (hours < 10){hours = "0" + hours}
@@ -397,7 +397,9 @@ fetch_gridload().then(([schedule, instance]) => {
         },
         mark: 'line',
         encoding: {x: {field: 'time', timeunit: 'minute'},
-        y: {aggregate:'sum',field:'grid_load',type: 'quantitative',axis: {title: 'Load KW'}}
+        y: {aggregate:'sum',field:'grid_load',type: 'quantitative',axis: {title: 'Load KW'}},
+        
+
         }
       };
 
@@ -526,7 +528,7 @@ function calc_load(schedule,instance,sl_val){
       activity_duration = duration_list_rec[row_arr[1]]
       for(var h = 0; h < 4; h++){
         for(var k= 0; k<activity_duration;k++){
-          var time_int = parseInt(row_arr[2]) + 672 * h + k
+          var time_int = parseInt(row_arr[2]) + 672 * h + k + 40
           var hours = math.floor((time_int % 96)/4)  
           var minutes = (time_int * 15) %60
           var day = math.floor(time_int /96) +1
@@ -547,7 +549,7 @@ function calc_load(schedule,instance,sl_val){
     if(row_arr[0] == "a"){
       activity_duration = duration_list_a[row_arr[1]]
       for(var k= 0; k<activity_duration;k++){
-        var time_int = parseInt(row_arr[2]) + k
+        var time_int = parseInt(row_arr[2]) + k + 40
         var hours = math.floor((time_int % 96)/4) 
         var minutes = (time_int * 15) %60
         var day = math.floor(time_int /96) +1
@@ -605,7 +607,7 @@ fetch_forecast().then(full_forecast => {
   
   var solar_chart = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-        title:"Solar Production" + " October " + sl_val,
+        title:" Predicted Solar Production" + " October " + sl_val,
         width: 800,
         data: {
           values: solar
@@ -624,7 +626,7 @@ fetch_forecast().then(full_forecast => {
       
   var building_chart = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
-        title:"Building Energy Demand" + " October " + sl_val,
+        title:"Predicted Building Energy Demand" + " October " + sl_val,
         width: 800,
         data: {
           values: building
