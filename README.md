@@ -7,7 +7,7 @@ This library provide:
 * Data augmentation and forecaster (achieved 0.80 MASE score).
 * Optimization function to schedule the instance.
 
-## Setup (MacOS/Ubuntu)
+## Setup (Linux/MacOS)
 Open your terminal, clone the repository and cd into it.
 ```
 git clone git@github.com:hbhungg/tinygrid.git 
