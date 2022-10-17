@@ -170,9 +170,9 @@ div.content {
 div.grid_right{
     background-color:grey;
     color: white;
-    font-size: 15px;
+    font-size: 12px;
     width:300px;
-    height:250px;
+    height:200px;
     overflow: scroll;
     
 }

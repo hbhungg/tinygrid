@@ -145,7 +145,7 @@ function parse_schedule(schedule,instance){
         var time_int = parseInt(row_arr[2]) + 672 * h
         var hours = math.floor((time_int % 96)/4) 
         var minutes = (time_int * 15) %60
-        var days = math.floor(math.floor(time_int /4) /24)
+        var days = math.floor(time_int /96) + 1
         if (hours < 10){hours = "0" + hours}
         if (minutes == 0){minutes = "00"}
         var num_rooms = parseInt(row_arr[3]);
@@ -168,7 +168,7 @@ function parse_schedule(schedule,instance){
         var time_int = parseInt(row_arr[2])
         var hours = math.floor((time_int % 96)/4) 
         var minutes = (time_int * 15) %60
-        var days = math.floor(math.floor(time_int /4) /24)
+        var days = math.floor(time_int /96) + 1
         if (hours < 10){hours = "0" + hours}
         if (minutes == 0){minutes = "00"}
         var num_rooms = parseInt(row_arr[3]);
@@ -227,10 +227,10 @@ function parse_schedule(schedule,instance){
 return(csv_array)}
 function fetch_schedule(){
   
-  fetch('https://raw.githubusercontent.com/hbhungg/tinygrid/main/cache/test_schedule.txt')
+  fetch('https://raw.githubusercontent.com/hbhungg/tinygrid/main/cache/phase2_instance_solution_small_2.txt')
   .then((response) => response.text())
   .then((data) => {
-  fetch('https://raw.githubusercontent.com/hbhungg/tinygrid/main/cache/phase1_instance_small_0.txt')
+  fetch('https://raw.githubusercontent.com/hbhungg/tinygrid/main/cache/phase2_instance_small_2.txt')
   .then((response) => response.text())
   .then((data2) => {
     var sl = document.getElementById("myRange");
@@ -333,8 +333,8 @@ for (var i = 0; i < 6; i++) {
 function battery_chart() {
 async function fetch_gridload() {
   const [scheduleResponse, instanceResponse] = await Promise.all([
-    fetch('https://raw.githubusercontent.com/hbhungg/tinygrid/main/cache/test_schedule.txt'),
-    fetch('https://raw.githubusercontent.com/hbhungg/tinygrid/main/cache/phase1_instance_small_0.txt')
+    fetch('https://raw.githubusercontent.com/hbhungg/tinygrid/main/cache/phase2_instance_solution_small_2.txt'),
+    fetch('https://raw.githubusercontent.com/hbhungg/tinygrid/main/cache/phase2_instance_small_2.txt')
   ]);
   const schedule = await scheduleResponse.text();
   const instance = await instanceResponse.text();
@@ -347,17 +347,42 @@ fetch_gridload().then(([schedule, instance]) => {
         document.getElementById("demo").innerHTML = "OCT: " + sl_val
         
         
-        var dat_val = csv_array
-        var capacity_chart = {
+        var dat_val = csv_array[0]
+        var b0_arr = csv_array[1]
+        var b1_arr = csv_array[2]
+        var b0_chart = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
         title:"Battery Capacity" + " October " + sl_val,
-        width: 400,
+        width: 300,
         data: {
-          values: dat_val
+          values: b0_arr
         },
-        mark: 'bar',
-        encoding: {x: {field: 'battery_time', timeunit: 'nominal',axis: {title:'Time'}},
-        y: {field: 'charge_level',type: 'quantitative',axis: {title: 'Battery Capacity (KwH)'}}
+        mark: 'line',
+        
+
+        
+        encoding: {x: {field: 'battery_time', timeunit: 'minute',axis: {title:'Time',labels:false}},
+        y: {field: 'charge_level',type: 'quantitative',axis: {title: 'Battery Capacity (KwH)'}},
+        
+        color:{field: 'battery_id',type: 'nominal'}
+        }
+      };
+      
+        var b1_chart = {
+        $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
+        title:"Battery Capacity" + " October " + sl_val,
+        width: 300,
+        data: {
+          values: b1_arr
+        },
+        mark: 'line',
+        
+
+        
+        encoding: {x: {field: 'battery_time', timeunit: 'minute',axis: {title:'Time',labels:false}},
+        y: {field: 'charge_level',type: 'quantitative',axis: {title: 'Battery Capacity (KwH)'}},
+        
+        color:{field: 'battery_id',type: 'nominal'}
         }
       };
       
@@ -366,7 +391,7 @@ fetch_gridload().then(([schedule, instance]) => {
         var load_chart = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
         title:"Total Grid Load" + " October " + sl_val,
-        width: 400,
+        width: 800,
         data: {
           values: dat_val
         },
@@ -377,7 +402,8 @@ fetch_gridload().then(([schedule, instance]) => {
       };
 
       // Embed the visualization in the container with id `vis`
-      vegaEmbed('#battery_capacity', capacity_chart);
+      vegaEmbed('#battery_capacity', b0_chart);
+      vegaEmbed('#b1_capacity',b1_chart);
       vegaEmbed('#grid_load', load_chart);
 
 }).catch(error => {
@@ -385,13 +411,26 @@ fetch_gridload().then(([schedule, instance]) => {
 });
 
 
+function time_str(time_int){
+  var hours = math.floor((time_int % 96)/4) ;
+  var minutes = (time_int * 15) %60;
+  var day = math.floor(math.floor(time_int/4)/24)+1;
+  if (hours < 10){hours = "0" + hours}
+  if (minutes == 0){minutes = "00"}
+  var time = hours + ":" + minutes
+  return(time)
+  
+}
   
 function calc_load(schedule,instance,sl_val){
-  var charge_level = 420
+
+  battery_arr = []
+  capacity_arr = []
   
   const schedule_array = schedule.split(/\n/)
   const instance_array = instance.split(/\n/)
-  
+  var b0_arr = []
+  var b1_arr = []
   var day_num = sl_val
   var grid_load = 0
   var gridload_array = [] 
@@ -414,36 +453,64 @@ function calc_load(schedule,instance,sl_val){
       load_list_a.push(parseInt(row_arr[4]))
       duration_list_a.push(parseInt(row_arr[5]))
       
-    } 
+    }
+    
+    if(row_arr[0] == "c"){
+      capacity = parseInt(row_arr[3]);
+      capacity_arr.push(capacity)
+      max_draw = parseInt(row_arr[4]);
+      efficiency = parseFloat(row_arr[5]);
+      battery_row = {
+        battery_capacity:capacity,
+        max_draw: max_draw,
+        efficiency: efficiency,
+      }
+      
+      battery_arr.push(battery_row)
+
+
+    }
      
    }
    
    for (var i = 0; i < schedule_array.length; i++) {
     var row = schedule_array[i];
-    var row_arr = row.split(/ /)
-    var time_int = parseInt(row_arr[2]);
-    var day = math.floor(math.floor(parseInt(row_arr[2])/4)/24) + 1;
+    var row_arr = row.split(/ /);
+
+
     if(row_arr[0] == "c"){
          var time_int = parseInt(row_arr[2]);
+         var time = time_str(time_int)
          var hours = math.floor((time_int % 96)/4) ;
          var minutes = (time_int * 15) %60;
-         var day = math.floor(math.floor(time_int/4)/24)+1;
+         var day = math.floor(time_int/96) + 1;
          if (hours < 10){hours = "0" + hours}
          if (minutes == 0){minutes = "00"}
          var time = hours + ":" + minutes
-         
-      
-        if(row_arr[3] == 0){var grid_load = 19.36;
-                            var charge_level = charge_level + 15}
-         
-        if(row_arr[3] == 2){var grid_load = -11.62;
-                             var charge_level =charge_level - 15}
+ 
+         var battery_id = parseInt(row_arr[1])
+         var grid_load = battery_arr[battery_id]
+         var charge_level = capacity_arr[battery_id]
 
-         var gridload_row = {battery_time:hours + ":" + minutes,
-                             time:hours + ":" + minutes,
+        if(row_arr[3] == 0){var load = (grid_load.max_draw / 4) * (1/grid_load.efficiency)  ;
+                            var charge_level = charge_level + 15
+                            capacity_arr[battery_id] = charge_level}
+        
+         
+        if(row_arr[3] == 2){var load = -(grid_load.max_draw / 4) * grid_load.efficiency;
+                            var charge_level =charge_level - 15
+                            capacity_arr[battery_id] = charge_level}
+                                                      
+
+         var gridload_row = {battery_id: battery_id,
+                             battery_time: time,
+                             time: time,
                              charge_level: charge_level,
-                             grid_load: grid_load}
+                             grid_load: load}
         if(day == day_num){gridload_array.push(gridload_row)}
+        if(day == day_num && battery_id == 0){b0_arr.push(gridload_row)}
+        if(day == day_num && battery_id == 1){b1_arr.push(gridload_row)}
+        
       
          
           
@@ -460,14 +527,35 @@ function calc_load(schedule,instance,sl_val){
       for(var h = 0; h < 4; h++){
         for(var k= 0; k<activity_duration;k++){
           var time_int = parseInt(row_arr[2]) + 672 * h + k
-          var hours = math.floor((time_int % 96)/4) 
+          var hours = math.floor((time_int % 96)/4)  
           var minutes = (time_int * 15) %60
-          var day = math.floor(math.floor(time_int /4) /24) +1
+          var day = math.floor(time_int /96) +1
           if (hours < 10){hours = "0" + hours}
           if (minutes == 0){minutes = "00"}
           var num_rooms = parseInt(row_arr[3])
+          
           var new_row = {time:hours + ":" + minutes,
                          grid_load: load_list_rec[row_arr[1]] * num_rooms}
+          
+          if(day == day_num){gridload_array.push(new_row)} 
+          }
+            
+          }
+          
+        }
+        
+    if(row_arr[0] == "a"){
+      activity_duration = duration_list_a[row_arr[1]]
+      for(var k= 0; k<activity_duration;k++){
+        var time_int = parseInt(row_arr[2]) + k
+        var hours = math.floor((time_int % 96)/4) 
+        var minutes = (time_int * 15) %60
+        var day = math.floor(time_int /96) +1
+        if (hours < 10){hours = "0" + hours}
+        if (minutes == 0){minutes = "00"}
+        var num_rooms = parseInt(row_arr[3])
+        var new_row = {time:hours + ":" + minutes,
+                       grid_load: load_list_a[row_arr[1]] * num_rooms}
           
           if(day == day_num){gridload_array.push(new_row)} 
           }
@@ -481,19 +569,9 @@ function calc_load(schedule,instance,sl_val){
     
     
     
-  }
-    
-    
-
-         
-
-
-    
   
-
-        
-
-  arr = gridload_array
+    
+  arr = [gridload_array,b0_arr,b1_arr]
           
 
   
@@ -583,7 +661,7 @@ function forecast_parse(full_forecast){
       var fc_list = full_forecast[key]
       slice_forecast = fc_list.slice()
       for (var j = start_index; j < end_index; j++ ){
-        var time_int = j+48
+        var time_int = j+40
         var hours = math.floor((time_int % 96)/4)
         var minutes = (time_int * 15) %60
         var days = math.floor(time_int / 96) +1
@@ -608,6 +686,29 @@ function forecast_parse(full_forecast){
 }
 
 function generate_charts_onload(){
+   
+    var specVis1 = "./forecast/building03_Visualisation.json";
+    var specVis2 = "./forecast/building46_Visualization.vl.json";
+    var specVis3 = "./forecast/solar02_Visualization.vl.json";
+    var specVis4 = "./forecast/solar35_Visualization.vl.json";
+
+    vegaEmbed('#forecast1', specVis1, { "actions": false });
+
+    vegaEmbed('#forecast2', specVis2, { "actions": false }).then(function (result) {
+      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
+    }).catch(console.error);
+
+    vegaEmbed('#forecast3', specVis3, { "actions": false }).then(function (result) {
+      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
+    }).catch(console.error);
+
+    vegaEmbed('#forecast4', specVis4, { "actions": false }).then(function (result) {
+      // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
+    }).catch(console.error);
+  
+
+  
+  
    
 
 

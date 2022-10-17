@@ -194,7 +194,7 @@
         <p> Adjust Slider to view scheduled activities & grid load for different days</p>
         
         <div class="slidecontainer">
-  <input type="range" step = "1" min="1" max="31" value="1" class="slider" id="myRange">
+  <input type="range" step = "1" min="1" max="30" value="1" class="slider" id="myRange">
   <p>Date:  <span id="demo"></span></p>
 </div>
         
@@ -248,18 +248,19 @@
 
         <div class = "flex-container">
   
-    <div class="flex-child" id = "battery_capacity">
+    <div class="flex-child" id = "battery_capacity"></div>
+    <div class="flex-child" id = "b1_capacity"></div>
     
-  </div>
+    </div>  
   
-  <div class="flex-child" id = "grid_load">
+  <div class="flex-container" id = "grid_load">
     placeholder txt
 
   </div>
   
   
   
-</div>        
+      
         
         
         
@@ -298,7 +299,7 @@ slider.oninput = function() {
     <!-- 5th content -->
     <div class="row content_block p-5" id="content_5" style="padding-bottom: 0 !important;">
       <div id="content_5_sup" class="p-3">
-        <h3 class="text_right_heading"  style = "margin-top: 500px">Team members</h3>
+        <h3 class="text_right_heading"  style = "margin-top: 750px">Team members</h3>
         <!-- weather data -->
         <div class="row"> 
           <div class="col text_right1">
