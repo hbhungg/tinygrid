@@ -353,7 +353,7 @@ fetch_gridload().then(([schedule, instance]) => {
         var b0_chart = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
         title:"Battery Capacity" + " October " + sl_val,
-        width: 300,
+        width: 200,
         data: {
           values: b0_arr
         },
@@ -371,7 +371,7 @@ fetch_gridload().then(([schedule, instance]) => {
         var b1_chart = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
         title:"Battery Capacity" + " October " + sl_val,
-        width: 300,
+        width: 200,
         data: {
           values: b1_arr
         },
@@ -391,7 +391,7 @@ fetch_gridload().then(([schedule, instance]) => {
         var load_chart = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
         title:"Total Grid Load" + " October " + sl_val,
-        width: 800,
+        width: 600,
         data: {
           values: dat_val
         },
@@ -608,7 +608,7 @@ fetch_forecast().then(full_forecast => {
   var solar_chart = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
         title:" Predicted Solar Production" + " October " + sl_val,
-        width: 800,
+        width: 600,
         data: {
           values: solar
         },
@@ -627,7 +627,7 @@ fetch_forecast().then(full_forecast => {
   var building_chart = {
         $schema: 'https://vega.github.io/schema/vega-lite/v5.json',
         title:"Predicted Building Energy Demand" + " October " + sl_val,
-        width: 800,
+        width: 600,
         data: {
           values: building
         },
