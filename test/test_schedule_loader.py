@@ -4,7 +4,7 @@ from tinygrid.dataset._schedule_loader import instance_parser, schedule_parser
 
 class instance_parser_tests(unittest.TestCase):
   _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-  INSTANCE_PATH = os.path.join(_BASE_DIR, "instance/")
+  INSTANCE_PATH = os.path.join(_BASE_DIR, "../tinygrid/dataset/instance/")
 
   def setUp(self):
     self.instance_fnames = os.listdir(self.INSTANCE_PATH)
@@ -103,7 +103,7 @@ class instance_parser_tests(unittest.TestCase):
 
 class schedule_parser_tests(unittest.TestCase):
   _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-  INSTANCE_SAMPLE_SOLUTION_PATH = os.path.join(_BASE_DIR, "instance_sample_solution/")
+  INSTANCE_SAMPLE_SOLUTION_PATH = os.path.join(_BASE_DIR, "../tinygrid/dataset/instance_sample_solution/")
 
   def setUp(self):
     self.instance_sol_fnames = os.listdir(self.INSTANCE_SAMPLE_SOLUTION_PATH)
