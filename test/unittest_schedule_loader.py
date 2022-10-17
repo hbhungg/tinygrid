@@ -1,6 +1,6 @@
 import unittest
 import os
-from _schedule_loader import instance_parser, schedule_parser
+from tinygrid.dataset._schedule_loader import instance_parser, schedule_parser
 
 class instance_parser_tests(unittest.TestCase):
   _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
