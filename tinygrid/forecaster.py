@@ -1,13 +1,11 @@
 import os
 from datetime import datetime, timedelta
 
-from tqdm import tqdm
 import pandas as pd
 import numpy as np
 import sklearn.ensemble
 
-from ..dataset import IEEE_CISMixin
-from ..utils import Const, mase
+from .utils import Const
 
 # Flags
 # How to invoke: DEBUG=1 python3 script.py
@@ -83,8 +81,7 @@ def generate_solar_data(data: pd.DataFrame,
                         weather_data: pd.DataFrame,
                         start: datetime=None,
                         end: datetime=None,
-                        cutoff_date: datetime=None,
-                        cache: bool=False):
+                        cutoff_date: datetime=None):
   """
   Transform the solar data using the ERA5 weather data.
   """

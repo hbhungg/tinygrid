@@ -12,6 +12,11 @@ class TestMetrics(unittest.TestCase):
     with self.assertRaises(TypeError):
       mase(pred, true, training)
 
+  def test_mase_pred_eq_true(self):
+    pred, true, training = np.zeros(10), np.zeros(9), np.zeros(20)
+    with self.assertRaises(ValueError):
+      mase(pred, true, training)
+
   @unittest.skip("skip this test im not done writing it yet!")
   def test_mase_nan(self):
     pass

@@ -6,7 +6,7 @@ import pandas as pd
 from .tsf_loader import convert_tsf_to_dataframe
 from ._schedule_loader import instance_parser, Instance, schedule_parser, Schedule
 
-class IEEE_CISMixin:
+class IEEE_CIS:
   """
   This is a mixin class, design to be inherited by other class to access the method.
   """
@@ -25,7 +25,7 @@ class IEEE_CISMixin:
 
 
   @classmethod
-  def _load_instance_data(cls) -> dict[str, Instance]:
+  def load_instance_data(cls) -> dict[str, Instance]:
     """
     Load and parse all of the instance .txt files from IEEE-CIS's competition
     """
@@ -38,7 +38,7 @@ class IEEE_CISMixin:
     return instance_data
 
   @classmethod
-  def _load_instance_sample_solution_data(cls) -> dict[str, Schedule]:
+  def load_instance_sample_solution_data(cls) -> dict[str, Schedule]:
     """
     Load and parse all of the instance sample solution .txt files from IEEE-CIS's competition
     """
@@ -52,7 +52,7 @@ class IEEE_CISMixin:
 
   
   @classmethod
-  def _load_energy_data(cls) -> dict[str, pd.DataFrame]:
+  def load_energy_data(cls) -> dict[str, pd.DataFrame]:
     """
     Transform the atrocious format from "convert_tsf_to_dataframe" function to a sane format.
     Each series name will now be a entry of a dict, and all values is now a DataFrame with dates as the index column.
@@ -73,7 +73,7 @@ class IEEE_CISMixin:
 
 
   @classmethod
-  def _load_ERA5_weather_data(cls) -> pd.DataFrame:
+  def load_ERA5_weather_data(cls) -> pd.DataFrame:
     """
     Load ERA5 weather data from csv to pandas DataFrame. Transform the datetime string to appropriate type.
     Set the dataframe index to the datetime column.
@@ -87,7 +87,7 @@ class IEEE_CISMixin:
 
 
   @classmethod
-  def _load_AEMO_price_data(cls) -> pd.DataFrame:
+  def load_AEMO_price_data(cls) -> pd.DataFrame:
     """
     Load AEMO price data from Sept to Nov. (Cover training, phase 1 and phase 2)
     Set the dataframe index to the datetime column.

@@ -43,7 +43,26 @@ class TestImport(unittest.TestCase):
     except ModuleNotFoundError as e: self.fail(e)
     except ImportError as e: self.fail(e)
 
-  # TODO: Test for hidden function
+  # Private function
+  def test_import_date_range(self):
+    try: from tinygrid.utils import date_range
+    except ModuleNotFoundError as e: self.fail(e)
+    except ImportError as e: self.fail(e)
+
+  def test_import_weekday_range(self):
+    try: from tinygrid.utils import weekday_range
+    except ModuleNotFoundError as e: self.fail(e)
+    except ImportError as e: self.fail(e)
+
+  def test_import_weekday_range(self):
+    try: from tinygrid.utils import weekday_range
+    except ModuleNotFoundError as e: self.fail(e)
+    except ImportError as e: self.fail(e)
+
+  def test_import_first_dow(self):
+    try: from tinygrid.utils import first_dow
+    except ModuleNotFoundError as e: self.fail(e)
+    except ImportError as e: self.fail(e)
 
 if __name__ == "__main__":
   unittest.main()
