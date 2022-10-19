@@ -13,10 +13,8 @@ class IEEE_CIS:
   _BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
   WEATHER_DATA_PATH = os.path.join(_BASE_DIR, "weather/ERA5_Weather_Data_Monash.csv")
-  SEPT_PRICE_DATA_PATH = os.path.join(_BASE_DIR, "price/PRICE_AND_DEMAND_202009_VIC1.csv")
-  OCT_PRICE_DATA_PATH = os.path.join(_BASE_DIR, "price/PRICE_AND_DEMAND_202010_VIC1.csv")
-  NOV_PRICE_DATA_PATH = os.path.join(_BASE_DIR, "price/PRICE_AND_DEMAND_202011_VIC1.csv")
   ENERGY_DATA_PATH = os.path.join(_BASE_DIR, "energy/nov_data.tsf")
+  PRICE_DATA_PATH = os.path.join(_BASE_DIR, "price/")
   INSTANCE_DATA_PATH = os.path.join(_BASE_DIR, "instance/")
   INSTANCE_SAMPLE_SOLUTION_PATH = os.path.join(_BASE_DIR, "instance_sample_solution/")
 
@@ -32,9 +30,9 @@ class IEEE_CIS:
     instance_data = {}
     # Get all of the files inside instance/ folder.
     instance_fnames = os.listdir(cls.INSTANCE_DATA_PATH)
-    for name in instance_fnames:
-      full_path = os.path.join(cls.INSTANCE_DATA_PATH, name)
-      instance_data[name] = instance_parser(full_path)
+    for fname in instance_fnames:
+      full_path = os.path.join(cls.INSTANCE_DATA_PATH, fname)
+      instance_data[fname] = instance_parser(full_path)
     return instance_data
 
   @classmethod
@@ -45,9 +43,9 @@ class IEEE_CIS:
     instance_data = {}
     # Get all of the files inside instance_sample_solution/ folder.
     instance_fnames = os.listdir(cls.INSTANCE_SAMPLE_SOLUTION_PATH)
-    for name in instance_fnames:
-      full_path = os.path.join(cls.INSTANCE_SAMPLE_SOLUTION_PATH, name)
-      instance_data[name] = schedule_parser(full_path)
+    for fname in instance_fnames:
+      full_path = os.path.join(cls.INSTANCE_SAMPLE_SOLUTION_PATH, fname)
+      instance_data[fname] = schedule_parser(full_path)
     return instance_data
 
   
@@ -92,13 +90,10 @@ class IEEE_CIS:
     Load AEMO price data from Sept to Nov. (Cover training, phase 1 and phase 2)
     Set the dataframe index to the datetime column.
     """
-    p1 = pd.read_csv(cls.SEPT_PRICE_DATA_PATH)
-    p2 = pd.read_csv(cls.OCT_PRICE_DATA_PATH)
-    p3 = pd.read_csv(cls.NOV_PRICE_DATA_PATH)
-    price_data = pd.concat([p1, p2, p3])
+    price_data = pd.concat((pd.read_csv(os.path.join(cls.PRICE_DATA_PATH, fname)) for fname in os.listdir(cls.PRICE_DATA_PATH)))
     price_data['SETTLEMENTDATE'] = pd.to_datetime(price_data['SETTLEMENTDATE'], format="%Y/%m/%d %H:%M:%S")
     price_data = price_data.set_index('SETTLEMENTDATE')
     # Price data is AEST (GMT+10), no daylight time saving
-    price_data = price_data.tz_localize("Etc/GMT+10")
+    price_data = price_data.tz_localize("Australia/Queensland")
     # Resample to 15 min instead of 30 min, and do bfill.
     return price_data.resample("15min").asfreq().fillna(method="bfill")
