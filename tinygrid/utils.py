@@ -60,8 +60,10 @@ def weekday_range(start: datetime, end: datetime, office=False, offset: int=0) -
     if office is True:  minute_in_day = Const.OFFICE_CLOSE_TIME.hour * 60 + Const.OFFICE_CLOSE_TIME.minute
     if office is False: minute_in_day = 60*24
     offset_time = minute_in_day - offset * 15 
+    # Offset by each day
     end_time = time(hour=offset_time//60, minute=offset_time%60)
-  
+    # At the end of the range
+    end = end-timedelta(minutes=offset*15) 
   for idx, tx in enumerate(date_range(start, end)):
     isow = tx.isoweekday()
     # Start at the first week of the month (first Monday).
@@ -70,7 +72,7 @@ def weekday_range(start: datetime, end: datetime, office=False, offset: int=0) -
     if isow <= Const.FRIDAY and fw is True: 
       if office is True and (Const.OFFICE_OPEN_TIME <= tx.time() <= end_time):
         yield (idx, isow)
-      elif office is False and not (isow == Const.FRIDAY and tx.time() > end_time):
+      elif office is False and tx.time() <= end_time:
         yield (idx, isow)
 
 
@@ -136,6 +138,8 @@ class Const:
   SATURDAY  = 6
   SUNDAY    = 7
 
+  SECOND_PER_HOUR = 24*60
+  SECOND_PER_DAY = SECOND_PER_HOUR * 24
   # Date for covid restriction
   S1 = datetime(day=19, month=6, year=2020, hour=23, minute=59, second=59, tzinfo=UTC) # 20th June 
   S2 = datetime(day=1,  month=8, year=2020, hour=23, minute=59, second=59, tzinfo=UTC) # 2nd Aug

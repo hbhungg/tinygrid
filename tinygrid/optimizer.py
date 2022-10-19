@@ -1,20 +1,23 @@
+import math
 from datetime import datetime, timedelta
 
 from ortools.sat.python import cp_model
+from .utils import Const, date_range, weekday_range, first_dow, first_week_map
+from .dataset._schedule_loader import Instance, Schedule, BatterySchedule, ActivitySchedule
 
-from ..utils import Const, date_range, weekday_range, first_dow, first_week_map
-from ..dataset._schedule_loader import Instance, Schedule, BatterySchedule, ActivitySchedule
+# Inspired by "State-of-the-art predictive and prescriptive analytics for IEEE CIS 3rd Technical Challenge"
+# Abolghasemi, M., Esmaeilbeigi, R., 2021
+# at https://arxiv.org/pdf/2112.03595.pdf
 
-
-def optimizer(instance: Instance, warm_start: Schedule, 
+def optimizer(instance: Instance, price, warm_start: Schedule, 
               start_time: datetime, end_time:datetime,
-              fix_start: bool=False): 
+              fix_start: bool=False, verbose=False): 
 
   # Init CP model
   model = cp_model.CpModel()
 
   # First week start and end day of month
-  _, fmonday = first_dow(Const.MONDAY, start_time, end_time)
+  ffmonday_idx, fmonday = first_dow(Const.MONDAY, start_time, end_time)
   ffriday_idx, ffriday = first_dow(Const.FRIDAY, start_time, end_time)
   # End of office hour is 17:00, so we add 17 hours.
   ffriday_end_office = ffriday + timedelta(hours=17)
@@ -23,6 +26,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
   # **********************************
   # *********** VARIABLES ************
   # **********************************
+
 
   # ****** Recurrence variables ******
 
@@ -45,6 +49,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
       re_act_start[(idx, tx)] = \
           model.NewBoolVar(f"re_act_start_{idx}_{tx}")
 
+
   # ****** Once off variables ******
 
   once_act_start_day = {}
@@ -60,12 +65,12 @@ def optimizer(instance: Instance, warm_start: Schedule,
         model.NewBoolVar(f"once_act_scheduled_{idx}")
 
     # Binary for if activity is still in duration
-    for tx, _ in weekday_range(start_time, end_time, office=True):
+    for tx, _ in weekday_range(start_time, end_time):
       once_act_in_duration[(idx, tx)] = \
           model.NewBoolVar(f"once_act_in_duration_{idx}_{tx}")
 
     # Binary for if activity start at this time step
-    for tx, _ in weekday_range(start_time, end_time, office=True, offset=act.duration):
+    for tx, _ in weekday_range(start_time, end_time, offset=act.duration):
       once_act_start[(idx, tx)] = \
           model.NewBoolVar(f"once_act_start_{idx}_{tx}")
 
@@ -122,7 +127,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
     temp = []
     st, wt = 0, 0
 
-    for tx, _ in weekday_range(start_time, end_time, office=True, offset=act.duration):
+    for tx, _ in weekday_range(start_time, end_time, offset=act.duration):
       temp.append(once_act_start[(idx, tx)])
       # Day index that activity start
       st += ((tx + offset_start)//Const.PERIOD_IN_DAY) * once_act_start[(idx, tx)]
@@ -136,7 +141,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
     model.Add(once_act_start_day[idx] == st+1)
 
     # Activity in duration base on the start time
-    for tx, _ in weekday_range(start_time, end_time, office=True):
+    for tx, _ in weekday_range(start_time, end_time):
       zt = sum(once_act_start.get((idx, tt), 0) for tt in range(tx-act.duration+1, tx+1))
       model.Add(once_act_in_duration[(idx, tx)] == zt)
 
@@ -164,6 +169,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
     model.Add(c_small <= total_small_r)
     model.Add(c_large <= total_large_r)
 
+
   # ****** Battery constraint ******
 
   # Battery can only hold, charge or discharge at a time.
@@ -179,13 +185,37 @@ def optimizer(instance: Instance, warm_start: Schedule,
             4*bat_cap[(idx, tx-1)] + b.max_power*(bat_charge[(idx, tx)] - bat_discharge[(idx, tx)]))
 
 
+#  # ****** Objective function *******
+#
+#  # Convert to the same timezone as the start and end time.
+#  price = price.tz_convert(start_time.tzinfo)
+#  price = price[start_time:end_time].copy()
+#
+#  obj = 0
+#  for tx, _ in enumerate(date_range(start_time, end_time)):
+#    cumm = 0
+#    for idx, b in instance.batteries.items():
+#      mxp = instance.batteries[idx].max_power
+#      eff = instance.batteries[idx].efficiency
+#      cc = bat_charge[(idx, tx)]
+#      dd = bat_discharge[(idx, tx)]
+#      cumm += (mxp // math.sqrt(eff)) * (cc - eff * dd)
+#
+#    for idx, act in instance.once_act.items():
+#      cumm += act.load * act.n_room * once_act_in_duration.get((idx, tx), 0)
+#
+#    obj += price.get(tx, 0) * cumm
+#
+#  model.Minimize((0.25/1000)*obj)
+#
   # **********************************
   # ************ SOLVING *************
   # **********************************
 
   solver = cp_model.CpSolver()
   solver.parameters.num_search_workers = 10
-  solver.parameters.log_search_progress = True
+  if verbose: 
+    solver.parameters.log_search_progress = True
   status = solver.Solve(model)
 
   if status == cp_model.OPTIMAL or status == cp_model.FEASIBLE:
@@ -201,6 +231,13 @@ def optimizer(instance: Instance, warm_start: Schedule,
       for i in range(bd.n_small): small_bmap.append(idx)
       for i in range(bd.n_large): large_bmap.append(idx)
 
+    small_room_track = {}
+    large_room_track = {}
+    small_room_track[ffmonday_idx] = small_rooms
+    large_room_track[ffmonday_idx] = large_rooms
+
+    # TODO: FIX??
+    # The whole room assignment code below is very hacky and error prone.
     pair_tx_txmf = list(zip(weekday_range(start_time, end_time), first_week_map(start_time, end_time)))
     for prev_t, curr_t in zip(pair_tx_txmf, pair_tx_txmf[1:]):
       prev_tx = prev_t[0][0]
@@ -225,20 +262,34 @@ def optimizer(instance: Instance, warm_start: Schedule,
           if bidxs is not None and curr_tx <= ffriday_idx_end_office:
             retval.re_act[idx] = ActivitySchedule(start_time=curr_tx, n_room=act.n_room, building_id=bidxs)
 
-        for idx, act in instance.once_act.items():
-          # Activity in duration at t
-          t0_status = solver.Value(once_act_in_duration.get((idx, curr_tx), 0))
-          # Activity in duration at t-1
-          ts1_status = solver.Value(once_act_in_duration.get((idx, prev_tx), 0))
-          # Assign activity room to buildings
-          small_rooms, large_rooms, bidxs = \
-              _fill_or_remove_room(t0_status, ts1_status, tt, idx, 
-                                   small_rooms, large_rooms, act, "o",
-                                   small_bmap, large_bmap)
+      small_room_track[curr_tx] = small_rooms.copy()
+      large_room_track[curr_tx] = large_rooms.copy()
 
-          # Write out the building assignment
-          if bidxs is not None:
-            retval.once_act[idx] = ActivitySchedule(start_time=curr_tx, n_room=act.n_room, building_id=bidxs)
+    # Very hacky
+    for (idx, tx), v in once_act_start.items():
+      if solver.Value(v) == 1:
+        act = instance.once_act[idx]
+        bidxs = []
+        if act.size == "S":
+          lz = len(small_rooms)
+          rtype = small_room_track
+          bmap = small_bmap
+        elif act.size == "L":
+          lz = len(large_rooms)
+          rtype = large_room_track
+          bmap = large_bmap
+        for _ in range(act.n_room):
+          for i in range(lz):
+            valid = True
+            for td in range(act.duration):
+              if rtype[tx+td][i] is not None:
+                valid = False
+            if valid:
+              bidxs.append(bmap[i])
+              for td in range(act.duration):
+                rtype[tx+td][i] = (idx, "o")
+              break
+        retval.once_act[idx] = ActivitySchedule(start_time=tx, n_room=act.n_room, building_id=bidxs)
 
     for ((idxc, txc), vc), ((idxd, txd), vd) in zip(bat_charge.items(), bat_discharge.items()):
       svc = solver.Value(vc)
@@ -255,7 +306,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
           retval.batteries[idxd].append(bat_sche)
         else:
           retval.batteries[idxd] = [bat_sche]
-
+    retval.heading = instance.heading
     return retval
   else:
     return None
@@ -293,7 +344,7 @@ def _remove_room(room_lst, val):
 
 def save_schedule(path, schedule):
   with open(path, "w") as f:
-    f.write("ppoi 6 6 2 50 20\n")
+    f.write(f'{" ".join(map(str, schedule.heading))}\n')
     f.write(f"sched {len(schedule.re_act)} {len(schedule.once_act)}\n")
     for idx, act in schedule.re_act.items():
       f.write(f'r {idx} {act.start_time} {act.n_room} {" ".join(map(str, act.building_id))}\n')

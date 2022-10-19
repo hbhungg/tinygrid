@@ -27,9 +27,6 @@ def generate_building_data(data: pd.DataFrame,
     lower: omit data lower, if daat is None, this will be ignore.
     cutoff_date: date to cut off, if data is None, this will be ignore.
   """
-  HOUR = 24*60
-  DAY = 24*60*60
-
   # Transform raw seconds into sin and cos value
   # Creating values that represent the repeat of hour and day
   if data is None:
@@ -40,10 +37,10 @@ def generate_building_data(data: pd.DataFrame,
     data = data[cutoff_date:]
 
   time_stamp = data.index.tz_convert("Australia/Melbourne").map(pd.Timestamp.timestamp)
-  data['hour_sin'] = np.cos(time_stamp * (2 * np.pi/HOUR))
-  data['hour_cos'] = np.cos(time_stamp * (2 * np.pi/HOUR))
-  data['day_sin'] = np.sin(time_stamp * (2 * np.pi/DAY))
-  data['day_cos'] = np.cos(time_stamp * (2 * np.pi/DAY))
+  data['hour_sin'] = np.cos(time_stamp * (2 * np.pi/Const.SECOND_PER_HOUR))
+  data['hour_cos'] = np.cos(time_stamp * (2 * np.pi/Const.SECOND_PER_HOUR))
+  data['day_sin'] = np.sin(time_stamp * (2 * np.pi/Const.SECOND_PER_DAY))
+  data['day_cos'] = np.cos(time_stamp * (2 * np.pi/Const.SECOND_PER_DAY))
 
   # Monday-Friday 1, else 0
   data['weekday'] = data.index.weekday < 5
@@ -85,16 +82,22 @@ def generate_solar_data(data: pd.DataFrame,
   """
   Transform the solar data using the ERA5 weather data.
   """
-  weather_data = weather_data.drop(
-             ['coordinates (lat,lon)', 
-              'model (name)',
-              'utc_offset (hrs)', 
-              'model elevation (surface)',
-              "mean_sea_level_pressure (Pa)",
-              "wind_speed (m/s)",
-              "relative_humidity ((0-1))"], 
-             axis=1).resample('15min').asfreq()
+  if data is None:
+    idx = pd.date_range(start, end-timedelta(seconds=1), freq="15min")
+    data = pd.DataFrame(index=idx)
+    new = True
+  else:
+    data = data.copy()
+    data = data[cutoff_date:]
+    new = False
 
+  time_stamp = data.index.tz_convert("Australia/Melbourne").map(pd.Timestamp.timestamp)
+  data['hour_sin'] = np.cos(time_stamp * (2 * np.pi/Const.SECOND_PER_HOUR))
+  data['hour_cos'] = np.cos(time_stamp * (2 * np.pi/Const.SECOND_PER_HOUR))
+  data['day_sin'] = np.sin(time_stamp * (2 * np.pi/Const.SECOND_PER_DAY))
+  data['day_cos'] = np.cos(time_stamp * (2 * np.pi/Const.SECOND_PER_DAY))
+
+  weather_data = weather_data.copy()
   for col in list(weather_data.columns):
     for lag in range(1, 4):
       # Forward lag all columns 
@@ -103,12 +106,13 @@ def generate_solar_data(data: pd.DataFrame,
       weather_data[f"{col}_lag_{-lag}"] = weather_data[col].shift(-lag)
   weather_data = weather_data.interpolate()
 
-  if data is not None:
+  if not new:
     data = data[cutoff_date:]
     data = data.join(weather_data).dropna()
     return data.drop("energy", axis=1).to_numpy(), data['energy'].to_numpy()
   else:
-    return weather_data[start:end-timedelta(seconds=1)].to_numpy()
+    data = data.join(weather_data)
+    return data.to_numpy()
 
 
 class Forecaster:

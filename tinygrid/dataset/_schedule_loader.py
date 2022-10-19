@@ -28,6 +28,7 @@ class ActivityInstance:
 
 @dataclass
 class Instance:
+  heading: str = ""
   buildings: dict[int, BuildingInstance] = field(default_factory=dict)
   solars:    dict[int, int] = field(default_factory=dict)
   batteries: dict[int, BatteryInstance] = field(default_factory=dict)
@@ -48,6 +49,7 @@ class ActivitySchedule:
 
 @dataclass
 class Schedule:
+  heading: str = ""
   re_act:   dict[int, ActivitySchedule] = field(default_factory=dict)
   once_act: dict[int, ActivitySchedule] = field(default_factory=dict)
   batteries:  dict[int, list[BatterySchedule]] = field(default_factory=dict)
@@ -132,7 +134,7 @@ def instance_parser(f_name: str) -> Instance:
         else:
           # Store it
           ppoi = split_line
-
+    ins.heading = ppoi
     if not is_instance_valid(ins, ppoi):
       raise Instance_exception("provided instance was parsed, but invalid", ins)
     return ins
@@ -210,7 +212,7 @@ def schedule_parser(f_name: str) -> Schedule:
         else:
           # Store it
           sched = split_line
-
+    sche = ppoi
     if not is_schedule_valid(sche, [ppoi, sched]):
       raise Schedule_exception("provided schedule was parsed, but invalid", sche)
     return sche
@@ -339,21 +341,21 @@ def is_instance_valid(ins: Instance, ppoi: list) -> bool:
 
   return True
 
-class Line_exception():
+class Line_exception(Exception):
   def __init__(self, message, line):
     self.message = message
     self.line = line
   def __str__(self):
     return self.message
 
-class Schedule_exception():
+class Schedule_exception(Exception):
   def __init__(self, message, sche):
     self.message = message
     self.sched = sche
   def __str__(self):
     return self.message
 
-class Instance_exception():
+class Instance_exception(Exception):
   def __init__(self, message, ins):
     self.message = message
     self.ins = ins
