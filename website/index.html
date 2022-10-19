@@ -7,9 +7,6 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <!-- Style sheet -->
     <link rel="stylesheet" href="style.css">
-    
-    
-    
   </head>
   <body onload = "generate_charts_onload()">
   <!-- Left content -->
@@ -20,28 +17,20 @@
     </div>
     <!-- Left content items -->
     <h3 class="text_left_heading noselect"><a class="text_line selected" id="left_heading_1" onclick="left_btn_selected(1)">Description</a></h3>
-    <div class="text_left" id="left_text_1">
-      <strong>Tinygrid</strong> is a project to develop an optimal battery schedule and an optimal lecture schedule in Monash University Clayton Campus, based on predictions of future values of energy demand and production.
+    <div id="left_text_1">
     </div>
     <h3 class="text_left_heading noselect"><a class="text_line" id="left_heading_2" onclick="left_btn_selected(2)">Data</a></h3>
-    <div class="text_left hidden" id="left_text_2">
-      Dataset needed in order to complete the forecasting and optimisation part of our project.
+    <div id="left_text_2">
     </div>
     <h3 class="text_left_heading noselect"><a class="text_line" id="left_heading_3" onclick="left_btn_selected(3)">Forecasting</a></h3>
     <div class="text_left hidden" id="left_text_3">
       <strong>Energy demand</strong> and <strong>Solar production</strong> for all 6 buildings and 6 solar panels are forecasted in order to get the data used to find the optimal battery and activity schedule. They are calculated using the historical 15-minutely energy demand of buildings and power production of solar panels from Monash University, Melbourne, Australia and the Melbourne weather data.
-      <br>
-      <br>
-      Several models are trained in order to forecast the power production from 1st of October to 30th of November 2020. Models that we decided to use are lasso and random forest. Out of all these models, we found out that the best model for this dataset is random forest. The mean MASE calculated of both the energy production and solar production for our model is 0.80 which puts our team in 5th position of the IEEE-CIS competition.</div>
+      Models that we decided to use are lasso and random forest. Out of all these models, we found out that the best model for this dataset is random forest. The MASE calculated of both the energy production and solar production for our model is 0.80 which puts our team in 5th position of the IEEE-CIS competition.</div>
     <h3 class="text_left_heading noselect"><a class="text_line" id="left_heading_4" onclick="left_btn_selected(4)">Optimisation</a></h3>
     <div class="text_left hidden" id="left_text_4">
-      Optimised schedule which optimally schedule the battery and time
-      
-      tabled activities (lectures) for the month of November 2020. They are calculated using the problem instance text file and electricity price data from AEMO to minimise the cost of the battery (charge, hold and discharge).
+      This is a display of a single instance being scheduled, which includes battery and activities (lectures) for the month of November 2020. They are calculated using a problem instance text file and electricity price data from AEMO to minimise the cost of the battery (charge, hold and discharge).
+      Moreover, the TinyGrid solution involved using Mixed Integer Programming and the package Ortools by Google.
     </div>
-    <h3 class="text_left_heading noselect"><a class="text_line" id="left_heading_5" onclick="left_btn_selected(5)">Team</a></h3>
-    <div class="text_left hidden" id="left_text_5">
-      
     </div>
   </div>
 
@@ -58,9 +47,14 @@
               <br>
           </div>
         </div>
-        <div class="row">
+        <div class="row p-1">
+          <div class="col text_right1"><strong>TinyGrid</strong> is a project to develop an optimal battery schedule and an optimal lecture schedule in Monash University Clayton Campus, based on predictions of future values of energy demand and production. </div>
+        </div>
+        <div class="row p-1">
           <div class="col text_right1">One of the most important measures to deal with climate change is through the use of renewable energy such as wind and solar. However, renewable energy cannot be produced on command, which means energy storage is required. At the same time, storing energy is very expensive and may cause a loss of energy stored. Therefore, we need to forecast the energy demand and production from renewables, in order to optimally schedule energy storage such as batteries. This enables an optimal charging and discharging schedule, based on the required demand.</div>
-          <div class="col text_right1">This is where our project TinyGrid steps in.  TinyGrid at its core has a prediction module that predicts solar energy production and building energy usage from the Monash Microgrid system, and an optimization module which schedules building activities and batteries to minimise energy wastage. Presented as a website interface that lets users interact with figures and values about the evaluation of forecasting and optimization solutions. Thus, TinyGrid solves the problem of optimising renewable energy storage and usage.</div>
+        </div>
+        <div class="row p-1">
+          <div class="col text_right1">This is where our project TinyGrid steps in. TinyGrid at its core has a prediction module that predicts solar energy production and building energy usage from the Monash Microgrid system, and an optimization module which schedules building activities and batteries to minimise energy wastage. Presented as a website interface that lets users interact with figures and values about the evaluation of forecasting and optimization solutions. Thus, TinyGrid solves the problem of optimising renewable energy storage and usage.</div>
         </div>
       </div>
     </div>
@@ -68,53 +62,33 @@
     <div class="row content_block p-5" id="content_2">
       <div id="content_2_sup" class="p-3">
         <h3 class="text_right_heading">Data</h3>
-        <!-- empty space -->
-        <div class="row"> 
-          <div class="col text_right"> 
-              <br>
-          </div>
-        </div>
+
         <!-- weather data -->
-        <div class="row"> 
+        <div class="row p-1"> 
           <div class="col text_right2">
             <strong>Weather data</strong><br>
             The daily minimum temperature (C), maximum temperature (C), rainfall (mm) and solar exposure (MJm^2) of three weather stations near Melbourne: Olympic Park, Moorabbin Airport and Oakleigh (Metropolitan Golf Club) from http://www.bom.gov.au/climate/data/. Each weather series starts from 1st of January 2016 and contains corresponding values until November 2022). This is needed to forecast the solar power production.
           </div>
         </div>
-        <!-- empty space -->
-        <div class="row"> 
-          <div class="col text_right"> 
-            <br>
-          </div>
-        </div>
+
         <!-- electricity price data -->
-        <div class="row"> 
+        <div class="row p-1"> 
           <div class="col text_right2">
             <strong>Electricity price data</strong><br>
             Australian electricity price data from https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem/aggregated-data to achieve the lowest energy cost when scheduling the activities.
           </div>
         </div>
-        <!-- empty space -->
-        <div class="row"> 
-          <div class="col text_right"> 
-            <br>
-          </div>
-        </div>
+
         <!-- historical energy demand and power production -->
-        <div class="row"> 
+        <div class="row p-1"> 
           <div class="col text_right2">
             <strong>Historical energy demand and power production</strong><br>
             Historical 15-minutely energy demand of 6 buildings and 15-minutely power production of 6 solar panels from Monash University, Melbourne, Australia. Given as a time series format to forecast the energy demand and power production in October and November 2020.
           </div>
         </div>
-        <!-- empty space -->
-        <div class="row"> 
-          <div class="col text_right"> 
-            <br>
-          </div>
-        </div>
+
         <!-- problem instance -->
-        <div class="row"> 
+        <div class="row p-1"> 
           <div class="col text_right2">
             <strong>Problem instance</strong><br>
               Instances of buildings, solar panels, batteries and activities that will be optimised. This is given in a text format with the first line being ppoi (predict-plus-optimize instance) which is the summary of the problem instance. It also has Buildings with attributes id, number of large rooms and number of small rooms; Solar panels with attributes solar id and building id; Batteries with attributes building id, capacity (kWh), max power kW and efficiency; Reccuring activities with an activity object and precendeces; Once-off activities with an activity object, value($), penalty($) and precedences; where activity object has attributes id, number of rooms, room size, load (kW) and duration.
@@ -145,9 +119,7 @@
           <div class="pure-u-1-2">
             <div id="forecast2" class="vis-container" style="margin-left: 15px;"></div>
           </div>
-
         </div>
-        <!-- end pure grid group -->
 
         <!-- empty space -->
         <div class="row">
@@ -169,7 +141,6 @@
 
         </div>
         <!-- end pure grid group -->
-    
       </div>
     </div>
     
@@ -177,40 +148,39 @@
     <div class="row content_block p-5" id="content_4">
       <div id="content_4_sup" class="p-3">
         <h3 class="text_right_heading">Optimisation</h3>
-        
         <p> Adjust slider to view scheduled activities & grid load for different days</p>
         
         <div class="slidecontainer">
           <input type="range" step = "1" min="1" max="30" value="1" class="slider" id="myRange">
           <p>Date:  <span id="demo"></span></p>
         </div>
+
         <div class="container" id = "optim_grid">
           <div class="row">
             <div class="col grid_right" id = "table_0">
               <p class = "table_header">building 0</p>
-          </div>
+            </div>
             <div class="col grid_right" id = "table_1">
               <p class = "table_header">building 1</p>
-          </div>
+            </div>
             <div class="col grid_right" id = "table_3">
               <p class = "table_header">building 3</p>
-          </div>
+            </div>
           </div>
           
           <div class = "row">
             <div class="col grid_right" id = "table_4">
               <p class = "table_header">building 4</p>
-          </div>
+            </div>
             <div class="col grid_right" id = "table_5">
               <p class = "table_header">building 5</p>
-          </div>
+            </div>
             <div class="col grid_right" id = "table_6">
               <p class = "table_header">building 6</p>
-          </div>
+            </div>
           </div>
         </div>
-              
-
+        
         <div class="flex-child" id = "solar_forecast">
           placeholder txt
         </div>
@@ -219,7 +189,7 @@
           placeholder txt
         </div>
 
-        </div>
+        <div>
           <div class = "flex-container">
             <div class="flex-child" id = "battery_capacity"></div>
             <div class="flex-child" id = "b1_capacity"></div>
@@ -228,23 +198,10 @@
             placeholder txt
           </div>
         </div>
-    <!-- 5th content -->
-    <div class="row content_block p-5" id="content_5" style="padding-bottom: 0 !important;">
-      <div id="content_5_sup" class="p-3">
-        <h3 class="text_right_heading"  style = "margin-top: 750px">Team members</h3>
-        <!-- weather data -->
-        <div class="row"> 
-          <div class="col text_right1">
-            <br>
-            <strong>Ordered alphabetically</strong><br>
-            Aldrich Buntoro: Forecasting solution graphs, Website layout, Optimisation<br>
-            Anirudh Prakash: Optimisation solution graphs, Website layout, Forecasting<br>
-            Ba Hung Huynh: Data engineering, Forecasting solution, Optimisation solution<br>
-            Harris Perdikoyiannis: Website functionality, Website layout, Optimisation<br>
-          </div>
-        </div>
+
       </div>
     </div>
+
     <div class="container-fluid right_head"></div>
   </div>
   </body>

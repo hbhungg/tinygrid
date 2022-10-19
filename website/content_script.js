@@ -6,7 +6,6 @@ left_heading_1, left_text_1, content_1, content_1_sup, 1
 left_heading_2, left_text_2, content_2, content_2_sup, 2
 left_heading_3, left_text_3, content_3, content_3_sup, 3
 left_heading_4, left_text_4, content_4, content_4_sup, 4
-left_heading_5, left_text_5, content_5, content_5_sup, 5
 */
 
 // Globals
@@ -64,7 +63,7 @@ function left_btn_selected(button_num) {
  */
 function scroll_content_effect() {
   // List content ids
-  var lst_ids = [1,2,3,4,5];
+  var lst_ids = [1,2,3,4];
   // For each id get associated id region, each if user scroll height is in region, then if true call left_btn_selected_helper 
   for (let i=0; i<lst_ids.length; i++) {
     var el = document.getElementById("content_" + lst_ids[i].toString());
@@ -330,6 +329,7 @@ for (var i = 0; i < 6; i++) {
   thead.appendChild(row_1);}
   
 }
+
 function battery_chart() {
 async function fetch_gridload() {
   const [scheduleResponse, instanceResponse] = await Promise.all([
@@ -340,6 +340,7 @@ async function fetch_gridload() {
   const instance = await instanceResponse.text();
   return [schedule, instance];
 }
+
 fetch_gridload().then(([schedule, instance]) => {
         var sl_val = document.getElementById("myRange").value;
         var csv_array = calc_load(schedule,instance,sl_val)
@@ -707,14 +708,7 @@ function generate_charts_onload(){
     vegaEmbed('#forecast4', specVis4, { "actions": false }).then(function (result) {
       // Access the Vega view instance (https://vega.github.io/vega/docs/api/view/) as result.view
     }).catch(console.error);
-  
 
-  
-  
-   
-
-
-  
     // Loading Cache files
     make_header()
     fetch_schedule()
