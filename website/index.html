@@ -42,18 +42,26 @@
       <div id="content_1_sup" class="p-3">
         <h3 class="text_right_heading">Description</h3>
 
-
         <div class="row p-1">
-          <div class="col text_right1"><strong>TinyGrid</strong> is a project to develop an optimal battery schedule and an optimal lecture schedule in Monash University Clayton Campus, based on predictions of future values of energy demand and production. </div>
+          <div class="col text_right1">
+            <strong>What is TinyGrid?</strong><br>
+            TinyGrid is a project to develop an optimal battery schedule and an optimal lecture schedule in Monash University Clayton Campus, based on predictions of future values of energy demand and production. This problem was presented in 2021 by IEEE as a competition, and in 2022 a team of four students from Monash University took on the challenge retrospectively; TinyGrid is our solution to the competition.
+          </div>
         </div>
         <div class="row p-1">
-          <div class="col text_right1">One of the most important measures to deal with climate change is through the use of renewable energy such as wind and solar. However, renewable energy cannot be produced on command, which means energy storage is required. At the same time, storing energy is very expensive and may cause a loss of energy stored. Therefore, we need to forecast the energy demand and production from renewables, in order to optimally schedule energy storage such as batteries. This enables an optimal charging and discharging schedule, based on the required demand.</div>
+          <div class="col text_right1">
+            <strong>Why is this needed?</strong><br>
+            One of the most important measures to deal with climate change is through the use of renewable energy such as wind and solar. However, renewable energy cannot be produced on command, which means energy storage is required. At the same time, storing energy is very expensive and may cause a loss of energy stored. Therefore, we need to forecast the energy demand and production from renewables, in order to optimally schedule energy storage such as batteries. This enables an optimal charging and discharging schedule, based on the required demand.
+          </div>
         </div>
         <div class="row p-1">
           <div class="col text_right1">This is where our project TinyGrid steps in. TinyGrid at its core has a prediction module that predicts solar energy production and building energy usage from the Monash Microgrid system, and an optimization module which schedules building activities and batteries to minimise energy wastage. Presented as a website interface that lets users interact with figures and values about the evaluation of forecasting and optimization solutions. Thus, TinyGrid solves the problem of optimising renewable energy storage and usage.</div>
         </div>
         <div class="row p-1">
-          <div class="col text_right1">Here is a link to the <a href="https://ieee-dataport.org/competitions/ieee-cis-technical-challenge-predictoptimize-renewable-energy-scheduling" class="col text_right1">IEEE Competition</a>.</div>
+          <div class="col text_right1">
+            <strong>Helpful links</strong><br>
+            Here is a link to the <a href="https://ieee-dataport.org/competitions/ieee-cis-technical-challenge-predictoptimize-renewable-energy-scheduling" class="col text_right1">IEEE Competition</a> the <a href="https://github.com/hbhungg/tinygrid" class="col text_right1">GitHub Repository</a>.
+          </div>
         </div>
 
       </div>
@@ -65,23 +73,23 @@
 
         <!-- weather data -->
         <div class="row p-1"> 
-          <div class="col text_right2">
+          <div class="col text_right1">
             <strong>Weather data</strong><br>
-            The daily minimum temperature (C), maximum temperature (C), rainfall (mm) and solar exposure (MJm^2) of three weather stations near Melbourne: Olympic Park, Moorabbin Airport and Oakleigh (Metropolitan Golf Club) from http://www.bom.gov.au/climate/data/. Each weather series starts from 1st of January 2016 and contains corresponding values until November 2022). This is needed to forecast the solar power production.
+            The daily minimum temperature (C), maximum temperature (C), rainfall (mm) and solar exposure (MJm^2) of three weather stations near Melbourne: Olympic Park, Moorabbin Airport and Oakleigh (Metropolitan Golf Club) from <a href="http://www.bom.gov.au/climate/data/" class="col text_right1">BOM</a>. Each weather series starts from 1st of January 2016 and contains corresponding values until November 2022). This is needed to forecast the solar power production.
           </div>
         </div>
 
         <!-- electricity price data -->
         <div class="row p-1"> 
-          <div class="col text_right2">
+          <div class="col text_right1">
             <strong>Electricity price data</strong><br>
-            Australian electricity price data from https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem/aggregated-data to achieve the lowest energy cost when scheduling the activities.
+            Australian electricity price data from <a href="https://www.aemo.com.au/energy-systems/electricity/national-electricity-market-nem/data-nem/aggregated-data" class="col text_right1">AEMO</a> to achieve the lowest energy cost when scheduling the activities.
           </div>
         </div>
 
         <!-- historical energy demand and power production -->
         <div class="row p-1"> 
-          <div class="col text_right2">
+          <div class="col text_right1">
             <strong>Historical energy demand and power production</strong><br>
             Historical 15-minutely energy demand of 6 buildings and 15-minutely power production of 6 solar panels from Monash University, Melbourne, Australia. Given as a time series format to forecast the energy demand and power production in October and November 2020.
           </div>
@@ -89,7 +97,7 @@
 
         <!-- problem instance -->
         <div class="row p-1"> 
-          <div class="col text_right2">
+          <div class="col text_right1">
             <strong>Problem instance</strong><br>
               Instances of buildings, solar panels, batteries and activities that will be optimised. This is given in a text format with the first line being ppoi (predict-plus-optimize instance) which is the summary of the problem instance. It also has Buildings with attributes id, number of large rooms and number of small rooms; Solar panels with attributes solar id and building id; Batteries with attributes building id, capacity (kWh), max power kW and efficiency; Reccuring activities with an activity object and precendeces; Once-off activities with an activity object, value($), penalty($) and precedences; where activity object has attributes id, number of rooms, room size, load (kW) and duration.
           </div>
