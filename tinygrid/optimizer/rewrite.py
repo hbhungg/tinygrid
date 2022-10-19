@@ -25,13 +25,14 @@ def optimizer(instance: Instance, warm_start: Schedule,
   # **********************************
 
   # ****** Recurrence variables ******
+
   re_act_start_day = {}
   re_act_in_duration = {}
   re_act_start = {}
   for idx, act in instance.re_act.items():
     # Start day index for each activity
     re_act_start_day[idx] = \
-      model.NewIntVar(1, 31, f"re_act_start_day_{idx}")
+      model.NewIntVar(0, 32, f"re_act_start_day_{idx}")
 
     # Binary for if activity is still in duration
     for tx, _ in weekday_range(start_time, ffriday_end_office, office=True):
@@ -45,6 +46,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
           model.NewBoolVar(f"re_act_start_{idx}_{tx}")
 
   # ****** Once off variables ******
+
   once_act_start_day = {}
   once_act_in_duration = {}
   once_act_start = {}
@@ -52,7 +54,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
   for idx, act in instance.once_act.items():
     # Start day index for each activity
     once_act_start_day[idx] = \
-        model.NewIntVar(1, 31, f"once_act_start_day_{idx}")
+        model.NewIntVar(0, 32, f"once_act_start_day_{idx}")
     # If a once activity is scheduled
     once_act_scheduled[idx] = \
         model.NewBoolVar(f"once_act_scheduled_{idx}")
@@ -69,17 +71,18 @@ def optimizer(instance: Instance, warm_start: Schedule,
 
 
   # ****** Battery variables ******
-  #bat_charge = {}
-  #bat_discharge = {}
-  #bat_cap = {}
-  #for idx, bat in instance.batteries.items():
-  #  for tx, _ in enumerate(date_range(start_time, end_time)):
-  #    # Batteries charge action time step t
-  #    bat_charge[(idx, tx)] = model.NewBoolVar(f"bat_c_{idx}_{tx}") 
-  #    # Batteries discharge action time step t
-  #    bat_discharge[(idx, tx)] = model.NewBoolVar(f"bat_d_{idx}_{tx}") 
-  #    # Battery capacity at time step t
-  #    bat_cap[(idx, tx)] = model.NewIntVar(0, bat.capacity, f"bat_c_{idx}_{tx}")
+
+  bat_charge = {}
+  bat_discharge = {}
+  bat_cap = {}
+  for idx, bat in instance.batteries.items():
+    for tx, _ in enumerate(date_range(start_time, end_time)):
+      # Batteries charge action time step t
+      bat_charge[(idx, tx)] = model.NewBoolVar(f"bat_c_{idx}_{tx}") 
+      # Batteries discharge action time step t
+      bat_discharge[(idx, tx)] = model.NewBoolVar(f"bat_d_{idx}_{tx}") 
+      # Battery capacity at time step t
+      bat_cap[(idx, tx)] = model.NewIntVar(0, bat.capacity, f"bat_c_{idx}_{tx}")
 
 
   # **********************************
@@ -87,6 +90,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
   # **********************************
 
   # ****** Recurrence activity constraint ******
+
   offset_start = start_time.time().hour * 4 + start_time.time().minute//15
   for idx, act in instance.re_act.items():
     temp = []
@@ -96,7 +100,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
                                office=True, offset=act.duration):
       temp.append(re_act_start[(idx, tx)])
       # Day index that activity start
-      st += (tx + offset_start)//Const.PERIOD_IN_DAY * re_act_start[(idx, tx)]
+      st += ((tx + offset_start)//Const.PERIOD_IN_DAY) * re_act_start[(idx, tx)]
 
     # Recurrence activity must be schedule, and schedule once
     model.AddExactlyOne(temp)
@@ -113,6 +117,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
 
   
   # ****** Once-off activity constraint ******
+
   for idx, act in instance.once_act.items():
     temp = []
     st, wt = 0, 0
@@ -120,7 +125,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
     for tx, _ in weekday_range(start_time, end_time, office=True, offset=act.duration):
       temp.append(once_act_start[(idx, tx)])
       # Day index that activity start
-      st += (tx + offset_start)//Const.PERIOD_IN_DAY * once_act_start[(idx, tx)]
+      st += ((tx + offset_start)//Const.PERIOD_IN_DAY) * once_act_start[(idx, tx)]
     #  wt += once_act_start[(idx, tx)]
 
     # Once off can be schedule once or not
@@ -141,6 +146,7 @@ def optimizer(instance: Instance, warm_start: Schedule,
 
 
   # ****** Room constraint ******
+
   # Total small and large room of all the buildings
   total_small_r = sum((i.n_small for i in instance.buildings.values()))
   total_large_r = sum((i.n_large for i in instance.buildings.values()))
@@ -157,6 +163,20 @@ def optimizer(instance: Instance, warm_start: Schedule,
       if act.size == "L": c_large += once_act_in_duration.get((idx, tx), 0) * act.n_room
     model.Add(c_small <= total_small_r)
     model.Add(c_large <= total_large_r)
+
+  # ****** Battery constraint ******
+
+  # Battery can only hold, charge or discharge at a time.
+  for idx, b in instance.batteries.items():
+    for tx, _ in enumerate(date_range(start_time, end_time)):
+      model.AddAtMostOne([bat_charge[(idx, tx)], bat_discharge[(idx, tx)]])
+      # current battery capacity depends on previous capacity values
+      if tx == 0:
+        model.Add(4*bat_cap[(idx, tx)] == \
+            4*b.capacity + b.max_power*(bat_charge[(idx, tx)] - bat_discharge[(idx, tx)]))
+      else:
+        model.Add(4*bat_cap[(idx, tx)] == \
+            4*bat_cap[(idx, tx-1)] + b.max_power*(bat_charge[(idx, tx)] - bat_discharge[(idx, tx)]))
 
 
   # **********************************
@@ -220,6 +240,22 @@ def optimizer(instance: Instance, warm_start: Schedule,
           if bidxs is not None:
             retval.once_act[idx] = ActivitySchedule(start_time=curr_tx, n_room=act.n_room, building_id=bidxs)
 
+    for ((idxc, txc), vc), ((idxd, txd), vd) in zip(bat_charge.items(), bat_discharge.items()):
+      svc = solver.Value(vc)
+      svd = solver.Value(vd)
+      if svc == 1:
+        bat_sche = BatterySchedule(time=txc, decision=0) 
+        if idxc in retval.batteries:
+          retval.batteries[idxc].append(bat_sche)
+        else:
+          retval.batteries[idxc] = [bat_sche]
+      if svd == 1:
+        bat_sche = BatterySchedule(time=txd, decision=2)
+        if idxc in retval.batteries:
+          retval.batteries[idxd].append(bat_sche)
+        else:
+          retval.batteries[idxd] = [bat_sche]
+
     return retval
   else:
     return None
@@ -263,3 +299,6 @@ def save_schedule(path, schedule):
       f.write(f'r {idx} {act.start_time} {act.n_room} {" ".join(map(str, act.building_id))}\n')
     for idx, act in schedule.once_act.items():
       f.write(f'a {idx} {act.start_time} {act.n_room} {" ".join(map(str, act.building_id))}\n')
+    for idx, ll in schedule.batteries.items():
+      for l in ll:
+        f.write(f"c {idx} {l.time} {l.decision}\n")
