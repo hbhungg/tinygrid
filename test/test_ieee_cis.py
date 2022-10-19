@@ -36,7 +36,7 @@ class load_energy_data_tests(unittest.TestCase):
 
 class load_instance_data(unittest.TestCase):
   def setUp(self):
-    self.cl = IEEE_CISMixin
+    self.cl = IEEE_CIS
   def test_call(self):
     try:
       self.cl._load_instance_data()
@@ -45,7 +45,7 @@ class load_instance_data(unittest.TestCase):
 
 class load_instance_sample_solution_data(unittest.TestCase):
   def setUp(self):
-    self.cl = IEEE_CISMixin
+    self.cl = IEEE_CIS
   def test_call(self):
     try:
       self.cl._load_instance_sample_solution_data()

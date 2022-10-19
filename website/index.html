@@ -37,7 +37,7 @@
     <div class="text_left hidden" id="left_text_4">
       Optimised schedule which optimally schedule the battery and time
       
-      tabled activities (lectures) for the month of November 2020. They are calculated using the problem instance text file and electricity price data from AEMO to minimise the cost of the battery (charge, holf and discharge).
+      tabled activities (lectures) for the month of November 2020. They are calculated using the problem instance text file and electricity price data from AEMO to minimise the cost of the battery (charge, hold and discharge).
     </div>
     <h3 class="text_left_heading noselect"><a class="text_line" id="left_heading_5" onclick="left_btn_selected(5)">Team</a></h3>
     <div class="text_left hidden" id="left_text_5">
@@ -137,14 +137,6 @@
           </div>
         </div>
 
-        <!--
-        energy demand
-        <div class="row">
-          <div class="col text_right"><strong>Energy demand</strong> for all 6 buildings are forecasted. The forecasted energy demand are done in a time series data set where a 15 minute time step is used. Several models are trained in order to forecast the energy demand from 1st of October to 30th of November 2020.</div>
-          <div class="col text_right">The models used are lasso and random forest. Out of all these models, we found out that the best model for this dataset is random forest.</div>
-        </div>
-        -->
-
         <!-- pure grid group -->
         <div class="pure-g">
           <div class="pure-u-1-2">
@@ -166,13 +158,6 @@
           </div>
         </div>
 
-        <!-- solar production 
-        <div class="row">
-          <div class="col text_right"><strong>Solar production</strong> for all 6 solar panels are forecasted. The forecasted solar production are done in a time series data set where a 15 minute time step is used. Several models are trained in order to forecast the power production from 1st of October to 30th of</div>
-          <div class="col text_right"> November 2020. The <strong>mean MASE</strong> calculated of both the energy production and solar production for our model is <strong>0.80</strong> which puts our team in 5th position of the IEEE-CIS competition.</div>
-        </div>
-        -->
-
         <!-- pure grid group -->
         <div class="pure-g">
           <div class="pure-u-1-2">
@@ -193,111 +178,56 @@
       <div id="content_4_sup" class="p-3">
         <h3 class="text_right_heading">Optimisation</h3>
         
-        <p> Adjust Slider to view scheduled activities & grid load for different days</p>
+        <p> Adjust slider to view scheduled activities & grid load for different days</p>
         
         <div class="slidecontainer">
-  <input type="range" step = "1" min="1" max="30" value="1" class="slider" id="myRange">
-  <p>Date:  <span id="demo"></span></p>
-</div>
-        
-        
+          <input type="range" step = "1" min="1" max="30" value="1" class="slider" id="myRange">
+          <p>Date:  <span id="demo"></span></p>
+        </div>
         <div class="container" id = "optim_grid">
-  <div class="row">
-    <div class="col grid_right" id = "table_0">
-      <p class = "table_header">building 0</p>
-  </div>
-    <div class="col grid_right" id = "table_1">
-      <p class = "table_header">building 1</p>
-  </div>
-    <div class="col grid_right" id = "table_3">
-      <p class = "table_header">building 3</p>
-  </div>
-  </div>
-  
-  <div class = "row">
-    <div class="col grid_right" id = "table_4">
-      <p class = "table_header">building 4</p>
-  </div>
-    <div class="col grid_right" id = "table_5">
-      <p class = "table_header">building 5</p>
-  </div>
-    <div class="col grid_right" id = "table_6">
-      <p class = "table_header">building 6</p>
-  </div>
-  </div>
-    
-    
-  </div>
-        
-        
-        
-        
-        <div class = "flex-container"> 
-  <div class="flex-child" id = "solar_forecast">
-    placeholder txt
-  </div>
-  
-  <div class="flex-child" id = "building_forecast">
-    placeholder txt
+          <div class="row">
+            <div class="col grid_right" id = "table_0">
+              <p class = "table_header">building 0</p>
+          </div>
+            <div class="col grid_right" id = "table_1">
+              <p class = "table_header">building 1</p>
+          </div>
+            <div class="col grid_right" id = "table_3">
+              <p class = "table_header">building 3</p>
+          </div>
+          </div>
+          
+          <div class = "row">
+            <div class="col grid_right" id = "table_4">
+              <p class = "table_header">building 4</p>
+          </div>
+            <div class="col grid_right" id = "table_5">
+              <p class = "table_header">building 5</p>
+          </div>
+            <div class="col grid_right" id = "table_6">
+              <p class = "table_header">building 6</p>
+          </div>
+          </div>
+        </div>
+              
 
-  </div>
-
-
-
-</div>
-
-  
-
-        <div class = "flex-container">
-  
-    <div class="flex-child" id = "battery_capacity"></div>
-    <div class="flex-child" id = "b1_capacity"></div>
-    
-    </div>  
-  
-  <div class="flex-container" id = "grid_load">
-    placeholder txt
-
-  </div>
-  
-  
-  
-      
+        <div class="flex-child" id = "solar_forecast">
+          placeholder txt
+        </div>
         
-        
-        
+        <div class="flex-child" id = "building_forecast">
+          placeholder txt
+        </div>
 
-
-
-        
-        
-        
-        
-        
-        
-        
-        
-        <script>
-var slider = document.getElementById("myRange");
-var output = document.getElementById("demo");
-output.innerHTML = "OCT " + slider.value;
-
-slider.oninput = function() {
-  fetch_schedule()
-  battery_chart()
-  get_forecast()
-  
-  output.innerHTML = this.value;
-}
-
-
-</script>
-
-        
-        
-
-      </div>
-    </div>
+        </div>
+          <div class = "flex-container">
+            <div class="flex-child" id = "battery_capacity"></div>
+            <div class="flex-child" id = "b1_capacity"></div>
+          </div>  
+          <div class="flex-container" id = "grid_load">
+            placeholder txt
+          </div>
+        </div>
     <!-- 5th content -->
     <div class="row content_block p-5" id="content_5" style="padding-bottom: 0 !important;">
       <div id="content_5_sup" class="p-3">
@@ -320,6 +250,19 @@ slider.oninput = function() {
   </body>
 
   <!-- Import Vega , Vega-Lite & other packages (does not have to be from CDN) -->
+  <script>
+    var slider = document.getElementById("myRange");
+    var output = document.getElementById("demo");
+    output.innerHTML = "OCT " + slider.value;
+
+    slider.oninput = function() {
+      fetch_schedule()
+      battery_chart()
+      get_forecast()
+      
+      output.innerHTML = this.value;
+    }
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/vega@5.20.2"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-lite@5.1.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/vega-embed@6.17.0"></script>
@@ -334,7 +277,5 @@ slider.oninput = function() {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <!-- CSS file -->
   <link rel="stylesheet" type="text/css" href="styles.css" media="all">
-
-
 
 </html>
