@@ -11,6 +11,7 @@ from extra import schedule_eval_wrapper
 
 
 if __name__ == "__main__":
+  sys.path.append(os.getcwd())
   cutoffs = { 
     'Building0' : datetime(day=1, month=1,  year=2020, hour=0, minute=0, second=0, tzinfo=Const.UTC),
     'Building1' : datetime(day=1, month=1,  year=2020, hour=0, minute=0, second=0, tzinfo=Const.UTC),  

@@ -30,6 +30,11 @@ This will create a virtual env inside Tinygrid's folder, activate it and install
 
 ## Quick example
 _(The project is in development stage, some of the import API and modules name might change)._
+
+For an example run
+```
+python3 example.py
+```
 ### Forecasting
 First, load the IEEE-CIS dataset.
 ```python
