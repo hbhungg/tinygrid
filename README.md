@@ -1,5 +1,5 @@
 # Tinygrid
-Tinygrid is a small Python library that team DS-9 use to solve the [IEEE-CIS Monash Microgrid prediction and optimization challenge](https://ieee-dataport.org/competitions/ieee-cis-technical-challenge-predictoptimize-renewable-energy-scheduling). 
+Tinygrid is a small Python library that team DS-9 used to solve the [IEEE-CIS Monash Microgrid prediction and optimization challenge](https://ieee-dataport.org/competitions/ieee-cis-technical-challenge-predictoptimize-renewable-energy-scheduling). 
 
 This library provide:
 * Modules to load the energy dataset.
