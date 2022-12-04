@@ -101,6 +101,8 @@ score = mase(solar0_pred, solar0_test['energy'].to_numpy(), solar0_train['energy
  ```
 
 ### Scheduling
+(a bit broken atm, can only schedule, not optimize)
+
 Load the instance. As an example, we will optimize for phase 1 instance small 0.
 ```python
 from tinygrid.dataset import IEEE_CIS
